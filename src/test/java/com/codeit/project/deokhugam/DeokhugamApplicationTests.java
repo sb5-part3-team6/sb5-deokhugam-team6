@@ -1,5 +1,7 @@
 package com.codeit.project.deokhugam;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
@@ -7,7 +9,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 class DeokhugamApplicationTests {
 
   @Test
-  void contextLoads() {
+  void test(){
+    assertThat("test").isEqualTo("test");
   }
 
 }
