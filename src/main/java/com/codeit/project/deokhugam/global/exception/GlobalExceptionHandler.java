@@ -22,7 +22,7 @@ public class GlobalExceptionHandler {
   }
 
   @ExceptionHandler(DeokhugamException.class)
-  public ResponseEntity<ErrorResponse> handleDiscodeitException(DeokhugamException exception) {
+  public ResponseEntity<ErrorResponse> handleDeokhugamException(DeokhugamException exception) {
     log.error("커스텀 예외 발생: code={}, message={}", exception.getErrorCode(), exception.getMessage(),
         exception);
     HttpStatus status = determineHttpStatus(exception);
