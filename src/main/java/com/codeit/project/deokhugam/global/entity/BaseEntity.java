@@ -6,8 +6,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.MappedSuperclass;
-import java.time.Instant;
-import java.util.UUID;
+import java.time.LocalDateTime;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -28,17 +27,17 @@ public abstract class BaseEntity {
 
   @CreatedDate
   @Column(columnDefinition = "timestamp with time zone", updatable = false, nullable = false)
-  private Instant createdAt;
+  private LocalDateTime createdAt;
 
   @LastModifiedDate
   @Column(columnDefinition = "timestamp with time zone")
-  private Instant updatedAt;
+  private LocalDateTime updatedAt;
 
   @Column(columnDefinition = "timestamp with time zone")
-  private Instant deletedAt;
+  private LocalDateTime deletedAt;
 
   public void softDelete() {
-    this.deletedAt = Instant.now();
+    this.deletedAt = LocalDateTime.now();
   }
 
   public void restore() {
