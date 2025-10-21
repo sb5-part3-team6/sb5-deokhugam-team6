@@ -37,7 +37,7 @@ public class NotificationController {
     return null;
   }
 
-  @GetMapping("/read-all")
+  @PatchMapping("/read-all")
   public ResponseEntity<NotificationDto> updateNotificationAll(
       @RequestHeader("Deokhugam-Request-User-ID") String userId) {
     return null;
