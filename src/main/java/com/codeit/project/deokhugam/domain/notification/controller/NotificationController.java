@@ -30,7 +30,7 @@ public class NotificationController {
   }
 
   @PatchMapping("/{notificationId}")
-  public ResponseEntity<NotificationDto> updateNotificationById(
+  public ResponseEntity<NotificationDto> checkNotificationById(
       @PathVariable("notificationId") String notificationId,
       @RequestBody NotificationUpdateRequest request,
       @RequestHeader("Deokhugam-Request-User-ID") String userId) {
@@ -38,7 +38,7 @@ public class NotificationController {
   }
 
   @PatchMapping("/read-all")
-  public ResponseEntity<NotificationDto> updateNotificationAll(
+  public ResponseEntity<NotificationDto> checkAllNotification(
       @RequestHeader("Deokhugam-Request-User-ID") String userId) {
     return null;
   }

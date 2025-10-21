@@ -9,7 +9,7 @@ public interface NotificationService {
   CursorPageResponseNotificationDto getNotifications(String userId, String direction, String cursor,
       LocalDate after, Integer limit);
 
-  NotificationDto updateNotificationById(String notificationId, String userId);
+  NotificationDto checkNotificationById(String notificationId, String userId);
 
-  void updateNotificationAll(String userId);
+  void checkAllNotification(String userId);
 }

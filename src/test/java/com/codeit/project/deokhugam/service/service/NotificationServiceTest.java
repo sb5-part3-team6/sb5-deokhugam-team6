@@ -61,7 +61,7 @@ class NotificationServiceTest {
     given(notificationRepository.findById(1L)).willReturn(Optional.of(notification));
     given(notificationMapper.toDto(notification)).willReturn(notificationDto);
 
-    NotificationDto result = notificationService.updateNotificationById("1", "1");
+    NotificationDto result = notificationService.checkNotificationById("1", "1");
 
     assertThat(notification.getConfirmed()).isTrue();
     assertThat(result).isEqualTo(notificationDto);
@@ -74,7 +74,7 @@ class NotificationServiceTest {
   void updateNotificationById_NotFound() {
     given(notificationRepository.findById(1L)).willReturn(Optional.empty());
 
-    assertThatThrownBy(() -> notificationService.updateNotificationById("1", "2"))
+    assertThatThrownBy(() -> notificationService.checkNotificationById("1", "2"))
         .isInstanceOf(NotificationNotFoundException.class);
   }
 
@@ -83,7 +83,7 @@ class NotificationServiceTest {
   void updateNotificationById_InvalidUser() {
     given(notificationRepository.findById(1L)).willReturn(Optional.of(notification));
 
-    assertThatThrownBy(() -> notificationService.updateNotificationById("1", "2"))
+    assertThatThrownBy(() -> notificationService.checkNotificationById("1", "2"))
         .isInstanceOf(NotificationInvalidUserException.class);
   }
 
@@ -96,7 +96,7 @@ class NotificationServiceTest {
     given(notificationRepository.findAllByUserId(1L)).willReturn(
         List.of(notification, notification2));
 
-    notificationService.updateNotificationAll("1");
+    notificationService.checkAllNotification("1");
 
     assertThat(notification.getConfirmed()).isTrue();
     verify(notificationRepository).findAllByUserId(1L);

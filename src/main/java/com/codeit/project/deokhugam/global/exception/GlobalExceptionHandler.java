@@ -35,6 +35,8 @@ public class GlobalExceptionHandler {
   private HttpStatus determineHttpStatus(DeokhugamException exception) {
     ErrorCode errorCode = exception.getErrorCode();
     return switch (errorCode) {
+      case NOTIFICATION_NOT_FOUND -> HttpStatus.NOT_FOUND;
+      case INVALID_USER_CREDENTIALS -> HttpStatus.UNAUTHORIZED;
       case INVALID_REQUEST -> HttpStatus.BAD_REQUEST;
       case INTERNAL_SERVER_ERROR -> HttpStatus.INTERNAL_SERVER_ERROR;
     };
