@@ -35,7 +35,7 @@ public class UserService {
     }
 
     if(!isValidNickname(request.nickname())) {
-      log.error("이미 존재하는 닉네임, Nickname = {}", request.nickname());
+      log.error("이미 존재하는 닉네임이거나 너무 짧음, Nickname = {}", request.nickname());
       throw new IllegalArgumentException("이미 존재하는 닉네임입니다.");
     }
 
