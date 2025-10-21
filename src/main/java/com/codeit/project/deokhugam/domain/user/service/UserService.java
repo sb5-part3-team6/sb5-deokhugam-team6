@@ -1,9 +1,11 @@
 package com.codeit.project.deokhugam.domain.user.service;
 
 import com.codeit.project.deokhugam.domain.user.dto.UserDto;
+import com.codeit.project.deokhugam.domain.user.dto.UserLoginRequest;
 import com.codeit.project.deokhugam.domain.user.dto.UserRegisterRequest;
 import com.codeit.project.deokhugam.domain.user.entity.User;
 import com.codeit.project.deokhugam.domain.user.repository.UserRepository;
+import java.util.NoSuchElementException;
 import java.util.regex.Pattern;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -48,6 +50,27 @@ public class UserService {
     User saved = userRepository.save(user);
 
     return new UserDto(saved.getId().toString(), saved.getEmail(), saved.getNickname(), saved.getCreatedAt());
+  }
+
+  @Transactional
+  public UserDto login(UserLoginRequest request) {
+    if(!isValidEmail(request.email())) {
+      log.error("유효하지 않은 이메일 형식, Email = {}", request.email());
+      throw new IllegalArgumentException("유효하지 않은 이메일 형식입니다.");
+    }
+
+    User findUser = userRepository.findByEmail(request.email())
+        .orElseThrow(() -> {
+            log.warn("존재하지 않는 이메일, Email = {}", request.email());
+            throw new NoSuchElementException("존재하지 않는 이메일입니다.");
+        });
+
+    if(!findUser.getPassword().equals(request.password())) {
+      log.warn("비밀번호 불일치");
+      throw new IllegalArgumentException("이메일 또는 비밀번호를 확인해주세요.");
+    }
+
+    return new UserDto(findUser.getId().toString(), findUser.getEmail(), findUser.getNickname(), findUser.getCreatedAt());
   }
 
   private boolean isValidEmail(String email) {
