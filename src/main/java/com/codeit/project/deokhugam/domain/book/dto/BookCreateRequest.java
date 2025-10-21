@@ -2,7 +2,7 @@ package com.codeit.project.deokhugam.domain.book.dto;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
-import java.util.Date;
+import java.time.LocalDate;
 
 public record BookCreateRequest(
    @NotBlank(message = "제목을 입력해주세요.")
@@ -22,7 +22,7 @@ public record BookCreateRequest(
    String publisher,
 
    @NotBlank(message = "출판일을 선택해주세요.")
-   Date publishedDate,
+   LocalDate publishedDate,
 
    @NotBlank(message = "ISBN정보를 불러와주세요.")
    String isbn

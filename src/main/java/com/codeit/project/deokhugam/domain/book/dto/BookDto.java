@@ -5,6 +5,7 @@ import java.util.Date;
 
 public record BookDto(
   String id,
+  
   String title,
 
   String author,
