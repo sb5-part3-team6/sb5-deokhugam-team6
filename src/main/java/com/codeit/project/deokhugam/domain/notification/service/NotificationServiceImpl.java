@@ -23,7 +23,7 @@ public class NotificationServiceImpl implements NotificationService {
 
   @Override
   public CursorPageResponseNotificationDto getNotifications(String userId, String direction,
-      String cursor, LocalDate after, Integer limit) {
+      LocalDate cursor, LocalDate after, Integer limit) {
     return null;
   }
 
@@ -56,6 +56,11 @@ public class NotificationServiceImpl implements NotificationService {
 
     List<Notification> notifications = notificationRepository.findAllByUserId(
         Long.parseLong(userId));
+
+    if (notifications.isEmpty()) {
+      throw NotificationInvalidUserException
+          .withNotificationIdAndUserId("all", userId);
+    }
 
     for (Notification notification : notifications) {
       notification.updateConfirmed(true);
