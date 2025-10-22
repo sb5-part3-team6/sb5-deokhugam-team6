@@ -292,4 +292,41 @@ class UserServiceTest {
 
     verify(mockUser).softDelete();
   }
+
+  @Test
+  @DisplayName("사용자 영구 삭제 실패 - Soft Delete가 수행되지 않음")
+  void hardDelete_Fail_UserIsActive() {
+    String userId = "1";
+    Long userLongId = 1L;
+
+    User mockUser = mock(User.class);
+    when(mockUser.getDeletedAt()).thenReturn(null);
+
+    when(userRepository.findById(userLongId)).thenReturn(Optional.of(mockUser));
+
+    IllegalStateException exception = assertThrows(IllegalStateException.class, () -> {
+      userService.hardDelete(userId);
+    });
+
+    assertEquals("Soft Delete가 수행되지 않았습니다.", exception.getMessage());
+    verify(userRepository).findById(userLongId);
+  }
+
+  @Test
+  @DisplayName("사용자 영구 삭제 성공")
+  void hardDelete_Success() {
+    String userId = "1";
+    Long userLongId = 1L;
+
+    User mockUser = mock(User.class);
+    when(mockUser.getDeletedAt()).thenReturn(LocalDateTime.now());
+
+    when(userRepository.findById(userLongId)).thenReturn(Optional.of(mockUser));
+
+    userService.hardDelete(userId);
+
+    verify(userRepository).findById(userLongId);
+
+    verify(userRepository).delete(mockUser);
+  }
 }
