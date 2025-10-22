@@ -1,7 +1,9 @@
 package com.codeit.project.deokhugam.domain.user.dto;
 
+import java.util.List;
+
 public record CursorPageResponsePowerUserDto(
-    PowerUserDto content,
+    List<PowerUserDto> content,
     String nextCursor,
     String nextAfter,
     Integer size,
