@@ -102,13 +102,13 @@ class NotificationServiceTest {
     ReflectionTestUtils.setField(notification2, "id", 2L);
 
     given(userRepository.existsById(1L)).willReturn(true);
-    given(notificationRepository.findAllByUserId(1L)).willReturn(
+    given(notificationRepository.findAllByUserIdAndConfirmedFalse(1L)).willReturn(
         List.of(notification, notification2));
 
     notificationService.checkAllNotification("1");
 
     assertThat(notification.getConfirmed()).isTrue();
-    verify(notificationRepository).findAllByUserId(1L);
+    verify(notificationRepository).findAllByUserIdAndConfirmedFalse(1L);
   }
 
   @Test

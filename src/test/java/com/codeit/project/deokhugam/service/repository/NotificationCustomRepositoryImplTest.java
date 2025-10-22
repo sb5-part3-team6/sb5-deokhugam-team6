@@ -7,9 +7,8 @@ import com.codeit.project.deokhugam.domain.notification.entity.Notification;
 import com.codeit.project.deokhugam.domain.notification.repository.NotificationRepository;
 import com.codeit.project.deokhugam.domain.review.entity.Review;
 import com.codeit.project.deokhugam.domain.user.entity.User;
-import com.querydsl.jpa.impl.JPAQueryFactory;
+import com.codeit.project.deokhugam.global.config.QuerydslConfig;
 import jakarta.persistence.EntityManager;
-import jakarta.persistence.PersistenceContext;
 import java.time.LocalDate;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
@@ -17,29 +16,11 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.boot.test.context.TestConfiguration;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
-import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 
 @DataJpaTest
-@Import(NotificationCustomRepositoryImplTest.TestConfig.class)
-@EnableJpaRepositories(
-    basePackages = "com.codeit.project.deokhugam.domain.notification.repository"
-)
+@Import(QuerydslConfig.class)
 class NotificationCustomRepositoryImplTest {
-
-  @TestConfiguration
-  static class TestConfig {
-
-    @PersistenceContext
-    private EntityManager em;
-
-    @Bean
-    public JPAQueryFactory jpaQueryFactory() {
-      return new JPAQueryFactory(em);
-    }
-  }
 
   @Autowired
   private EntityManager em;
@@ -101,8 +82,8 @@ class NotificationCustomRepositoryImplTest {
   @Test
   @DisplayName("JPA - findAllByUserId() 기본 조회")
   void findAllByUserId() {
-    List<Notification> result = notificationRepository.findAllByUserId(user1.getId());
-    assertThat(result).hasSize(30)
+    List<Notification> result = notificationRepository.findAllByUserIdAndConfirmedFalse(user1.getId());
+    assertThat(result).hasSize(15)
                       .allMatch(n -> n.getUser()
                                       .getId()
                                       .equals(user1.getId()));
