@@ -17,7 +17,7 @@ public class FileConfigDev implements FileConfig {
 
   @PostConstruct
   public void init(){
-    String os = System.getProperty("os.name");
+    String os = System.getProperty("os.name").toLowerCase();
     if(os.contains("win")){
       uploadDir = "C:/uploads/";
     }else{

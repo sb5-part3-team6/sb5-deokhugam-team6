@@ -1,6 +1,7 @@
 package com.codeit.project.deokhugam.domain.book.dto;
 
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import java.time.LocalDate;
 
@@ -21,7 +22,7 @@ public record BookCreateRequest(
    @Size(max=50, message="글자수를 50자 이하로 입력해주세요")
    String publisher,
 
-   @NotBlank(message = "출판일을 선택해주세요.")
+   @NotNull(message = "출판일을 선택해주세요.")
    LocalDate publishedDate,
 
    @NotBlank(message = "ISBN정보를 불러와주세요.")
