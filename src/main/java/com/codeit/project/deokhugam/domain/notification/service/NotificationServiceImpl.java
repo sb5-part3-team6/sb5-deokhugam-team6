@@ -26,7 +26,28 @@ public class NotificationServiceImpl implements NotificationService {
   @Override
   public CursorPageResponseNotificationDto getNotifications(String userId, String direction,
       LocalDate cursor, LocalDate after, Integer limit) {
-    return null;
+
+    Long uid = Long.parseLong(userId);
+
+    int fetchLimit = limit != null ? limit : 20;
+
+    List<Notification> notifications = notificationRepository.findNotificationsByUserId(
+        uid, direction, cursor, after, fetchLimit
+    );
+
+    Long total = notificationRepository.countByUserId(uid);
+
+    String nextCursor = notifications.isEmpty() ? null : notifications.get(notifications.size() - 1).getCreatedAt().toLocalDate().toString();
+
+    boolean hasNext = notifications.size() >= fetchLimit;
+
+    return new CursorPageResponseNotificationDto(
+        notifications.stream().map(notificationMapper::toDto).toList(),
+        nextCursor,
+        notifications.size(),
+        hasNext,
+        total
+    );
   }
 
   @Override
