@@ -16,6 +16,7 @@ import com.codeit.project.deokhugam.domain.notification.repository.NotificationR
 import com.codeit.project.deokhugam.domain.notification.service.NotificationServiceImpl;
 import com.codeit.project.deokhugam.domain.review.entity.Review;
 import com.codeit.project.deokhugam.domain.user.entity.User;
+import com.codeit.project.deokhugam.domain.user.repository.UserRepository;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -34,6 +35,9 @@ class NotificationServiceTest {
 
   @Mock
   private NotificationRepository notificationRepository;
+
+  @Mock
+  private UserRepository userRepository;
 
   @Mock
   private NotificationMapper notificationMapper;
@@ -97,6 +101,7 @@ class NotificationServiceTest {
     Notification notification2 = new Notification(new Review(), user, "", "", false);
     ReflectionTestUtils.setField(notification2, "id", 2L);
 
+    given(userRepository.existsById(1L)).willReturn(true);
     given(notificationRepository.findAllByUserId(1L)).willReturn(
         List.of(notification, notification2));
 
