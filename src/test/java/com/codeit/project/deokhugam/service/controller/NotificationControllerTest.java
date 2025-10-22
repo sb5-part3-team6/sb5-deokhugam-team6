@@ -1,24 +1,33 @@
 package com.codeit.project.deokhugam.service.controller;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import com.codeit.project.deokhugam.domain.notification.controller.NotificationController;
+import com.codeit.project.deokhugam.domain.notification.dto.CursorPageResponseNotificationDto;
+import com.codeit.project.deokhugam.domain.notification.dto.NotificationDto;
 import com.codeit.project.deokhugam.domain.notification.dto.NotificationUpdateRequest;
+import com.codeit.project.deokhugam.domain.notification.service.NotificationService;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.List;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.data.jpa.mapping.JpaMetamodelMappingContext;
 import org.springframework.http.MediaType;
-import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
-
-@SpringBootTest
-@AutoConfigureMockMvc
-@ActiveProfiles("test")
+@WebMvcTest(NotificationController.class)
 class NotificationControllerTest {
 
   @Autowired
@@ -27,68 +36,97 @@ class NotificationControllerTest {
   @Autowired
   private ObjectMapper objectMapper;
 
+  @MockitoBean
+  private NotificationService notificationService;
+
+  @MockitoBean
+  private JpaMetamodelMappingContext jpaMetamodelMappingContext;
+
+  private NotificationDto sampleNotification;
+  private CursorPageResponseNotificationDto samplePageResponse;
+
+  @BeforeEach
+  void setup() {
+    sampleNotification = new NotificationDto(
+        "1", "user-1", "101", "Clean Code",
+        "좋은 책이에요", true,
+        LocalDateTime.now().minusDays(1),
+        LocalDateTime.now()
+    );
+
+    samplePageResponse = new CursorPageResponseNotificationDto(
+        List.of(sampleNotification),
+        "nextCursor",
+        1,
+        true,
+        1L
+    );
+  }
+
   @Test
-  @DisplayName("GET /api/notifications - 유효한 요청 파라미터로 호출 성공")
+  @DisplayName("GET /api/notifications - 정상 조회")
   void getNotifications_success() throws Exception {
+    when(notificationService.getNotifications(
+        anyString(), anyString(), any(LocalDate.class), any(LocalDate.class), anyInt()))
+        .thenReturn(samplePageResponse);
+
     mockMvc.perform(get("/api/notifications")
-               .param("userId", "1")
+               .param("userId", "user-1")
                .param("direction", "DESC")
-               .param("cursor", "10")
                .param("limit", "20")
                .accept(MediaType.APPLICATION_JSON))
            .andExpect(status().isOk())
-           .andExpect(jsonPath("$.content").exists())
-           .andExpect(jsonPath("$.nextCursor").exists())
-           .andExpect(jsonPath("$.nextAfter").exists())
-           .andExpect(jsonPath("$.size").exists())
-           .andExpect(jsonPath("$.totalElements").exists())
-           .andExpect(jsonPath("$.hasNext").exists())
-           .andExpect(jsonPath("$.content[0].id").exists())
-           .andExpect(jsonPath("$.content[0].userId").exists())
-           .andExpect(jsonPath("$.content[0].reviewId").exists())
-           .andExpect(jsonPath("$.content[0].reviewTitle").exists())
-           .andExpect(jsonPath("$.content[0].content").exists())
-           .andExpect(jsonPath("$.content[0].confirmed").exists())
+           .andExpect(jsonPath("$.content[0].id").value(sampleNotification.id()))
+           .andExpect(jsonPath("$.content[0].userId").value(sampleNotification.userId()))
+           .andExpect(jsonPath("$.content[0].reviewId").value(sampleNotification.reviewId()))
+           .andExpect(jsonPath("$.content[0].reviewTitle").value(sampleNotification.reviewTitle()))
+           .andExpect(jsonPath("$.content[0].content").value(sampleNotification.content()))
+           .andExpect(jsonPath("$.content[0].confirmed").value(sampleNotification.confirmed()))
            .andExpect(jsonPath("$.content[0].createdAt").exists())
-           .andExpect(jsonPath("$.content[0].updatedAt").exists());
+           .andExpect(jsonPath("$.content[0].updatedAt").exists())
+           .andExpect(jsonPath("$.nextCursor").exists())
+           .andExpect(jsonPath("$.hasNext").value(true))
+           .andExpect(jsonPath("$.size").value(1))
+           .andExpect(jsonPath("$.totalElements").value(1L));
   }
 
   @Test
-  @DisplayName("GET /api/notifications - 잘못된 after 파라미터 형식으로 실패")
+  @DisplayName("GET /api/notifications - 잘못된 after 파라미터")
   void getNotifications_invalidAfterParam() throws Exception {
     mockMvc.perform(get("/api/notifications")
-               .param("userId", "1")
-               .param("direction", "DESC")
-               .param("cursor", "10")
-               .param("limit", "20")
+               .param("userId", "user-1")
                .param("after", "not-a-date")
                .accept(MediaType.APPLICATION_JSON))
-           .andExpect(status().isBadRequest()); // 400 정상
+           .andExpect(status().isBadRequest());
   }
 
   @Test
-  @DisplayName("PATCH /api/notifications/{id} - 유효한 요청으로 호출 성공")
-  void updateNotificationById_success() throws Exception {
+  @DisplayName("PATCH /api/notifications/{id} - 단일 알림 확인")
+  void checkNotificationById_success() throws Exception {
+    when(notificationService.checkNotificationById(
+        anyString(), any(NotificationUpdateRequest.class), anyString()))
+        .thenReturn(sampleNotification);
+
     NotificationUpdateRequest request = new NotificationUpdateRequest(true);
 
     mockMvc.perform(patch("/api/notifications/{notificationId}", "1")
+               .header("Deokhugam-Request-User-ID", "user-1")
                .contentType(MediaType.APPLICATION_JSON)
-               .header("Deokhugam-Request-User-ID", "1")
                .content(objectMapper.writeValueAsString(request)))
            .andExpect(status().isOk())
-           .andExpect(jsonPath("$.id").exists())
-           .andExpect(jsonPath("$.userId").exists())
-           .andExpect(jsonPath("$.reviewId").exists())
-           .andExpect(jsonPath("$.reviewTitle").exists())
-           .andExpect(jsonPath("$.content").exists())
-           .andExpect(jsonPath("$.confirmed").exists())
+           .andExpect(jsonPath("$.id").value(sampleNotification.id()))
+           .andExpect(jsonPath("$.userId").value(sampleNotification.userId()))
+           .andExpect(jsonPath("$.reviewId").value(sampleNotification.reviewId()))
+           .andExpect(jsonPath("$.reviewTitle").value(sampleNotification.reviewTitle()))
+           .andExpect(jsonPath("$.content").value(sampleNotification.content()))
+           .andExpect(jsonPath("$.confirmed").value(sampleNotification.confirmed()))
            .andExpect(jsonPath("$.createdAt").exists())
            .andExpect(jsonPath("$.updatedAt").exists());
   }
 
   @Test
-  @DisplayName("PATCH /api/notifications/{id} - 헤더 누락 시 실패")
-  void updateNotificationById_missingHeader() throws Exception {
+  @DisplayName("PATCH /api/notifications/{id} - 헤더 누락")
+  void checkNotificationById_missingHeader() throws Exception {
     NotificationUpdateRequest request = new NotificationUpdateRequest(true);
 
     mockMvc.perform(patch("/api/notifications/{notificationId}", "1")
@@ -98,16 +136,16 @@ class NotificationControllerTest {
   }
 
   @Test
-  @DisplayName("PATCH /api/notifications/read-all - 헤더 포함 요청 성공")
-  void updateNotificationAll_success() throws Exception {
+  @DisplayName("PATCH /api/notifications/read-all - 전체 확인")
+  void checkAllNotification_success() throws Exception {
     mockMvc.perform(patch("/api/notifications/read-all")
-               .header("Deokhugam-Request-User-ID", "1"))
-           .andExpect(status().isOk());
+               .header("Deokhugam-Request-User-ID", "user-1"))
+           .andExpect(status().isNoContent());
   }
 
   @Test
-  @DisplayName("PATCH /api/notifications/read-all - 헤더 누락 시 실패")
-  void updateNotificationAll_missingHeader() throws Exception {
+  @DisplayName("PATCH /api/notifications/read-all - 헤더 누락")
+  void checkAllNotification_missingHeader() throws Exception {
     mockMvc.perform(patch("/api/notifications/read-all"))
            .andExpect(status().isBadRequest());
   }
