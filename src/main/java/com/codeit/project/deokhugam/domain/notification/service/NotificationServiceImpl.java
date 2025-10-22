@@ -83,8 +83,7 @@ public class NotificationServiceImpl implements NotificationService {
       throw NotificationInvalidUserException.withNotificationIdAndUserId("all", userId);
     }
 
-    List<Notification> notifications = notificationRepository.findAllByUserId(
-        Long.parseLong(userId));
+    List<Notification> notifications = notificationRepository.findAllByUserId(uid);
 
     for (Notification notification : notifications) {
       notification.updateConfirmed(true);
