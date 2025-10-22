@@ -51,6 +51,22 @@ public class BookController {
     @DeleteMapping(path="{bookId}")
     public ResponseEntity<Void> softDelete(@PathVariable Long bookId) {
         bookService.softDelete(bookId);
-        return ResponseEntity.noContent().build();
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
+
+    @DeleteMapping(path = "{bookId}/hard")
+    public ResponseEntity<Void> hardDelete(@PathVariable Long bookId) {
+        bookService.hardDelete(bookId);
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+    }
+
+    @GetMapping(path = "{bookId}")
+    public ResponseEntity<BookDto> findById(@PathVariable Long bookId) {
+        BookDto findBookDto = bookService.findById(bookId);
+        return ResponseEntity.status(HttpStatus.OK).body(findBookDto);
+    }
+
+
+
+
 }

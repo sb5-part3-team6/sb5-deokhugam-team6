@@ -41,4 +41,17 @@ public class FileStorageDev implements FileStorage {
         .path(isbn)
         .toUriString();
   }
+
+  @Override
+  public void deleteThumbnailImage(String isbn) {
+    File dir = fileConfig.getThumbnailUploadDirFile();
+    File dest = new File(dir, isbn);
+    if(dest.exists()){
+      boolean deleted = dest.delete();
+      if(!deleted){
+        throw new RuntimeException("기존 썸네일 삭제 실패 : "+dest.getAbsolutePath());
+      }
+    }
+    System.out.println("썸네일 삭제 완료 : "+ dest.getAbsolutePath());
+  }
 }

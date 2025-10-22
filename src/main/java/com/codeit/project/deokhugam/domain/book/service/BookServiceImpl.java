@@ -76,4 +76,20 @@ public class BookServiceImpl implements BookService {
         .orElseThrow(()-> new NoSuchElementException("도서가 존재하지 않습니다."));
     book.softDelete();
   }
+
+  @Transactional
+  @Override
+  public void hardDelete(Long bookId) {
+    Book book = bookRepository.findById(bookId)
+        .orElseThrow(()-> new NoSuchElementException("도서가 존재하지 않습니다."));
+    fileStorage.deleteThumbnailImage(book.getIsbn());
+    bookRepository.deleteById(bookId);
+  }
+
+  @Override
+  public BookDto findById(Long bookId) {
+    Book book = bookRepository.findById(bookId)
+        .orElseThrow(()->new NoSuchElementException("도서가 존재하지 않습니다."));
+    return bookMapper.toDto(book);
+  }
 }
