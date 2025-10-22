@@ -31,7 +31,7 @@ public class NotificationExceptionHandler {
       NotificationNotFoundException exception) {
     log.error("알림 예외 발생: code={}, message={}", exception.getErrorCode(), exception.getMessage(),
         exception);
-    HttpStatus status = HttpStatus.FORBIDDEN;
+    HttpStatus status = HttpStatus.NOT_FOUND;
     ErrorResponse response = new ErrorResponse(exception, status.value());
     return ResponseEntity
         .status(status)
@@ -50,7 +50,7 @@ public class NotificationExceptionHandler {
   }
 
   @ExceptionHandler(MethodArgumentTypeMismatchException.class)
-  public ResponseEntity<ErrorResponse> handleMissingHeader(
+  public ResponseEntity<ErrorResponse> handleMismatch(
       MethodArgumentTypeMismatchException exception) {
     log.error("알림 예외 발생: message={}", exception.getMessage(),
         exception);

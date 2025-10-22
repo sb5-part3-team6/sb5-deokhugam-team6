@@ -28,8 +28,9 @@ public class NotificationCustomRepositoryImpl implements NotificationCustomRepos
       builder.and(notification.createdAt.lt(cursor.atStartOfDay()));
     }
 
-    if (after != null) {
-      builder.and(notification.createdAt.lt(after.atStartOfDay()));
+    if (after != null && cursor != after) {
+      // TODO : 프로토 타입 cursor = after던데 체크 필요
+      builder.and(notification.createdAt.gt(after.atStartOfDay()));
     }
 
     OrderSpecifier<?> order = "ASC".equalsIgnoreCase(direction)

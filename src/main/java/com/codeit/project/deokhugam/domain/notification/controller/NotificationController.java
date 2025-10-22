@@ -4,6 +4,7 @@ import com.codeit.project.deokhugam.domain.notification.dto.CursorPageResponseNo
 import com.codeit.project.deokhugam.domain.notification.dto.NotificationDto;
 import com.codeit.project.deokhugam.domain.notification.dto.NotificationUpdateRequest;
 import com.codeit.project.deokhugam.domain.notification.service.NotificationService;
+import jakarta.validation.Valid;
 import java.time.LocalDate;
 import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -45,7 +46,7 @@ public class NotificationController implements NotificationApi {
   @PatchMapping("/{notificationId}")
   public ResponseEntity<NotificationDto> checkNotificationById(
       @PathVariable("notificationId") String notificationId,
-      @RequestBody NotificationUpdateRequest request,
+      @Valid @RequestBody NotificationUpdateRequest request,
       @RequestHeader("Deokhugam-Request-User-ID") String userId) {
 
     NotificationDto notificationDto = notificationService.checkNotificationById(notificationId,

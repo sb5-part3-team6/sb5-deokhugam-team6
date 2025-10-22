@@ -31,23 +31,22 @@ public class NotificationServiceImpl implements NotificationService {
 
     int fetchLimit = limit != null ? limit : 20;
 
-    List<Notification> notifications = notificationRepository.findNotificationsByUserId(
-        uid, direction, cursor, after, fetchLimit
-    );
+    List<Notification> notifications = notificationRepository.findNotificationsByUserId(uid,
+        direction, cursor, after, fetchLimit);
 
     Long total = notificationRepository.countByUserId(uid);
 
-    String nextCursor = notifications.isEmpty() ? null : notifications.get(notifications.size() - 1).getCreatedAt().toLocalDate().toString();
+    String nextCursor = notifications.isEmpty() ? null : notifications.get(notifications.size() - 1)
+                                                                      .getCreatedAt()
+                                                                      .toLocalDate()
+                                                                      .toString();
 
     boolean hasNext = notifications.size() >= fetchLimit;
 
-    return new CursorPageResponseNotificationDto(
-        notifications.stream().map(notificationMapper::toDto).toList(),
-        nextCursor,
-        notifications.size(),
-        hasNext,
-        total
-    );
+    return new CursorPageResponseNotificationDto(notifications.stream()
+                                                              .map(notificationMapper::toDto)
+                                                              .toList(), nextCursor,
+        notifications.size(), hasNext, total);
   }
 
   @Override
@@ -55,17 +54,18 @@ public class NotificationServiceImpl implements NotificationService {
   public NotificationDto checkNotificationById(String notificationId,
       NotificationUpdateRequest request, String userId) {
 
-    Notification notification = notificationRepository.findById(Long.parseLong(notificationId))
+    Long nid = Long.parseLong(notificationId);
+    Long uid = Long.parseLong(userId);
+
+    Notification notification = notificationRepository.findById(nid)
                                                       .orElseThrow(
-                                                          () -> NotificationNotFoundException
-                                                              .withId(notificationId));
+                                                          () -> NotificationNotFoundException.withId(
+                                                              notificationId));
 
     if (!notification.getUser()
                      .getId()
-                     .toString()
-                     .equals(userId)) {
-      throw NotificationInvalidUserException
-          .withNotificationIdAndUserId(notificationId, userId);
+                     .equals(uid)) {
+      throw NotificationInvalidUserException.withNotificationIdAndUserId(notificationId, userId);
     }
 
     notification.updateConfirmed(request.confirmed());
@@ -77,9 +77,10 @@ public class NotificationServiceImpl implements NotificationService {
   @Transactional
   public void checkAllNotification(String userId) {
 
-    if (!userRepository.existsById(Long.parseLong(userId))) {
-      throw NotificationInvalidUserException
-          .withNotificationIdAndUserId("all", userId);
+    Long uid = Long.parseLong(userId);
+
+    if (!userRepository.existsById(uid)) {
+      throw NotificationInvalidUserException.withNotificationIdAndUserId("all", userId);
     }
 
     List<Notification> notifications = notificationRepository.findAllByUserId(
