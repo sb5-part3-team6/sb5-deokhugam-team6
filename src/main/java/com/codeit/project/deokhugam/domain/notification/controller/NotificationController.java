@@ -3,8 +3,11 @@ package com.codeit.project.deokhugam.domain.notification.controller;
 import com.codeit.project.deokhugam.domain.notification.dto.CursorPageResponseNotificationDto;
 import com.codeit.project.deokhugam.domain.notification.dto.NotificationDto;
 import com.codeit.project.deokhugam.domain.notification.dto.NotificationUpdateRequest;
+import com.codeit.project.deokhugam.domain.notification.service.NotificationService;
 import java.time.LocalDate;
+import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -17,8 +20,12 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/notifications")
-public class NotificationController {
+@RequiredArgsConstructor
+public class NotificationController implements NotificationApi {
 
+  private final NotificationService notificationService;
+
+  @Override
   @GetMapping
   public ResponseEntity<CursorPageResponseNotificationDto> getNotifications(
       @RequestParam String userId,
@@ -26,20 +33,34 @@ public class NotificationController {
       @RequestParam String cursor,
       @RequestParam(name = "after", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate after,
       @RequestParam(name = "limit", defaultValue = "20") Integer limit) {
-    return null;
+
+    CursorPageResponseNotificationDto page = notificationService.getNotifications(userId, direction,
+        cursor, after, limit);
+
+    return ResponseEntity.status(HttpStatus.OK)
+                         .body(page);
   }
 
+  @Override
   @PatchMapping("/{notificationId}")
   public ResponseEntity<NotificationDto> checkNotificationById(
       @PathVariable("notificationId") String notificationId,
       @RequestBody NotificationUpdateRequest request,
       @RequestHeader("Deokhugam-Request-User-ID") String userId) {
-    return null;
+
+    NotificationDto notificationDto = notificationService.checkNotificationById(notificationId,
+        request, userId);
+
+    return ResponseEntity.status(HttpStatus.OK)
+                         .body(notificationDto);
   }
 
+  @Override
   @PatchMapping("/read-all")
-  public ResponseEntity<NotificationDto> checkAllNotification(
+  public ResponseEntity<Void> checkAllNotification(
       @RequestHeader("Deokhugam-Request-User-ID") String userId) {
-    return null;
+    notificationService.checkAllNotification(userId);
+    return ResponseEntity.status(HttpStatus.NO_CONTENT)
+                         .build();
   }
 }

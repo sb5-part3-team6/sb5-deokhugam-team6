@@ -32,7 +32,7 @@ public class Notification extends BaseEntity {
   @Column(nullable = false)
   private Boolean confirmed = false;
 
-  public void toggleConfirmed() {
-    this.confirmed = !this.confirmed;
+  public void toggleConfirmed(Boolean confirmed) {
+    this.confirmed = confirmed;
   }
 }

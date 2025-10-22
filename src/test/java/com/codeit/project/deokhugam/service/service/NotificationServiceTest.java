@@ -7,6 +7,7 @@ import static org.mockito.Mockito.verify;
 
 import com.codeit.project.deokhugam.domain.notification.dto.CursorPageResponseNotificationDto;
 import com.codeit.project.deokhugam.domain.notification.dto.NotificationDto;
+import com.codeit.project.deokhugam.domain.notification.dto.NotificationUpdateRequest;
 import com.codeit.project.deokhugam.domain.notification.entity.Notification;
 import com.codeit.project.deokhugam.domain.notification.exception.NotificationInvalidUserException;
 import com.codeit.project.deokhugam.domain.notification.exception.NotificationNotFoundException;
@@ -61,7 +62,8 @@ class NotificationServiceTest {
     given(notificationRepository.findById(1L)).willReturn(Optional.of(notification));
     given(notificationMapper.toDto(notification)).willReturn(notificationDto);
 
-    NotificationDto result = notificationService.checkNotificationById("1", "1");
+    NotificationDto result = notificationService.checkNotificationById("1",
+        new NotificationUpdateRequest(true), "1");
 
     assertThat(notification.getConfirmed()).isTrue();
     assertThat(result).isEqualTo(notificationDto);
@@ -74,7 +76,8 @@ class NotificationServiceTest {
   void updateNotificationById_NotFound() {
     given(notificationRepository.findById(1L)).willReturn(Optional.empty());
 
-    assertThatThrownBy(() -> notificationService.checkNotificationById("1", "2"))
+    assertThatThrownBy(() -> notificationService.checkNotificationById("1",
+        new NotificationUpdateRequest(true), "2"))
         .isInstanceOf(NotificationNotFoundException.class);
   }
 
@@ -83,7 +86,8 @@ class NotificationServiceTest {
   void updateNotificationById_InvalidUser() {
     given(notificationRepository.findById(1L)).willReturn(Optional.of(notification));
 
-    assertThatThrownBy(() -> notificationService.checkNotificationById("1", "2"))
+    assertThatThrownBy(() -> notificationService.checkNotificationById("1",
+        new NotificationUpdateRequest(true), "2"))
         .isInstanceOf(NotificationInvalidUserException.class);
   }
 

@@ -2,6 +2,7 @@ package com.codeit.project.deokhugam.domain.notification.service;
 
 import com.codeit.project.deokhugam.domain.notification.dto.CursorPageResponseNotificationDto;
 import com.codeit.project.deokhugam.domain.notification.dto.NotificationDto;
+import com.codeit.project.deokhugam.domain.notification.dto.NotificationUpdateRequest;
 import com.codeit.project.deokhugam.domain.notification.entity.Notification;
 import com.codeit.project.deokhugam.domain.notification.exception.NotificationInvalidUserException;
 import com.codeit.project.deokhugam.domain.notification.exception.NotificationNotFoundException;
@@ -28,7 +29,8 @@ public class NotificationServiceImpl implements NotificationService {
 
   @Override
   @Transactional
-  public NotificationDto checkNotificationById(String notificationId, String userId) {
+  public NotificationDto checkNotificationById(String notificationId,
+      NotificationUpdateRequest request, String userId) {
 
     Notification notification = notificationRepository.findById(Long.parseLong(notificationId))
                                                       .orElseThrow(
@@ -36,14 +38,14 @@ public class NotificationServiceImpl implements NotificationService {
                                                               .withId(notificationId));
 
     if (!notification.getUser()
-                    .getId()
-                    .toString()
-                    .equals(userId)) {
+                     .getId()
+                     .toString()
+                     .equals(userId)) {
       throw NotificationInvalidUserException
           .withNotificationIdAndUserId(notificationId, userId);
     }
 
-    notification.toggleConfirmed();
+    notification.toggleConfirmed(request.confirmed());
 
     return notificationMapper.toDto(notification);
   }
@@ -52,10 +54,11 @@ public class NotificationServiceImpl implements NotificationService {
   @Transactional
   public void checkAllNotification(String userId) {
 
-    List<Notification> notifications = notificationRepository.findAllByUserId(Long.parseLong(userId));
+    List<Notification> notifications = notificationRepository.findAllByUserId(
+        Long.parseLong(userId));
 
     for (Notification notification : notifications) {
-      notification.toggleConfirmed();
+      notification.toggleConfirmed(true);
     }
   }
 }
