@@ -119,6 +119,23 @@ public class UserService {
     }
   }
 
+  @Transactional
+  public void hardDelete(String id) {
+    User findUser = userRepository.findById(Long.parseLong(id))
+        .orElseThrow(() -> {
+          log.warn("존재하지 않는 사용자");
+          throw new NoSuchElementException("사용자를 찾을 수 없습니다.");
+        });
+
+    if(findUser.getDeletedAt() == null) {
+      log.warn("soft delete가 우선적으로 수행되어야함.");
+      throw new IllegalStateException("Soft Delete가 수행되지 않았습니다.");
+    }
+    else {
+      userRepository.delete(findUser);
+    }
+  }
+
   private boolean isValidEmail(String email) {
     if (email == null || email.isEmpty() || email.isBlank()) {
       return false;
