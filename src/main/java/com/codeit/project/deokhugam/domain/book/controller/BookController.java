@@ -25,7 +25,7 @@ public class BookController {
 
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<BookDto> create(
-        @RequestPart(name = "bookData ")@Valid BookCreateRequest bookData,
+        @RequestPart(name = "bookData")@Valid BookCreateRequest bookData,
         @RequestPart(value="thumbnailImage",required = false) MultipartFile thumbnailImage) {
         BookDto bookDto = bookService.create(bookData,thumbnailImage);
 

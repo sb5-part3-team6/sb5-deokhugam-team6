@@ -8,9 +8,7 @@ import org.mapstruct.Mapping;
 
 @Mapper(componentModel = "spring")
 public abstract class BookMapper {
+  @Mapping(source = "publishedAt", target = "publishedDate")
   public abstract BookDto toDto(Book book);
-
-  @Mapping(source = "publishedDate", target = "publishedAt")
-  public abstract Book toBook(BookCreateRequest bookCreateRequest);
 
 }
