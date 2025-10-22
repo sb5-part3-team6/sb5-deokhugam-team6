@@ -3,14 +3,17 @@ package com.codeit.project.deokhugam.domain.user.service;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.codeit.project.deokhugam.domain.user.dto.UserDto;
 import com.codeit.project.deokhugam.domain.user.dto.UserLoginRequest;
 import com.codeit.project.deokhugam.domain.user.dto.UserRegisterRequest;
 import com.codeit.project.deokhugam.domain.user.entity.User;
 import com.codeit.project.deokhugam.domain.user.repository.UserRepository;
+import java.time.LocalDateTime;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
@@ -150,5 +153,54 @@ class UserServiceTest {
     });
 
     assertEquals("이메일 또는 비밀번호를 확인해주세요.", exception.getMessage());
+  }
+
+  @Test
+  @DisplayName("사용자 조회 실패 - 존재하지 않는 사용자")
+  void findById_Fail_UserNotFound() {
+    String userId = "99";
+    Long userLongId = 99L;
+
+    when(userRepository.findById(userLongId)).thenReturn(Optional.empty());
+
+    NoSuchElementException exception = assertThrows(NoSuchElementException.class, () -> {
+      userService.findById(userId);
+    });
+
+    assertEquals("사용자를 찾을 수 없습니다.", exception.getMessage());
+
+    verify(userRepository).findById(userLongId);
+  }
+
+  @Test
+  @DisplayName("사용자 조회 성공")
+  void findById_Success() {
+    // given
+    String userId = "1";
+    Long userLongId = 1L;
+    LocalDateTime now = LocalDateTime.now();
+
+    // User 엔티티를 Mocking하여 getter 메서드들의 반환 값을 정의합니다.
+    User mockUser = mock(User.class);
+    when(mockUser.getId()).thenReturn(userLongId);
+    when(mockUser.getEmail()).thenReturn("test@example.com");
+    when(mockUser.getNickname()).thenReturn("testuser");
+    when(mockUser.getCreatedAt()).thenReturn(now);
+
+    // Repository가 Mock User를 Optional로 감싸서 반환하도록 설정
+    when(userRepository.findById(userLongId)).thenReturn(Optional.of(mockUser));
+
+    // when
+    UserDto userDto = userService.findById(userId);
+
+    // then
+    assertNotNull(userDto);
+    assertEquals(userId, userDto.id());
+    assertEquals("test@example.com", userDto.email());
+    assertEquals("testuser", userDto.nickname());
+    assertEquals(now, userDto.createdAt());
+
+    // findById가 1L 인자로 정확히 1번 호출되었는지 검증
+    verify(userRepository).findById(userLongId);
   }
 }
