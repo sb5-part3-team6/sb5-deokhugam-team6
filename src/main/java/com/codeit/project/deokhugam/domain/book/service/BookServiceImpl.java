@@ -2,10 +2,13 @@ package com.codeit.project.deokhugam.domain.book.service;
 
 import com.codeit.project.deokhugam.domain.book.dto.BookCreateRequest;
 import com.codeit.project.deokhugam.domain.book.dto.BookDto;
+import com.codeit.project.deokhugam.domain.book.dto.BookUpdateRequest;
 import com.codeit.project.deokhugam.domain.book.entity.Book;
 import com.codeit.project.deokhugam.domain.book.mapper.BookMapper;
 import com.codeit.project.deokhugam.domain.book.repository.BookRepository;
 import com.codeit.project.deokhugam.domain.book.storage.FileStorage;
+import java.time.LocalDate;
+import java.util.NoSuchElementException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -30,6 +33,7 @@ public class BookServiceImpl implements BookService {
       fileStorage.saveThumbnailImage(bookData.isbn(), thumbnailImage);
       thumbnailImageUrl = fileStorage.getThumbnailImage(bookData.isbn());
     }
+    //리뷰갯수 평점 넣어야 함
     Book book =new Book(
         bookData.title(),
         bookData.author(),
@@ -41,5 +45,35 @@ public class BookServiceImpl implements BookService {
 
     Book created = bookRepository.save(book);
     return bookMapper.toDto(created);
+  }
+
+  @Transactional
+  @Override
+  public BookDto update(Long bookId, BookUpdateRequest bookData, MultipartFile thumbnailImage) {
+    Book book = bookRepository.findById(bookId)
+        .orElseThrow(()-> new NoSuchElementException("도서가 존재하지 않습니다."));
+
+    String newThumbnailImageUrl = book.getThumbnailUrl();
+    if(thumbnailImage!=null && !thumbnailImage.isEmpty()){
+      fileStorage.saveThumbnailImage(book.getIsbn(), thumbnailImage);
+      newThumbnailImageUrl = fileStorage.getThumbnailImage(book.getIsbn());
+    }
+
+    String newTitle = bookData.title();
+    String newAuthor = bookData.author();
+    String newDescription = bookData.description();
+    String newPublisher = bookData.publisher();
+    LocalDate newpublishedDate = bookData.publishedDate();
+
+    book.update(newTitle,newAuthor,newDescription,newPublisher,newpublishedDate,newThumbnailImageUrl);
+    Book updated = bookRepository.save(book);
+    return bookMapper.toDto(updated);
+  }
+
+  @Override
+  public void softDelete(Long bookId) {
+    Book book = bookRepository.findById(bookId)
+        .orElseThrow(()-> new NoSuchElementException("도서가 존재하지 않습니다."));
+    book.softDelete();
   }
 }

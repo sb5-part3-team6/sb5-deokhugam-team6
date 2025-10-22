@@ -2,6 +2,7 @@ package com.codeit.project.deokhugam.domain.book.controller;
 
 import com.codeit.project.deokhugam.domain.book.dto.BookCreateRequest;
 import com.codeit.project.deokhugam.domain.book.dto.BookDto;
+import com.codeit.project.deokhugam.domain.book.dto.BookUpdateRequest;
 import com.codeit.project.deokhugam.domain.book.service.BookService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -10,8 +11,12 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
@@ -31,5 +36,21 @@ public class BookController {
 
         return ResponseEntity.status(HttpStatus.CREATED).body(bookDto);
 
+    }
+
+    @PatchMapping(path ="{bookId}",consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<BookDto> updatePatch(
+        @PathVariable Long bookId,
+        @RequestPart("bookData")@Valid BookUpdateRequest bookData,
+        @RequestPart(value="thumbnailImage",required = false)MultipartFile thumbnailImage
+    ){
+        BookDto updatedBookDto = bookService.update(bookId,bookData,thumbnailImage);
+        return ResponseEntity.status(HttpStatus.OK).body(updatedBookDto);
+    }
+
+    @DeleteMapping(path="{bookId}")
+    public ResponseEntity<Void> softDelete(@PathVariable Long bookId) {
+        bookService.softDelete(bookId);
+        return ResponseEntity.noContent().build();
     }
 }

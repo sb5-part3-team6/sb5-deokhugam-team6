@@ -1,6 +1,8 @@
 package com.codeit.project.deokhugam.domain.book.dto;
 
 import java.time.Instant;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Date;
 
 public record BookDto(
@@ -14,7 +16,7 @@ public record BookDto(
 
   String publisher,
 
-  Date publishedDate,
+  LocalDate publishedDate,
 
   String isbn,
 
@@ -24,9 +26,9 @@ public record BookDto(
 
   Double rating,
 
-  Instant createAt,
+  LocalDateTime createdAt,
 
-  Instant updateAt
+  LocalDateTime updatedAt
 ) {
 
 }
