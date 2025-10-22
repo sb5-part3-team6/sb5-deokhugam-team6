@@ -4,6 +4,7 @@ import com.codeit.project.deokhugam.domain.review.dto.*;
 import com.codeit.project.deokhugam.domain.review.service.ReviewService;
 import com.codeit.project.deokhugam.global.common.dto.PageResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -33,15 +34,15 @@ public class ReviewController {
     }
 
     @GetMapping("/{reviewId}/like")
-    public ResponseEntity<String> detail(@PathVariable Long reviewId, @RequestHeader("Deokhugam-Request-User-ID") Long userId) {
-
-        return ResponseEntity.ok("success");
+    public ResponseEntity<ReviewDto> detail(@PathVariable Long reviewId, @RequestHeader("Deokhugam-Request-User-ID") Long userId) {
+        ReviewDto response = reviewService.detail(reviewId, userId);
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping("/popular")
-    public ResponseEntity<String> popularList(ReviewPopularQueryParams params) {
-
-        return ResponseEntity.ok("success");
+    public ResponseEntity<PageResponse> popularList(ReviewPopularQueryParams params) {
+        PageResponse response = reviewService.popularList(params);
+        return ResponseEntity.ok(response);
     }
 
     @PatchMapping("/{reviewId}/like")
@@ -50,16 +51,18 @@ public class ReviewController {
         return ResponseEntity.ok(response);
     }
 
-    @DeleteMapping("/{reviewId}/like")
+    @DeleteMapping("/{reviewId}")
     public ResponseEntity<String> softDelete(@PathVariable Long reviewId, @RequestHeader("Deokhugam-Request-User-ID") Long userId) {
         reviewService.softDelete(reviewId, userId);
-        return ResponseEntity.ok("success");
+        return ResponseEntity.status(HttpStatus.NO_CONTENT)
+                .body("리뷰 삭제 성공");
     }
 
-    @DeleteMapping("/{reviewId}/like/hard")
+    @DeleteMapping("/{reviewId}/hard")
     public ResponseEntity<String> hardDelete(@PathVariable Long reviewId, @RequestHeader("Deokhugam-Request-User-ID") Long userId) {
         reviewService.hardDelete(reviewId, userId);
-        return ResponseEntity.ok("success");
+        return ResponseEntity.status(HttpStatus.NO_CONTENT)
+                .body("리뷰 삭제 성공");
     }
 
 }
