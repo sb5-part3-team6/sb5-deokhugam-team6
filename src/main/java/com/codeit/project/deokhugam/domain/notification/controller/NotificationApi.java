@@ -22,8 +22,12 @@ public interface NotificationApi {
       @ApiResponse(responseCode = "400", description = "잘못된 요청 (정렬 방향 오류, 페이지네이션 파라미터 오류, 사용자 ID 누락)"),
       @ApiResponse(responseCode = "404", description = "사용자 정보 없음"),
       @ApiResponse(responseCode = "500", description = "서버 내부 오류")})
-  ResponseEntity<CursorPageResponseNotificationDto> getNotifications(String userId,
-      String direction, LocalDate cursor, LocalDate after, Integer limit);
+  ResponseEntity<CursorPageResponseNotificationDto> getNotifications(
+      @Parameter(description = "유저 ID") String userId,
+      @Parameter(description = "정렬 방향") String direction,
+      @Parameter(description = "페이지네이션 커서") LocalDate cursor,
+      @Parameter(description = "보조 커서") LocalDate after,
+      @Parameter(description = "페이지 크기") Integer limit);
 
   @Operation(summary = "알림 읽음 상태 업데이트")
   @ApiResponses(value = {
@@ -33,13 +37,14 @@ public interface NotificationApi {
       @ApiResponse(responseCode = "404", description = "알림 정보 없음"),
       @ApiResponse(responseCode = "500", description = "서버 내부 오류")})
   ResponseEntity<NotificationDto> checkNotificationById(
-      @Parameter(description = "Notification ID") String notificationId,
-      NotificationUpdateRequest request, @Parameter(description = "User ID") String userId);
+      @Parameter(description = "알림 ID") String notificationId,
+      @Parameter(description = "알림 확인 여부") NotificationUpdateRequest request,
+      @Parameter(description = "요청자 ID") String userId);
 
   @Operation(summary = "모든 알림 읽음 처리")
   @ApiResponses(value = {@ApiResponse(responseCode = "204", description = "알림 읽음 처리 성공"),
       @ApiResponse(responseCode = "400", description = "잘못된 요청 (요청자 ID 누락)"),
       @ApiResponse(responseCode = "404", description = "알림 정보 없음"),
       @ApiResponse(responseCode = "500", description = "서버 내부 오류")})
-  ResponseEntity<Void> checkAllNotification(@Parameter(description = "User ID") String userId);
+  ResponseEntity<Void> checkAllNotification(@Parameter(description = "유저 ID") String userId);
 }
