@@ -258,4 +258,38 @@ class UserServiceTest {
 
     verify(mockUser, never()).updateNickname(anyString());
   }
+
+  @Test
+  @DisplayName("사용자 논리 삭제 실패 - 존재하지 않는 사용자")
+  void softDelete_Fail_UserNotFound() {
+    String userId = "99";
+    Long userLongId = 99L;
+
+    when(userRepository.findById(userLongId)).thenReturn(Optional.empty());
+
+    NoSuchElementException exception = assertThrows(NoSuchElementException.class, () -> {
+      userService.softDelete(userId);
+    });
+
+    assertEquals("사용자를 찾을 수 없습니다.", exception.getMessage());
+    verify(userRepository).findById(userLongId);
+  }
+
+  @Test
+  @DisplayName("사용자 논리 삭제 성공")
+  void softDelete_Success() {
+    String userId = "1";
+    Long userLongId = 1L;
+
+    User mockUser = mock(User.class);
+    when(mockUser.getDeletedAt()).thenReturn(null);
+
+    when(userRepository.findById(userLongId)).thenReturn(Optional.of(mockUser));
+
+    userService.softDelete(userId);
+
+    verify(userRepository).findById(userLongId);
+
+    verify(mockUser).softDelete();
+  }
 }
