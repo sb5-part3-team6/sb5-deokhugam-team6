@@ -11,6 +11,7 @@ import static org.mockito.Mockito.when;
 import com.codeit.project.deokhugam.domain.user.dto.UserDto;
 import com.codeit.project.deokhugam.domain.user.dto.UserLoginRequest;
 import com.codeit.project.deokhugam.domain.user.dto.UserRegisterRequest;
+import com.codeit.project.deokhugam.domain.user.dto.UserUpdateRequest;
 import com.codeit.project.deokhugam.domain.user.entity.User;
 import com.codeit.project.deokhugam.domain.user.repository.UserRepository;
 import java.time.LocalDateTime;
@@ -89,7 +90,7 @@ class UserServiceTest {
       userService.create(request);
     });
 
-    assertEquals("이미 존재하는 닉네임입니다.", exception.getMessage()); // 현재 로직에서는 닉네임 길이와 중복 예외 메시지가 동일
+    assertEquals("이미 존재하는 닉네임입니다.", exception.getMessage());
     verify(userRepository, never()).save(any(User.class));
   }
 
@@ -112,17 +113,14 @@ class UserServiceTest {
   @Test
   @DisplayName("로그인 실패 - 잘못된 이메일 형식")
   void login_Fail_InvalidEmailFormat() {
-    // given
     UserLoginRequest request = new UserLoginRequest("invalid-email", "password");
 
-    // when & then
     IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
       userService.login(request);
     });
 
     assertEquals("유효하지 않은 이메일 형식입니다.", exception.getMessage());
 
-    // 유효성 검사에서 실패했으므로, DB를 조회하는 findByEmail은 절대 호출되면 안 됨
     verify(userRepository, never()).findByEmail(anyString());
   }
 
@@ -196,5 +194,68 @@ class UserServiceTest {
     assertEquals(now, userDto.createdAt());
 
     verify(userRepository).findById(userLongId);
+  }
+
+  @Test
+  @DisplayName("사용자 정보 수정 실패 - 존재하지 않는 사용자")
+  void update_Fail_UserNotFound() {
+    String userId = "99";
+    Long userLongId = 99L;
+    UserUpdateRequest request = new UserUpdateRequest("newNickname");
+
+    when(userRepository.findById(userLongId)).thenReturn(Optional.empty());
+
+    NoSuchElementException exception = assertThrows(NoSuchElementException.class, () -> {
+      userService.update(userId, request);
+    });
+
+    assertEquals("사용자를 찾을 수 없습니다.", exception.getMessage());
+    verify(userRepository).findById(userLongId);
+  }
+
+  @Test
+  @DisplayName("사용자 정보 수정 실패 - 닉네임 중복")
+  void update_Fail_DuplicateNickname() {
+    String userId = "1";
+    Long userLongId = 1L;
+    String duplicateNickname = "existingNickname";
+    UserUpdateRequest request = new UserUpdateRequest(duplicateNickname);
+
+    User mockUser = mock(User.class);
+    when(userRepository.findById(userLongId)).thenReturn(Optional.of(mockUser));
+
+    when(userRepository.existsByNickname(duplicateNickname)).thenReturn(true);
+
+    IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
+      userService.update(userId, request);
+    });
+
+    assertEquals("이미 존재하는 닉네임입니다.", exception.getMessage());
+    verify(userRepository).findById(userLongId);
+    verify(userRepository).existsByNickname(duplicateNickname);
+  }
+
+  @Test
+  @DisplayName("사용자 정보 수정 실패 - 닉네임 길이 너무 짧음")
+  void update_Fail_NicknameTooShort() {
+    String userId = "1";
+    Long userLongId = 1L;
+    String shortNickname = "a";
+    UserUpdateRequest request = new UserUpdateRequest(shortNickname);
+
+    User mockUser = mock(User.class);
+    when(userRepository.findById(userLongId)).thenReturn(Optional.of(mockUser));
+
+    when(userRepository.existsByNickname(shortNickname)).thenReturn(false);
+
+    IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
+      userService.update(userId, request);
+    });
+
+    assertEquals("이미 존재하는 닉네임입니다.", exception.getMessage());
+    verify(userRepository).findById(userLongId);
+    verify(userRepository).existsByNickname(shortNickname);
+
+    verify(mockUser, never()).updateNickname(anyString());
   }
 }
