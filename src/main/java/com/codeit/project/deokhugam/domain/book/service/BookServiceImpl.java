@@ -7,6 +7,7 @@ import com.codeit.project.deokhugam.domain.book.entity.Book;
 import com.codeit.project.deokhugam.domain.book.mapper.BookMapper;
 import com.codeit.project.deokhugam.domain.book.repository.BookRepository;
 import com.codeit.project.deokhugam.domain.book.storage.FileStorage;
+import com.codeit.project.deokhugam.domain.review.repository.ReviewRepository;
 import java.time.LocalDate;
 import java.util.NoSuchElementException;
 import lombok.RequiredArgsConstructor;
@@ -20,6 +21,7 @@ public class BookServiceImpl implements BookService {
   private final BookMapper bookMapper;
   private final BookRepository bookRepository;
   private final FileStorage fileStorage;
+  private final ReviewRepository reviewRepository;
 
   @Override
   @Transactional
@@ -44,10 +46,12 @@ public class BookServiceImpl implements BookService {
         thumbnailImageUrl);
 
     Book created = bookRepository.save(book);
-    return bookMapper.toDto(created);
+    int reviewCount = getReviewCount(book.getId());
+    double rating = getAverageRating(book.getId());
+    return bookMapper.toDto(created, reviewCount, rating);
   }
 
-  @Transactional
+  @Transactional(readOnly = true)
   @Override
   public BookDto update(Long bookId, BookUpdateRequest bookData, MultipartFile thumbnailImage) {
     Book book = bookRepository.findById(bookId)
@@ -67,9 +71,31 @@ public class BookServiceImpl implements BookService {
 
     book.update(newTitle,newAuthor,newDescription,newPublisher,newpublishedDate,newThumbnailImageUrl);
     Book updated = bookRepository.save(book);
-    return bookMapper.toDto(updated);
+    int reviewCount = getReviewCount(updated.getId());
+    double rating = getAverageRating(updated.getId());
+    return bookMapper.toDto(updated,reviewCount,rating);
   }
 
+  //리뷰 가져오기 (?바로 레포지토리로 가져와도 되나?)
+  public double getAverageRating(Long bookId){
+    double avg = reviewRepository.getAverageRating(bookId);
+    return Math.round(avg * 10) / 10.0;
+  }
+  public int getReviewCount(Long bookId) {
+    return reviewRepository.getReviewCount(bookId);
+  }
+
+  @Transactional(readOnly = true)
+  @Override
+  public BookDto findById(Long bookId) {
+    Book book = bookRepository.findById(bookId)
+        .orElseThrow(()->new NoSuchElementException("도서가 존재하지 않습니다."));
+    int reviewCount = getReviewCount(book.getId());
+    double rating = getAverageRating(book.getId());
+    return bookMapper.toDto(book,reviewCount,rating);
+  }
+
+  @Transactional
   @Override
   public void softDelete(Long bookId) {
     Book book = bookRepository.findById(bookId)
@@ -84,12 +110,5 @@ public class BookServiceImpl implements BookService {
         .orElseThrow(()-> new NoSuchElementException("도서가 존재하지 않습니다."));
     fileStorage.deleteThumbnailImage(book.getIsbn());
     bookRepository.deleteById(bookId);
-  }
-
-  @Override
-  public BookDto findById(Long bookId) {
-    Book book = bookRepository.findById(bookId)
-        .orElseThrow(()->new NoSuchElementException("도서가 존재하지 않습니다."));
-    return bookMapper.toDto(book);
   }
 }

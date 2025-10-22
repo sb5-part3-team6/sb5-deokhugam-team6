@@ -1,5 +1,14 @@
 package com.codeit.project.deokhugam.domain.book.dto;
 
-public class CursorPageResponseBookDto {
+import java.util.List;
+
+public record CursorPageResponseBookDto (
+    List<BookDto> content,
+    String nextCursor,
+    String nextAfter,
+    String sizeExpand,
+    String totalElements,
+    String hasNext
+){
 
 }

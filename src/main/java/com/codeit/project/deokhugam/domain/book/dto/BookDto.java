@@ -1,9 +1,9 @@
 package com.codeit.project.deokhugam.domain.book.dto;
 
-import java.time.Instant;
+import jakarta.validation.constraints.Size;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.Date;
+import lombok.Builder;
 
 public record BookDto(
   String id,
@@ -30,5 +30,4 @@ public record BookDto(
 
   LocalDateTime updatedAt
 ) {
-
 }
