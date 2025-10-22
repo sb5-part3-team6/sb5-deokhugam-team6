@@ -3,6 +3,7 @@ package com.codeit.project.deokhugam.domain.user.service;
 import com.codeit.project.deokhugam.domain.user.dto.UserDto;
 import com.codeit.project.deokhugam.domain.user.dto.UserLoginRequest;
 import com.codeit.project.deokhugam.domain.user.dto.UserRegisterRequest;
+import com.codeit.project.deokhugam.domain.user.dto.UserUpdateRequest;
 import com.codeit.project.deokhugam.domain.user.entity.User;
 import com.codeit.project.deokhugam.domain.user.repository.UserRepository;
 import java.util.NoSuchElementException;
@@ -81,6 +82,23 @@ public class UserService {
           throw new NoSuchElementException("사용자를 찾을 수 없습니다.");
         });
 
+    return new UserDto(findUser.getId().toString(), findUser.getEmail(), findUser.getNickname(), findUser.getCreatedAt());
+  }
+
+  @Transactional
+  public UserDto update(String id, UserUpdateRequest request) {
+    User findUser = userRepository.findById(Long.parseLong(id))
+        .orElseThrow(() -> {
+          log.warn("존재하지 않는 사용자");
+          throw new NoSuchElementException("사용자를 찾을 수 없습니다.");
+        });
+
+    if(!isValidNickname(request.nickname())) {
+      log.error("이미 존재하는 닉네임이거나 너무 짧음, Nickname = {}", request.nickname());
+      throw new IllegalArgumentException("이미 존재하는 닉네임입니다.");
+    }
+
+    findUser.updateNickname(request.nickname());
     return new UserDto(findUser.getId().toString(), findUser.getEmail(), findUser.getNickname(), findUser.getCreatedAt());
   }
 
