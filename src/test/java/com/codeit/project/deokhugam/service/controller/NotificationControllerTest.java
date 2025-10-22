@@ -1,13 +1,9 @@
 package com.codeit.project.deokhugam.service.controller;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 import com.codeit.project.deokhugam.domain.notification.controller.NotificationController;
 import com.codeit.project.deokhugam.domain.notification.dto.CursorPageResponseNotificationDto;
@@ -27,6 +23,7 @@ import org.springframework.data.jpa.mapping.JpaMetamodelMappingContext;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
+
 @WebMvcTest(NotificationController.class)
 class NotificationControllerTest {
 
@@ -48,9 +45,10 @@ class NotificationControllerTest {
   @BeforeEach
   void setup() {
     sampleNotification = new NotificationDto(
-        "1", "user-1", "101", "Clean Code",
+        "1", "1", "101", "Clean Code",
         "좋은 책이에요", true,
-        LocalDateTime.now().minusDays(1),
+        LocalDateTime.now()
+                     .minusDays(1),
         LocalDateTime.now()
     );
 
@@ -67,14 +65,12 @@ class NotificationControllerTest {
   @DisplayName("GET /api/notifications - 정상 조회")
   void getNotifications_success() throws Exception {
     when(notificationService.getNotifications(
-        anyString(), anyString(), any(LocalDate.class), any(LocalDate.class), anyInt()))
+        anyString(), anyString(), nullable(LocalDate.class), nullable(LocalDate.class), anyInt()))
         .thenReturn(samplePageResponse);
 
     mockMvc.perform(get("/api/notifications")
-               .param("userId", "user-1")
-               .param("direction", "DESC")
-               .param("limit", "20")
-               .accept(MediaType.APPLICATION_JSON))
+               .queryParam("userId", "1")
+               .contentType(MediaType.APPLICATION_JSON))
            .andExpect(status().isOk())
            .andExpect(jsonPath("$.content[0].id").value(sampleNotification.id()))
            .andExpect(jsonPath("$.content[0].userId").value(sampleNotification.userId()))
@@ -94,8 +90,8 @@ class NotificationControllerTest {
   @DisplayName("GET /api/notifications - 잘못된 after 파라미터")
   void getNotifications_invalidAfterParam() throws Exception {
     mockMvc.perform(get("/api/notifications")
-               .param("userId", "user-1")
-               .param("after", "not-a-date")
+               .queryParam("userId", "user-1")
+               .queryParam("after", "not-a-date")
                .accept(MediaType.APPLICATION_JSON))
            .andExpect(status().isBadRequest());
   }
