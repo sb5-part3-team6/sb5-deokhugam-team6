@@ -73,6 +73,17 @@ public class UserService {
     return new UserDto(findUser.getId().toString(), findUser.getEmail(), findUser.getNickname(), findUser.getCreatedAt());
   }
 
+  @Transactional(readOnly = true)
+  public UserDto findById(String id) {
+    User findUser = userRepository.findById(Long.parseLong(id))
+        .orElseThrow(() -> {
+          log.warn("존재하지 않는 사용자");
+          throw new NoSuchElementException("사용자를 찾을 수 없습니다.");
+        });
+
+    return new UserDto(findUser.getId().toString(), findUser.getEmail(), findUser.getNickname(), findUser.getCreatedAt());
+  }
+
   private boolean isValidEmail(String email) {
     if (email == null || email.isEmpty() || email.isBlank()) {
       return false;
