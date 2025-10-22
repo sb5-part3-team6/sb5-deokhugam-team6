@@ -16,9 +16,8 @@ public class GlobalExceptionHandler {
   public ResponseEntity<ErrorResponse> handleException(Exception e) {
     log.error("예상치 못한 오류 발생: {}", e.getMessage(), e);
     ErrorResponse errorResponse = new ErrorResponse(e, HttpStatus.INTERNAL_SERVER_ERROR.value());
-    return ResponseEntity
-        .status(HttpStatus.INTERNAL_SERVER_ERROR)
-        .body(errorResponse);
+    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                         .body(errorResponse);
   }
 
   @ExceptionHandler(DeokhugamException.class)
@@ -27,9 +26,8 @@ public class GlobalExceptionHandler {
         exception);
     HttpStatus status = determineHttpStatus(exception);
     ErrorResponse response = new ErrorResponse(exception, status.value());
-    return ResponseEntity
-        .status(status)
-        .body(response);
+    return ResponseEntity.status(status)
+                         .body(response);
   }
 
   private HttpStatus determineHttpStatus(DeokhugamException exception) {
