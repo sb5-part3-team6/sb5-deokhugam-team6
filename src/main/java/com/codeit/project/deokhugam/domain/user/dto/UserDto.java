@@ -6,7 +6,7 @@ public record UserDto(
     String id,
     String email,
     String nickname,
-    LocalDateTime cratedAt
+    LocalDateTime createdAt
 ) {
 
 }
