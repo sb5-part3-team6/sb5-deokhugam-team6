@@ -112,7 +112,7 @@ class NotificationServiceTest {
     LocalDate after = LocalDate.now()
                                .minusDays(1);
     CursorPageResponseNotificationDto result = notificationService.getNotifications("1", "DESC",
-        "10", after, 20);
+        after, after, 20);
 
     assertThat(result).isNotNull();
   }
