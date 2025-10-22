@@ -23,7 +23,7 @@ public interface NotificationApi {
       @ApiResponse(responseCode = "404", description = "사용자 정보 없음"),
       @ApiResponse(responseCode = "500", description = "서버 내부 오류")})
   ResponseEntity<CursorPageResponseNotificationDto> getNotifications(String userId,
-      String direction, String cursor, LocalDate after, Integer limit);
+      String direction, LocalDate cursor, LocalDate after, Integer limit);
 
   @Operation(summary = "알림 읽음 상태 업데이트")
   @ApiResponses(value = {

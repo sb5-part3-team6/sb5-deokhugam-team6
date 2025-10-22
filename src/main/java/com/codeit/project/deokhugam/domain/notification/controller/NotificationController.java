@@ -30,7 +30,7 @@ public class NotificationController implements NotificationApi {
   public ResponseEntity<CursorPageResponseNotificationDto> getNotifications(
       @RequestParam String userId,
       @RequestParam(name = "direction", defaultValue = "DESC") String direction,
-      @RequestParam String cursor,
+      @RequestParam(name = "cursor", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate cursor,
       @RequestParam(name = "after", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate after,
       @RequestParam(name = "limit", defaultValue = "20") Integer limit) {
 

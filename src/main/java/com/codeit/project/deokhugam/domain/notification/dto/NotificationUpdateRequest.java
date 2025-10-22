@@ -1,5 +1,7 @@
 package com.codeit.project.deokhugam.domain.notification.dto;
 
-public record NotificationUpdateRequest(Boolean confirmed) {
+import jakarta.validation.constraints.NotNull;
+
+public record NotificationUpdateRequest(@NotNull Boolean confirmed) {
 
 }
