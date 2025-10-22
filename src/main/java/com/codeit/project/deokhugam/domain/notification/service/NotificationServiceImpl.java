@@ -8,6 +8,7 @@ import com.codeit.project.deokhugam.domain.notification.exception.NotificationIn
 import com.codeit.project.deokhugam.domain.notification.exception.NotificationNotFoundException;
 import com.codeit.project.deokhugam.domain.notification.mapper.NotificationMapper;
 import com.codeit.project.deokhugam.domain.notification.repository.NotificationRepository;
+import com.codeit.project.deokhugam.domain.user.repository.UserRepository;
 import jakarta.transaction.Transactional;
 import java.time.LocalDate;
 import java.util.List;
@@ -18,6 +19,7 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class NotificationServiceImpl implements NotificationService {
 
+  private final UserRepository userRepository;
   private final NotificationRepository notificationRepository;
   private final NotificationMapper notificationMapper;
 
@@ -54,13 +56,13 @@ public class NotificationServiceImpl implements NotificationService {
   @Transactional
   public void checkAllNotification(String userId) {
 
-    List<Notification> notifications = notificationRepository.findAllByUserId(
-        Long.parseLong(userId));
-
-    if (notifications.isEmpty()) {
+    if (!userRepository.existsById(Long.parseLong(userId))) {
       throw NotificationInvalidUserException
           .withNotificationIdAndUserId("all", userId);
     }
+
+    List<Notification> notifications = notificationRepository.findAllByUserId(
+        Long.parseLong(userId));
 
     for (Notification notification : notifications) {
       notification.updateConfirmed(true);
