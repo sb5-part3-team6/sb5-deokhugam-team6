@@ -102,6 +102,23 @@ public class UserService {
     return new UserDto(findUser.getId().toString(), findUser.getEmail(), findUser.getNickname(), findUser.getCreatedAt());
   }
 
+  @Transactional
+  public void softDelete(String id) {
+    User findUser = userRepository.findById(Long.parseLong(id))
+        .orElseThrow(() -> {
+          log.warn("존재하지 않는 사용자");
+          throw new NoSuchElementException("사용자를 찾을 수 없습니다.");
+        });
+
+    if(findUser.getDeletedAt() == null) {
+      findUser.softDelete();
+    }
+    else {
+      log.warn("이미 삭제된 사용자, Email = {}", findUser.getEmail());
+      throw new IllegalStateException("이미 삭제된 사용자입니다.");
+    }
+  }
+
   private boolean isValidEmail(String email) {
     if (email == null || email.isEmpty() || email.isBlank()) {
       return false;
