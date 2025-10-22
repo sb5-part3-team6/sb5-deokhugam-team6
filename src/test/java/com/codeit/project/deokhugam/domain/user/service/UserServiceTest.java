@@ -175,32 +175,26 @@ class UserServiceTest {
   @Test
   @DisplayName("사용자 조회 성공")
   void findById_Success() {
-    // given
     String userId = "1";
     Long userLongId = 1L;
     LocalDateTime now = LocalDateTime.now();
 
-    // User 엔티티를 Mocking하여 getter 메서드들의 반환 값을 정의합니다.
     User mockUser = mock(User.class);
     when(mockUser.getId()).thenReturn(userLongId);
     when(mockUser.getEmail()).thenReturn("test@example.com");
     when(mockUser.getNickname()).thenReturn("testuser");
     when(mockUser.getCreatedAt()).thenReturn(now);
 
-    // Repository가 Mock User를 Optional로 감싸서 반환하도록 설정
     when(userRepository.findById(userLongId)).thenReturn(Optional.of(mockUser));
 
-    // when
     UserDto userDto = userService.findById(userId);
 
-    // then
     assertNotNull(userDto);
     assertEquals(userId, userDto.id());
     assertEquals("test@example.com", userDto.email());
     assertEquals("testuser", userDto.nickname());
     assertEquals(now, userDto.createdAt());
 
-    // findById가 1L 인자로 정확히 1번 호출되었는지 검증
     verify(userRepository).findById(userLongId);
   }
 }
