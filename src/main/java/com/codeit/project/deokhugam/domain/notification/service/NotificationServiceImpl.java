@@ -45,7 +45,7 @@ public class NotificationServiceImpl implements NotificationService {
           .withNotificationIdAndUserId(notificationId, userId);
     }
 
-    notification.toggleConfirmed(request.confirmed());
+    notification.updateConfirmed(request.confirmed());
 
     return notificationMapper.toDto(notification);
   }
@@ -58,7 +58,7 @@ public class NotificationServiceImpl implements NotificationService {
         Long.parseLong(userId));
 
     for (Notification notification : notifications) {
-      notification.toggleConfirmed(true);
+      notification.updateConfirmed(true);
     }
   }
 }
