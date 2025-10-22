@@ -43,10 +43,15 @@ public class NotificationServiceImpl implements NotificationService {
 
     boolean hasNext = notifications.size() >= fetchLimit;
 
-    return new CursorPageResponseNotificationDto(notifications.stream()
-                                                              .map(notificationMapper::toDto)
-                                                              .toList(), nextCursor,
-        notifications.size(), hasNext, total);
+    return CursorPageResponseNotificationDto.builder()
+                                            .content(notifications.stream()
+                                                                  .map(notificationMapper::toDto)
+                                                                  .toList())
+                                            .nextCursor(nextCursor)
+                                            .size(notifications.size())
+                                            .hasNext(hasNext)
+                                            .totalElements(total)
+                                            .build();
   }
 
   @Override

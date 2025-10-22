@@ -43,35 +43,22 @@ class NotificationCustomRepositoryImplTest {
     em.persist(user1);
     em.persist(user2);
 
-    book = new Book(
-        "Clean Code", "Robert C. Martin", "클린 코드 설명",
+    book = new Book("Clean Code", "Robert C. Martin", "클린 코드 설명",
         "인사이트", LocalDate.of(2008, 8, 1),
-        "9788966260959", "https://example.com/cleancode.jpg"
-    );
+        "9788966260959", "https://example.com/cleancode.jpg");
     em.persist(book);
 
     review = new Review(user1, book, "좋은 책이에요", 5);
     em.persist(review);
 
     for (int i = 1; i <= 30; i++) {
-      Notification n = new Notification(
-          review,
-          user1,
-          i % 2 == 0 ? "LIKE" : "COMMENT",
-          "알림 메시지 " + i,
-          i % 2 == 0
-      );
+      Notification n = new Notification(review, user1, i % 2 == 0 ? "LIKE" : "COMMENT",
+          "알림 메시지 " + i, i % 2 == 0);
       em.persist(n);
     }
 
     for (int i = 1; i <= 5; i++) {
-      Notification n = new Notification(
-          review,
-          user2,
-          "LIKE",
-          "user2 알림 " + i,
-          false
-      );
+      Notification n = new Notification(review, user2, "LIKE", "user2 알림 " + i, false);
       em.persist(n);
     }
 
@@ -82,7 +69,8 @@ class NotificationCustomRepositoryImplTest {
   @Test
   @DisplayName("JPA - findAllByUserId() 기본 조회")
   void findAllByUserId() {
-    List<Notification> result = notificationRepository.findAllByUserIdAndConfirmedFalse(user1.getId());
+    List<Notification> result = notificationRepository.findAllByUserIdAndConfirmedFalse(
+        user1.getId());
     assertThat(result).hasSize(15)
                       .allMatch(n -> n.getUser()
                                       .getId()
@@ -92,38 +80,33 @@ class NotificationCustomRepositoryImplTest {
   @Test
   @DisplayName("QueryDSL - DESC 정렬, 전체 조회")
   void findNotificationsByUserId_desc() {
-    List<Notification> result = notificationRepositoryImpl.findNotificationsByUserId(
-        user1.getId(), "DESC", null, null, 50
-    );
+    List<Notification> result = notificationRepositoryImpl.findNotificationsByUserId(user1.getId(),
+        "DESC", null, null, 50);
 
     assertThat(result).hasSize(30);
     assertThat(result.get(0)
-                     .getCreatedAt())
-        .isAfterOrEqualTo(result.get(1)
-                                .getCreatedAt());
+                     .getCreatedAt()).isAfterOrEqualTo(result.get(1)
+                                                             .getCreatedAt());
   }
 
   @Test
   @DisplayName("QueryDSL - ASC 정렬 확인")
   void findNotificationsByUserId_asc() {
-    List<Notification> result = notificationRepositoryImpl.findNotificationsByUserId(
-        user1.getId(), "ASC", null, null, 50
-    );
+    List<Notification> result = notificationRepositoryImpl.findNotificationsByUserId(user1.getId(),
+        "ASC", null, null, 50);
 
     for (int i = 1; i < result.size(); i++) {
       assertThat(result.get(i - 1)
-                       .getCreatedAt())
-          .isBeforeOrEqualTo(result.get(i)
-                                   .getCreatedAt());
+                       .getCreatedAt()).isBeforeOrEqualTo(result.get(i)
+                                                                .getCreatedAt());
     }
   }
 
   @Test
   @DisplayName("QueryDSL - confirmed 필터 확인")
   void findNotificationsByUserId_confirmed() {
-    List<Notification> result = notificationRepositoryImpl.findNotificationsByUserId(
-        user1.getId(), "DESC", null, null, 50
-    );
+    List<Notification> result = notificationRepositoryImpl.findNotificationsByUserId(user1.getId(),
+        "DESC", null, null, 50);
 
     boolean hasUnconfirmed = result.stream()
                                    .anyMatch(n -> !n.getConfirmed());
@@ -137,16 +120,14 @@ class NotificationCustomRepositoryImplTest {
   @Test
   @DisplayName("QueryDSL - cursor 기반 페이징 확인")
   void findNotificationsByUserId_cursor() {
-    List<Notification> all = notificationRepositoryImpl.findNotificationsByUserId(
-        user1.getId(), "DESC", null, null, 50
-    );
+    List<Notification> all = notificationRepositoryImpl.findNotificationsByUserId(user1.getId(),
+        "DESC", null, null, 50);
 
     Notification cursorNotification = all.get(14);
 
     List<Notification> afterCursor = notificationRepositoryImpl.findNotificationsByUserId(
         user1.getId(), "DESC", cursorNotification.getCreatedAt()
-                                                 .toLocalDate(), null, 50
-    );
+                                                 .toLocalDate(), null, 50);
 
     for (Notification n : afterCursor) {
       assertThat(n.getCreatedAt()).isBefore(cursorNotification.getCreatedAt());
@@ -159,9 +140,8 @@ class NotificationCustomRepositoryImplTest {
     LocalDate after = LocalDate.now()
                                .plusDays(1);
 
-    List<Notification> result = notificationRepositoryImpl.findNotificationsByUserId(
-        user1.getId(), "DESC", null, after, 50
-    );
+    List<Notification> result = notificationRepositoryImpl.findNotificationsByUserId(user1.getId(),
+        "DESC", null, after, 50);
 
     assertThat(result).isEmpty();
   }

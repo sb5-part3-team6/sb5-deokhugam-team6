@@ -56,8 +56,8 @@ class NotificationServiceTest {
     notification = new Notification(new Review(), user, "", "", false);
     ReflectionTestUtils.setField(notification, "id", 1L);
 
-    notificationDto = new NotificationDto("1", "1", "1", "Test Notification", "", false,
-        LocalDateTime.now(), LocalDateTime.now());
+    notificationDto = new NotificationDto("1", "1", "1", "Test Notification",
+        "", false, LocalDateTime.now(), LocalDateTime.now());
   }
 
   @Test
@@ -80,9 +80,9 @@ class NotificationServiceTest {
   void updateNotificationById_NotFound() {
     given(notificationRepository.findById(1L)).willReturn(Optional.empty());
 
-    assertThatThrownBy(() -> notificationService.checkNotificationById("1",
-        new NotificationUpdateRequest(true), "2"))
-        .isInstanceOf(NotificationNotFoundException.class);
+    assertThatThrownBy(
+        () -> notificationService.checkNotificationById("1", new NotificationUpdateRequest(true),
+            "2")).isInstanceOf(NotificationNotFoundException.class);
   }
 
   @Test
@@ -90,9 +90,9 @@ class NotificationServiceTest {
   void updateNotificationById_InvalidUser() {
     given(notificationRepository.findById(1L)).willReturn(Optional.of(notification));
 
-    assertThatThrownBy(() -> notificationService.checkNotificationById("1",
-        new NotificationUpdateRequest(true), "2"))
-        .isInstanceOf(NotificationInvalidUserException.class);
+    assertThatThrownBy(
+        () -> notificationService.checkNotificationById("1", new NotificationUpdateRequest(true),
+            "2")).isInstanceOf(NotificationInvalidUserException.class);
   }
 
   @Test

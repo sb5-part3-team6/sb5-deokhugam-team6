@@ -21,9 +21,8 @@ public class NotificationExceptionHandler {
         exception);
     HttpStatus status = HttpStatus.FORBIDDEN;
     ErrorResponse response = new ErrorResponse(exception, status.value());
-    return ResponseEntity
-        .status(status)
-        .body(response);
+    return ResponseEntity.status(status)
+                         .body(response);
   }
 
   @ExceptionHandler(NotificationNotFoundException.class)
@@ -33,16 +32,14 @@ public class NotificationExceptionHandler {
         exception);
     HttpStatus status = HttpStatus.NOT_FOUND;
     ErrorResponse response = new ErrorResponse(exception, status.value());
-    return ResponseEntity
-        .status(status)
-        .body(response);
+    return ResponseEntity.status(status)
+                         .body(response);
   }
 
   @ExceptionHandler(MissingRequestHeaderException.class)
   public ResponseEntity<ErrorResponse> handleMissingHeader(
       MissingRequestHeaderException exception) {
-    log.error("알림 예외 발생: message={}",exception.getMessage(),
-        exception);
+    log.error("알림 예외 발생: message={}", exception.getMessage(), exception);
     HttpStatus status = HttpStatus.BAD_REQUEST;
     ErrorResponse response = new ErrorResponse(exception, status.value());
     return ResponseEntity.status(status)
@@ -52,8 +49,7 @@ public class NotificationExceptionHandler {
   @ExceptionHandler(MethodArgumentTypeMismatchException.class)
   public ResponseEntity<ErrorResponse> handleMismatch(
       MethodArgumentTypeMismatchException exception) {
-    log.error("알림 예외 발생: message={}", exception.getMessage(),
-        exception);
+    log.error("알림 예외 발생: message={}", exception.getMessage(), exception);
     HttpStatus status = HttpStatus.BAD_REQUEST;
     ErrorResponse response = new ErrorResponse(exception, status.value());
     return ResponseEntity.status(status)

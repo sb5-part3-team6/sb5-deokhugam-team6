@@ -33,8 +33,7 @@ public class NotificationCustomRepositoryImpl implements NotificationCustomRepos
       builder.and(notification.createdAt.gt(after.atStartOfDay()));
     }
 
-    OrderSpecifier<?> order = "ASC".equalsIgnoreCase(direction)
-        ? notification.createdAt.asc()
+    OrderSpecifier<?> order = "ASC".equalsIgnoreCase(direction) ? notification.createdAt.asc()
         : notification.createdAt.desc();
 
     return qf.selectFrom(notification)

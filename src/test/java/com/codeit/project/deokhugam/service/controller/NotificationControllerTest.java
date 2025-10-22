@@ -44,33 +44,22 @@ class NotificationControllerTest {
 
   @BeforeEach
   void setup() {
-    sampleNotification = new NotificationDto(
-        "1", "1", "101", "Clean Code",
-        "좋은 책이에요", true,
-        LocalDateTime.now()
-                     .minusDays(1),
-        LocalDateTime.now()
-    );
+    sampleNotification = new NotificationDto("1", "1", "101",
+        "Clean Code", "좋은 책이에요", true,
+        LocalDateTime.now().minusDays(1), LocalDateTime.now());
 
-    samplePageResponse = new CursorPageResponseNotificationDto(
-        List.of(sampleNotification),
-        "nextCursor",
-        1,
-        true,
-        1L
-    );
+    samplePageResponse = new CursorPageResponseNotificationDto(List.of(sampleNotification),
+        "nextCursor", 1, true, 1L);
   }
 
   @Test
   @DisplayName("GET /api/notifications - 정상 조회")
   void getNotifications_success() throws Exception {
-    when(notificationService.getNotifications(
-        anyString(), anyString(), nullable(LocalDate.class), nullable(LocalDate.class), anyInt()))
-        .thenReturn(samplePageResponse);
+    when(notificationService.getNotifications(anyString(), anyString(), nullable(LocalDate.class),
+        nullable(LocalDate.class), anyInt())).thenReturn(samplePageResponse);
 
-    mockMvc.perform(get("/api/notifications")
-               .queryParam("userId", "1")
-               .contentType(MediaType.APPLICATION_JSON))
+    mockMvc.perform(get("/api/notifications").queryParam("userId", "1")
+                                             .contentType(MediaType.APPLICATION_JSON))
            .andExpect(status().isOk())
            .andExpect(jsonPath("$.content[0].id").value(sampleNotification.id()))
            .andExpect(jsonPath("$.content[0].userId").value(sampleNotification.userId()))
@@ -89,26 +78,27 @@ class NotificationControllerTest {
   @Test
   @DisplayName("GET /api/notifications - 잘못된 after 파라미터")
   void getNotifications_invalidAfterParam() throws Exception {
-    mockMvc.perform(get("/api/notifications")
-               .queryParam("userId", "user-1")
-               .queryParam("after", "not-a-date")
-               .accept(MediaType.APPLICATION_JSON))
+    mockMvc.perform(get("/api/notifications").queryParam("userId", "user-1")
+                                             .queryParam("after", "not-a-date")
+                                             .accept(MediaType.APPLICATION_JSON))
            .andExpect(status().isBadRequest());
   }
 
   @Test
   @DisplayName("PATCH /api/notifications/{id} - 단일 알림 확인")
   void checkNotificationById_success() throws Exception {
-    when(notificationService.checkNotificationById(
-        anyString(), any(NotificationUpdateRequest.class), anyString()))
-        .thenReturn(sampleNotification);
+    when(
+        notificationService.checkNotificationById(anyString(), any(NotificationUpdateRequest.class),
+            anyString())).thenReturn(sampleNotification);
 
     NotificationUpdateRequest request = new NotificationUpdateRequest(true);
 
-    mockMvc.perform(patch("/api/notifications/{notificationId}", "1")
-               .header("Deokhugam-Request-User-ID", "user-1")
-               .contentType(MediaType.APPLICATION_JSON)
-               .content(objectMapper.writeValueAsString(request)))
+    mockMvc.perform(
+               patch("/api/notifications/{notificationId}", "1").header("Deokhugam-Request-User-ID",
+                                                                    "user-1")
+                                                                .contentType(MediaType.APPLICATION_JSON)
+                                                                .content(objectMapper.writeValueAsString(
+                                                                    request)))
            .andExpect(status().isOk())
            .andExpect(jsonPath("$.id").value(sampleNotification.id()))
            .andExpect(jsonPath("$.userId").value(sampleNotification.userId()))
@@ -125,17 +115,18 @@ class NotificationControllerTest {
   void checkNotificationById_missingHeader() throws Exception {
     NotificationUpdateRequest request = new NotificationUpdateRequest(true);
 
-    mockMvc.perform(patch("/api/notifications/{notificationId}", "1")
-               .contentType(MediaType.APPLICATION_JSON)
-               .content(objectMapper.writeValueAsString(request)))
+    mockMvc.perform(
+               patch("/api/notifications/{notificationId}", "1").contentType(MediaType.APPLICATION_JSON)
+                                                                .content(objectMapper.writeValueAsString(
+                                                                    request)))
            .andExpect(status().isBadRequest());
   }
 
   @Test
   @DisplayName("PATCH /api/notifications/read-all - 전체 확인")
   void checkAllNotification_success() throws Exception {
-    mockMvc.perform(patch("/api/notifications/read-all")
-               .header("Deokhugam-Request-User-ID", "user-1"))
+    mockMvc.perform(
+               patch("/api/notifications/read-all").header("Deokhugam-Request-User-ID", "user-1"))
            .andExpect(status().isNoContent());
   }
 
