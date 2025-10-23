@@ -7,7 +7,6 @@ import com.codeit.project.deokhugam.domain.user.dto.UserUpdateRequest;
 import com.codeit.project.deokhugam.domain.user.entity.User;
 import com.codeit.project.deokhugam.domain.user.repository.UserRepository;
 import java.util.NoSuchElementException;
-import java.util.regex.Pattern;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -19,8 +18,6 @@ import org.springframework.transaction.annotation.Transactional;
 public class UserService {
 
   private final UserRepository userRepository;
-
-  private final String EMAIL_PATTERN = "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,6}$";
 
   @Transactional
   public UserDto create(UserRegisterRequest request) {
@@ -43,11 +40,6 @@ public class UserService {
 
   @Transactional
   public UserDto login(UserLoginRequest request) {
-    if(!isValidEmail(request.email())) {
-      log.error("유효하지 않은 이메일 형식, Email = {}", request.email());
-      throw new IllegalArgumentException("유효하지 않은 이메일 형식입니다.");
-    }
-
     User findUser = userRepository.findByEmail(request.email())
         .orElseThrow(() -> {
             log.warn("존재하지 않는 이메일, Email = {}", request.email());
@@ -80,11 +72,6 @@ public class UserService {
           log.warn("존재하지 않는 사용자");
           throw new NoSuchElementException("사용자를 찾을 수 없습니다.");
         });
-
-    if(!isValidNickname(request.nickname())) {
-      log.error("이미 존재하는 닉네임이거나 너무 짧음, Nickname = {}", request.nickname());
-      throw new IllegalArgumentException("이미 존재하는 닉네임입니다.");
-    }
 
     findUser.updateNickname(request.nickname());
     return new UserDto(findUser.getId().toString(), findUser.getEmail(), findUser.getNickname(), findUser.getCreatedAt());
@@ -122,21 +109,5 @@ public class UserService {
     else {
       userRepository.delete(findUser);
     }
-  }
-
-  private boolean isValidEmail(String email) {
-    if (email == null || email.isEmpty() || email.isBlank()) {
-      return false;
-    }
-
-    return Pattern.matches(EMAIL_PATTERN, email);
-  }
-
-  private boolean isValidNickname(String nickname) {
-    if(userRepository.existsByNickname(nickname) || nickname.length() < 2) {
-      return false;
-    }
-
-    return true;
   }
 }
