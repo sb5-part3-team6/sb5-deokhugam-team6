@@ -2,13 +2,18 @@ package com.codeit.project.deokhugam.domain.book.service;
 
 import com.codeit.project.deokhugam.domain.book.dto.BookCreateRequest;
 import com.codeit.project.deokhugam.domain.book.dto.BookDto;
+import com.codeit.project.deokhugam.domain.book.dto.BookOrderBy;
+import com.codeit.project.deokhugam.domain.book.dto.BookSearchRequest;
 import com.codeit.project.deokhugam.domain.book.dto.BookUpdateRequest;
+import com.codeit.project.deokhugam.domain.book.dto.CursorPageResponseBookDto;
 import com.codeit.project.deokhugam.domain.book.entity.Book;
 import com.codeit.project.deokhugam.domain.book.mapper.BookMapper;
+import com.codeit.project.deokhugam.domain.book.repository.BookQueryRepository;
 import com.codeit.project.deokhugam.domain.book.repository.BookRepository;
 import com.codeit.project.deokhugam.domain.book.storage.FileStorage;
 import com.codeit.project.deokhugam.domain.review.repository.ReviewRepository;
 import java.time.LocalDate;
+import java.util.List;
 import java.util.NoSuchElementException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -22,6 +27,7 @@ public class BookServiceImpl implements BookService {
   private final BookRepository bookRepository;
   private final FileStorage fileStorage;
   private final ReviewRepository reviewRepository;
+  private final BookQueryRepository bookQueryRepository;
 
   @Override
   @Transactional
@@ -46,12 +52,12 @@ public class BookServiceImpl implements BookService {
         thumbnailImageUrl);
 
     Book created = bookRepository.save(book);
-    int reviewCount = getReviewCount(book.getId());
+    long reviewCount = getReviewCount(book.getId());
     double rating = getAverageRating(book.getId());
     return bookMapper.toDto(created, reviewCount, rating);
   }
 
-  @Transactional(readOnly = true)
+  @Transactional
   @Override
   public BookDto update(Long bookId, BookUpdateRequest bookData, MultipartFile thumbnailImage) {
     Book book = bookRepository.findById(bookId)
@@ -71,7 +77,7 @@ public class BookServiceImpl implements BookService {
 
     book.update(newTitle,newAuthor,newDescription,newPublisher,newpublishedDate,newThumbnailImageUrl);
     Book updated = bookRepository.save(book);
-    int reviewCount = getReviewCount(updated.getId());
+    long reviewCount = getReviewCount(updated.getId());
     double rating = getAverageRating(updated.getId());
     return bookMapper.toDto(updated,reviewCount,rating);
   }
@@ -81,7 +87,7 @@ public class BookServiceImpl implements BookService {
     double avg = reviewRepository.getAverageRating(bookId);
     return Math.round(avg * 10) / 10.0;
   }
-  public int getReviewCount(Long bookId) {
+  public Long getReviewCount(Long bookId) {
     return reviewRepository.getReviewCount(bookId);
   }
 
@@ -90,9 +96,43 @@ public class BookServiceImpl implements BookService {
   public BookDto findById(Long bookId) {
     Book book = bookRepository.findById(bookId)
         .orElseThrow(()->new NoSuchElementException("도서가 존재하지 않습니다."));
-    int reviewCount = getReviewCount(book.getId());
+    long reviewCount = getReviewCount(book.getId());
     double rating = getAverageRating(book.getId());
     return bookMapper.toDto(book,reviewCount,rating);
+  }
+
+  @Transactional(readOnly = true)
+  @Override
+  public CursorPageResponseBookDto<BookDto> search(BookSearchRequest bookSearchReq) {
+    int pageSize = bookSearchReq.getLimit() == null ? 50 : bookSearchReq.getLimit();
+    List<BookDto> bookList = bookQueryRepository.findBooks(bookSearchReq,pageSize+1);
+
+    boolean hasNext = bookList.size()>pageSize;
+    bookList = hasNext ? bookList.subList(0,pageSize): bookList;
+
+
+    String nextCursor = null;
+    String nextAfter = null;
+
+    if(hasNext && !bookList.isEmpty()){
+      BookDto last = bookList.get(bookList.size()-1);
+
+      switch (bookSearchReq.getOrderBy()) {
+        case title -> nextCursor = last.title();
+        case publishedDate -> nextCursor = last.publishedDate().toString();
+        case rating -> nextCursor = String.valueOf(last.rating());
+        case reviewCount -> nextCursor = String.valueOf(last.reviewCount());
+      }
+      nextAfter = last.createdAt().toString();
+    }
+    return new CursorPageResponseBookDto<>(
+        bookList,
+        nextCursor,
+        nextAfter,
+        String.valueOf(pageSize),
+        String.valueOf(bookList.size()),
+        String.valueOf(hasNext)
+    );
   }
 
   @Transactional

@@ -6,7 +6,7 @@ import java.time.LocalDateTime;
 import lombok.Builder;
 
 public record BookDto(
-  String id,
+  Long id,
   
   String title,
 
@@ -22,7 +22,7 @@ public record BookDto(
 
   String thumbnailUrl,
 
-  Integer  reviewCount,
+  Long  reviewCount,
 
   Double rating,
 

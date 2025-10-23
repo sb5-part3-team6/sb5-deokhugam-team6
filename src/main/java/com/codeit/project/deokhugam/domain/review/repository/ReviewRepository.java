@@ -20,6 +20,6 @@ public interface ReviewRepository extends JpaRepository<Review,Integer> {
   where :bookId = r.book.id
   and r.deletedAt IS NULL 
 """)
-  int getReviewCount(@Param("bookId")Long bookId);
+  Long getReviewCount(@Param("bookId")Long bookId);
 
 }
