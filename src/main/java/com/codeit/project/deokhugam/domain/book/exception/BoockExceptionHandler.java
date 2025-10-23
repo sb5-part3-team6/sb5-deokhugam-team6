@@ -1,4 +1,4 @@
-package com.codeit.project.deokhugam.domain.review.exception;
+package com.codeit.project.deokhugam.domain.book.exception;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ProblemDetail;
@@ -9,13 +9,13 @@ import java.net.URI;
 
 @Slf4j
 @RestControllerAdvice
-public class ReviewExceptionHandler {
+public class BoockExceptionHandler {
 
-    @ExceptionHandler(ReviewException.class)
-    public ProblemDetail handleReviewException(ReviewException e) {
-        ReviewErrorCode errorCode = e.getErrorCode();
+    @ExceptionHandler(BookException.class)
+    public ProblemDetail handleBookException(BookException e) {
+        BookErrorCode errorCode = e.getErrorCode();
         log.error(e.getMessage(), e);
-        ProblemDetail pd = ProblemDetail.forStatusAndDetail(errorCode.getHttpStatus(), errorCode.getMessage());
+        ProblemDetail pd = ProblemDetail.forStatusAndDetail(errorCode.getHttpStatus(), e.getMessage());
 
         pd.setType(URI.create("https://deokhugam.com/errors/" + errorCode.getCode()));
         pd.setTitle(errorCode.name());
@@ -25,5 +25,4 @@ public class ReviewExceptionHandler {
 
         return pd;
     }
-
 }
