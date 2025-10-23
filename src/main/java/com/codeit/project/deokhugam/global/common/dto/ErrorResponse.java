@@ -1,32 +1,42 @@
 package com.codeit.project.deokhugam.global.common.dto;
 
 import com.codeit.project.deokhugam.global.exception.DeokhugamException;
-import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
 
-@Getter
-@RequiredArgsConstructor
-public class ErrorResponse {
+public record ErrorResponse(LocalDateTime timestamp, String code, String message,
+                            Map<String, Object> details, String exceptionType, int status) {
 
-  private final Instant timestamp;
-  private final String code;
-  private final String message;
-  private final Map<String, Object> details;
-  private final String exceptionType;
-  private final int status;
+  public ErrorResponse {
+    if (timestamp == null) {
+      timestamp = LocalDateTime.now();
+    }
+  }
 
   public ErrorResponse(DeokhugamException exception, int status) {
-    this(Instant.now(), exception.getErrorCode().name(),
-        exception.getMessage(), exception.getDetails(),
-        exception.getClass().getSimpleName(), status);
+    this(
+        LocalDateTime.now(),
+        exception.getErrorCode()
+                 .name(),
+        exception.getMessage(),
+        exception.getDetails(),
+        exception.getClass()
+                 .getSimpleName(),
+        status
+    );
   }
 
   public ErrorResponse(Exception exception, int status) {
-    this(Instant.now(), exception.getClass().getSimpleName(),
-        exception.getMessage(), new HashMap<>(),
-        exception.getClass().getSimpleName(), status);
+    this(
+        LocalDateTime.now(),
+        exception.getClass()
+                 .getSimpleName(),
+        exception.getMessage(),
+        new HashMap<>(),
+        exception.getClass()
+                 .getSimpleName(),
+        status
+    );
   }
 }

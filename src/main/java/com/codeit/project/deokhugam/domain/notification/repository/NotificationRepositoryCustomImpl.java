@@ -12,7 +12,7 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 @RequiredArgsConstructor
-public class NotificationCustomRepositoryImpl implements NotificationCustomRepository {
+public class NotificationRepositoryCustomImpl implements NotificationRepositoryCustom {
 
   private final JPAQueryFactory qf;
   private final QNotification notification = QNotification.notification;

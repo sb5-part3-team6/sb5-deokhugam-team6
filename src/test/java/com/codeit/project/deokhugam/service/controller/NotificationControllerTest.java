@@ -1,15 +1,20 @@
 package com.codeit.project.deokhugam.service.controller;
 
-import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.nullable;
+import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.codeit.project.deokhugam.domain.notification.controller.NotificationController;
-import com.codeit.project.deokhugam.domain.notification.dto.CursorPageResponseNotificationDto;
 import com.codeit.project.deokhugam.domain.notification.dto.NotificationDto;
 import com.codeit.project.deokhugam.domain.notification.dto.NotificationUpdateRequest;
 import com.codeit.project.deokhugam.domain.notification.service.NotificationService;
+import com.codeit.project.deokhugam.global.common.dto.PageResponse;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -40,7 +45,7 @@ class NotificationControllerTest {
   private JpaMetamodelMappingContext jpaMetamodelMappingContext;
 
   private NotificationDto sampleNotification;
-  private CursorPageResponseNotificationDto samplePageResponse;
+  private PageResponse samplePageResponse;
 
   @BeforeEach
   void setup() {
@@ -48,14 +53,14 @@ class NotificationControllerTest {
         "Clean Code", "좋은 책이에요", true,
         LocalDateTime.now().minusDays(1), LocalDateTime.now());
 
-    samplePageResponse = new CursorPageResponseNotificationDto(List.of(sampleNotification),
-        "nextCursor", 1, true, 1L);
+    samplePageResponse = new PageResponse(List.of(sampleNotification),
+        "nextCursor", "1", 1, 1L, true);
   }
 
   @Test
   @DisplayName("GET /api/notifications - 정상 조회")
   void getNotifications_success() throws Exception {
-    when(notificationService.getNotifications(anyString(), anyString(), nullable(LocalDate.class),
+    when(notificationService.getByCursor(anyString(), anyString(), nullable(LocalDate.class),
         nullable(LocalDate.class), anyInt())).thenReturn(samplePageResponse);
 
     mockMvc.perform(get("/api/notifications").queryParam("userId", "1")
@@ -88,7 +93,7 @@ class NotificationControllerTest {
   @DisplayName("PATCH /api/notifications/{id} - 단일 알림 확인")
   void checkNotificationById_success() throws Exception {
     when(
-        notificationService.checkNotificationById(anyString(), any(NotificationUpdateRequest.class),
+        notificationService.checkById(anyString(), any(NotificationUpdateRequest.class),
             anyString())).thenReturn(sampleNotification);
 
     NotificationUpdateRequest request = new NotificationUpdateRequest(true);

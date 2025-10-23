@@ -5,7 +5,6 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
 
-import com.codeit.project.deokhugam.domain.notification.dto.CursorPageResponseNotificationDto;
 import com.codeit.project.deokhugam.domain.notification.dto.NotificationDto;
 import com.codeit.project.deokhugam.domain.notification.dto.NotificationUpdateRequest;
 import com.codeit.project.deokhugam.domain.notification.entity.Notification;
@@ -17,6 +16,7 @@ import com.codeit.project.deokhugam.domain.notification.service.NotificationServ
 import com.codeit.project.deokhugam.domain.review.entity.Review;
 import com.codeit.project.deokhugam.domain.user.entity.User;
 import com.codeit.project.deokhugam.domain.user.repository.UserRepository;
+import com.codeit.project.deokhugam.global.common.dto.PageResponse;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -66,7 +66,7 @@ class NotificationServiceTest {
     given(notificationRepository.findById(1L)).willReturn(Optional.of(notification));
     given(notificationMapper.toDto(notification)).willReturn(notificationDto);
 
-    NotificationDto result = notificationService.checkNotificationById("1",
+    NotificationDto result = notificationService.checkById("1",
         new NotificationUpdateRequest(true), "1");
 
     assertThat(notification.getConfirmed()).isTrue();
@@ -81,7 +81,7 @@ class NotificationServiceTest {
     given(notificationRepository.findById(1L)).willReturn(Optional.empty());
 
     assertThatThrownBy(
-        () -> notificationService.checkNotificationById("1", new NotificationUpdateRequest(true),
+        () -> notificationService.checkById("1", new NotificationUpdateRequest(true),
             "2")).isInstanceOf(NotificationNotFoundException.class);
   }
 
@@ -91,7 +91,7 @@ class NotificationServiceTest {
     given(notificationRepository.findById(1L)).willReturn(Optional.of(notification));
 
     assertThatThrownBy(
-        () -> notificationService.checkNotificationById("1", new NotificationUpdateRequest(true),
+        () -> notificationService.checkById("1", new NotificationUpdateRequest(true),
             "2")).isInstanceOf(NotificationInvalidUserException.class);
   }
 
@@ -105,7 +105,7 @@ class NotificationServiceTest {
     given(notificationRepository.findAllByUserIdAndConfirmedFalse(1L)).willReturn(
         List.of(notification, notification2));
 
-    notificationService.checkAllNotification("1");
+    notificationService.checkAll("1");
 
     assertThat(notification.getConfirmed()).isTrue();
     verify(notificationRepository).findAllByUserIdAndConfirmedFalse(1L);
@@ -116,7 +116,7 @@ class NotificationServiceTest {
   void getNotifications_ReturnsNull() {
     LocalDate after = LocalDate.now()
                                .minusDays(1);
-    CursorPageResponseNotificationDto result = notificationService.getNotifications("1", "DESC",
+    PageResponse result = notificationService.getByCursor("1", "DESC",
         after, after, 20);
 
     assertThat(result).isNotNull();

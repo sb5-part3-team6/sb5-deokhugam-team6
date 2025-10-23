@@ -10,7 +10,7 @@ import com.codeit.project.deokhugam.domain.review.entity.Review;
 import com.codeit.project.deokhugam.domain.review.entity.ReviewLike;
 import com.codeit.project.deokhugam.domain.review.repository.ReviewLikeRepository;
 import com.codeit.project.deokhugam.domain.review.repository.ReviewRepository;
-import com.codeit.project.deokhugam.domain.review.repository.ReviewRepositoryCustom;
+import com.codeit.project.deokhugam.domain.review.repository.ReviewRepositoryCustomImpl;
 import com.codeit.project.deokhugam.domain.user.entity.User;
 import com.codeit.project.deokhugam.domain.user.repository.UserRepository;
 import com.codeit.project.deokhugam.global.common.dto.PageResponse;
@@ -19,14 +19,13 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 @Service
 public class ReviewServiceImpl implements ReviewService {
 
     private final ReviewRepository reviewRepository;
-    private final ReviewRepositoryCustom reviewRepositoryCustom;
+    private final ReviewRepositoryCustomImpl reviewRepositoryCustom;
     private final ReviewLikeRepository reviewLikeRepository;
     private final BookRepository bookRepository;
     private final UserRepository userRepository;
