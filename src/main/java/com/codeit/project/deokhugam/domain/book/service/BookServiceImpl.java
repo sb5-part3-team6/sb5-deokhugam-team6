@@ -123,10 +123,10 @@ public class BookServiceImpl implements BookService {
       BookDto last = bookList.get(bookList.size()-1);
 
       switch (bookSearchReq.getOrderBy()) {
-        case title -> nextCursor = last.title();
-        case publishedDate -> nextCursor = last.publishedDate().toString();
-        case rating -> nextCursor = String.valueOf(last.rating());
-        case reviewCount -> nextCursor = String.valueOf(last.reviewCount());
+        case TITLE -> nextCursor = last.title();
+        case PUBLISHEDDATE -> nextCursor = last.publishedDate().toString();
+        case RATING -> nextCursor = String.valueOf(last.rating());
+        case REVIEWCOUNT -> nextCursor = String.valueOf(last.reviewCount());
       }
       nextAfter = last.createdAt().toString();
     }
@@ -162,6 +162,7 @@ public class BookServiceImpl implements BookService {
         .orElseThrow(()-> new NoSuchElementException("도서가 존재하지 않습니다."));
     fileStorage.deleteThumbnailImage(book.getIsbn());
     bookRepository.deleteById(bookId);
+
 
     // TODO Review, Comment 삭제 고려
   }

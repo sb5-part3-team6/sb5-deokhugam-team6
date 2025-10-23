@@ -11,7 +11,7 @@ import org.springframework.format.annotation.DateTimeFormat;
 public class BookSearchRequest {
   private String keyword;
 
-  private BookOrderBy orderBy = BookOrderBy.title;
+  private BookOrderBy orderBy = BookOrderBy.TITLE;
 
   private Direction direction = Direction.DESC;
 
