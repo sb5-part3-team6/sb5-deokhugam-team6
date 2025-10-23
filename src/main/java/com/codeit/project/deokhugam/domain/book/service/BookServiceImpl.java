@@ -2,7 +2,6 @@ package com.codeit.project.deokhugam.domain.book.service;
 
 import com.codeit.project.deokhugam.domain.book.dto.BookCreateRequest;
 import com.codeit.project.deokhugam.domain.book.dto.BookDto;
-import com.codeit.project.deokhugam.domain.book.dto.BookOrderBy;
 import com.codeit.project.deokhugam.domain.book.dto.BookSearchRequest;
 import com.codeit.project.deokhugam.domain.book.dto.BookUpdateRequest;
 import com.codeit.project.deokhugam.domain.book.dto.CursorPageResponseBookDto;
@@ -12,7 +11,7 @@ import com.codeit.project.deokhugam.domain.book.repository.BookQueryRepository;
 import com.codeit.project.deokhugam.domain.book.repository.BookRepository;
 import com.codeit.project.deokhugam.domain.book.storage.FileStorage;
 import com.codeit.project.deokhugam.domain.comment.entity.Comment;
-import com.codeit.project.deokhugam.domain.comment.entity.repository.CommentRepository;
+import com.codeit.project.deokhugam.domain.comment.repository.CommentRepository;
 import com.codeit.project.deokhugam.domain.review.entity.Review;
 import com.codeit.project.deokhugam.domain.review.repository.ReviewRepository;
 import java.time.LocalDate;
@@ -160,10 +159,16 @@ public class BookServiceImpl implements BookService {
   public void hardDelete(Long bookId) {
     Book book = bookRepository.findById(bookId)
         .orElseThrow(()-> new NoSuchElementException("도서가 존재하지 않습니다."));
+
+    List<Long> reviewIds = reviewRepository.findIdsByBookId(bookId);
+    if (!reviewIds.isEmpty()) {
+      commentRepository.bulkDeleteByReviewIds(reviewIds);
+    }
+
+    reviewRepository.bulkDeleteByBookId(bookId);
+
     fileStorage.deleteThumbnailImage(book.getIsbn());
     bookRepository.deleteById(bookId);
-
-
     // TODO Review, Comment 삭제 고려
   }
 }
