@@ -12,6 +12,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.codeit.project.deokhugam.domain.user.dto.UserDto;
 import com.codeit.project.deokhugam.domain.user.dto.UserRegisterRequest;
+import com.codeit.project.deokhugam.domain.user.exception.EmailDuplicationException;
+import com.codeit.project.deokhugam.domain.user.exception.NicknameDuplicationException;
 import com.codeit.project.deokhugam.domain.user.service.UserService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.DisplayName;
@@ -100,14 +102,37 @@ class UserControllerTest {
     );
 
     when(userService.create(any(UserRegisterRequest.class)))
-        .thenThrow(new IllegalArgumentException("이미 존재하는 이메일입니다."));
+        .thenThrow(new EmailDuplicationException());
 
     ResultActions actions = mockMvc.perform(post("/api/users")
         .contentType(MediaType.APPLICATION_JSON)
         .content(objectMapper.writeValueAsString(request)));
 
     actions
-        .andExpect(status().isBadRequest())
+        .andExpect(status().isConflict())
+        .andDo(print());
+
+    verify(userService, times(1)).create(any(UserRegisterRequest.class));
+  }
+
+  @Test
+  @DisplayName("회원가입 실패 - 400 / 중복된 닉네임")
+  void register_failed_duplicate_nickname() throws Exception {
+    UserRegisterRequest validRequest = new UserRegisterRequest(
+        "test@example.com",
+        "duplicateNickname",
+        "Password123"
+    );
+
+    when(userService.create(any(UserRegisterRequest.class)))
+        .thenThrow(new NicknameDuplicationException().withNickname("duplicateNickname"));
+
+    ResultActions actions = mockMvc.perform(post("/api/users")
+        .contentType(MediaType.APPLICATION_JSON)
+        .content(objectMapper.writeValueAsString(validRequest)));
+
+    actions
+        .andExpect(status().isConflict())
         .andDo(print());
 
     verify(userService, times(1)).create(any(UserRegisterRequest.class));
