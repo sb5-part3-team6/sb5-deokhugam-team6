@@ -31,4 +31,8 @@ public class Notification extends BaseEntity {
   private String content;
   @Column(nullable = false)
   private Boolean confirmed = false;
+
+  public void updateConfirmed(Boolean confirmed) {
+    this.confirmed = confirmed;
+  }
 }

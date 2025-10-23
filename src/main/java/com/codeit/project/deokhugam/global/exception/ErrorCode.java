@@ -8,5 +8,5 @@ public interface ErrorCode {
 
   String getMessage();
 
-  HttpStatus getHttpStatusCode();
+  HttpStatus getHttpStatus();
 }
