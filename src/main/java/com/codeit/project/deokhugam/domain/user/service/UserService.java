@@ -5,8 +5,13 @@ import com.codeit.project.deokhugam.domain.user.dto.UserLoginRequest;
 import com.codeit.project.deokhugam.domain.user.dto.UserRegisterRequest;
 import com.codeit.project.deokhugam.domain.user.dto.UserUpdateRequest;
 import com.codeit.project.deokhugam.domain.user.entity.User;
+import com.codeit.project.deokhugam.domain.user.exception.DeleteNotAllowedException;
+import com.codeit.project.deokhugam.domain.user.exception.EmailDuplicationException;
+import com.codeit.project.deokhugam.domain.user.exception.LoginInputInvalidException;
+import com.codeit.project.deokhugam.domain.user.exception.NicknameDuplicationException;
+import com.codeit.project.deokhugam.domain.user.exception.UserAlreadyDeletedException;
+import com.codeit.project.deokhugam.domain.user.exception.UserNotFoundException;
 import com.codeit.project.deokhugam.domain.user.repository.UserRepository;
-import java.util.NoSuchElementException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -24,12 +29,12 @@ public class UserService {
 
     if(userRepository.existsByEmail(request.email())) {
       log.error("이미 존재하는 이메일, Email = {}", request.email());
-      throw new IllegalArgumentException("이미 존재하는 이메일입니다.");
+      throw new EmailDuplicationException().withEmail(request.email());
     }
 
     if(userRepository.existsByNickname(request.nickname())) {
       log.error("이미 존재하는 닉네임, Nickname = {}", request.nickname());
-      throw new IllegalArgumentException("이미 존재하는 닉네임입니다.");
+      throw new NicknameDuplicationException().withNickname(request.nickname());
     }
 
     User user = new User(request.email(), request.nickname(), request.password());
@@ -43,12 +48,12 @@ public class UserService {
     User findUser = userRepository.findByEmail(request.email())
         .orElseThrow(() -> {
             log.warn("존재하지 않는 이메일, Email = {}", request.email());
-            throw new NoSuchElementException("존재하지 않는 이메일입니다.");
+            throw new LoginInputInvalidException().withEmail(request.email());
         });
 
     if(!findUser.getPassword().equals(request.password())) {
       log.warn("비밀번호 불일치");
-      throw new IllegalArgumentException("이메일 또는 비밀번호를 확인해주세요.");
+      throw new LoginInputInvalidException().withPassword(request.password());
     }
 
     return new UserDto(findUser.getId().toString(), findUser.getEmail(), findUser.getNickname(), findUser.getCreatedAt());
@@ -59,7 +64,7 @@ public class UserService {
     User findUser = userRepository.findById(Long.parseLong(id))
         .orElseThrow(() -> {
           log.warn("존재하지 않는 사용자");
-          throw new NoSuchElementException("사용자를 찾을 수 없습니다.");
+          throw new UserNotFoundException().withId(id);
         });
 
     return new UserDto(findUser.getId().toString(), findUser.getEmail(), findUser.getNickname(), findUser.getCreatedAt());
@@ -70,12 +75,12 @@ public class UserService {
     User findUser = userRepository.findById(Long.parseLong(id))
         .orElseThrow(() -> {
           log.warn("존재하지 않는 사용자");
-          throw new NoSuchElementException("사용자를 찾을 수 없습니다.");
+          throw new UserNotFoundException().withId(id);
         });
 
     if(userRepository.existsByNickname(request.nickname())) {
       log.error("이미 존재하는 닉네임, Nickname = {}", request.nickname());
-      throw new IllegalArgumentException("이미 존재하는 닉네임입니다.");
+      throw new NicknameDuplicationException().withNickname(request.nickname());
     }
 
     findUser.updateNickname(request.nickname());
@@ -87,7 +92,7 @@ public class UserService {
     User findUser = userRepository.findById(Long.parseLong(id))
         .orElseThrow(() -> {
           log.warn("존재하지 않는 사용자");
-          throw new NoSuchElementException("사용자를 찾을 수 없습니다.");
+          throw new UserNotFoundException().withId(id);
         });
 
     if(findUser.getDeletedAt() == null) {
@@ -95,7 +100,7 @@ public class UserService {
     }
     else {
       log.warn("이미 삭제된 사용자, Email = {}", findUser.getEmail());
-      throw new IllegalStateException("이미 삭제된 사용자입니다.");
+      throw new UserAlreadyDeletedException().withEmail(findUser.getEmail());
     }
   }
 
@@ -104,12 +109,12 @@ public class UserService {
     User findUser = userRepository.findById(Long.parseLong(id))
         .orElseThrow(() -> {
           log.warn("존재하지 않는 사용자");
-          throw new NoSuchElementException("사용자를 찾을 수 없습니다.");
+          throw new UserNotFoundException().withId(id);
         });
 
     if(findUser.getDeletedAt() == null) {
       log.warn("soft delete가 우선적으로 수행되어야함.");
-      throw new IllegalStateException("Soft Delete가 수행되지 않았습니다.");
+      throw new DeleteNotAllowedException().withEmail(findUser.getEmail());
     }
     else {
       userRepository.delete(findUser);
