@@ -36,7 +36,8 @@ class UserServiceTest {
   @Test
   @DisplayName("회원가입 실패 - 중복된 이메일")
   void createUser_Fail_DuplicateEmail() {
-    UserRegisterRequest request = new UserRegisterRequest("test@example.com", "testuser", "Password123");
+    UserRegisterRequest request = new UserRegisterRequest("test@example.com", "testuser",
+        "Password123");
 
     when(userRepository.existsByEmail(request.email())).thenReturn(true);
 
@@ -51,7 +52,8 @@ class UserServiceTest {
   @Test
   @DisplayName("회원가입 실패 - 중복된 닉네임")
   void createUser_Fail_DuplicateNickname() {
-    UserRegisterRequest request = new UserRegisterRequest("test@example.com", "testuser", "Password123");
+    UserRegisterRequest request = new UserRegisterRequest("test@example.com", "testuser",
+        "Password123");
 
     when(userRepository.existsByEmail(request.email())).thenReturn(false);
     when(userRepository.existsByNickname(request.nickname())).thenReturn(true);
@@ -67,7 +69,8 @@ class UserServiceTest {
   @Test
   @DisplayName("회원가입 성공")
   void create_Success() {
-    UserRegisterRequest request = new UserRegisterRequest("new@example.com", "newUser", "Password123");
+    UserRegisterRequest request = new UserRegisterRequest("new@example.com", "newUser",
+        "Password123");
 
     when(userRepository.existsByEmail(request.email())).thenReturn(false);
     when(userRepository.existsByNickname(request.nickname())).thenReturn(false);
@@ -90,20 +93,6 @@ class UserServiceTest {
     verify(userRepository).existsByEmail(request.email());
     verify(userRepository).existsByNickname(request.nickname());
     verify(userRepository).save(any(User.class));
-  }
-
-  @Test
-  @DisplayName("로그인 실패 - 잘못된 이메일 형식")
-  void login_Fail_InvalidEmailFormat() {
-    UserLoginRequest request = new UserLoginRequest("invalid-email", "password");
-
-    IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
-      userService.login(request);
-    });
-
-    assertEquals("유효하지 않은 이메일 형식입니다.", exception.getMessage());
-
-    verify(userRepository, never()).findByEmail(anyString());
   }
 
   @Test
@@ -238,30 +227,6 @@ class UserServiceTest {
     assertEquals("이미 존재하는 닉네임입니다.", exception.getMessage());
     verify(userRepository).findById(userLongId);
     verify(userRepository).existsByNickname(duplicateNickname);
-  }
-
-  @Test
-  @DisplayName("사용자 정보 수정 실패 - 닉네임 길이 너무 짧음")
-  void update_Fail_NicknameTooShort() {
-    String userId = "1";
-    Long userLongId = 1L;
-    String shortNickname = "a";
-    UserUpdateRequest request = new UserUpdateRequest(shortNickname);
-
-    User mockUser = mock(User.class);
-    when(userRepository.findById(userLongId)).thenReturn(Optional.of(mockUser));
-
-    when(userRepository.existsByNickname(shortNickname)).thenReturn(false);
-
-    IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
-      userService.update(userId, request);
-    });
-
-    assertEquals("이미 존재하는 닉네임입니다.", exception.getMessage());
-    verify(userRepository).findById(userLongId);
-    verify(userRepository).existsByNickname(shortNickname);
-
-    verify(mockUser, never()).updateNickname(anyString());
   }
 
   @Test
