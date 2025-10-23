@@ -28,14 +28,14 @@ public class NotificationController implements NotificationApi {
 
   @Override
   @GetMapping
-  public ResponseEntity<CursorPageResponseNotificationDto> getNotifications(
+  public ResponseEntity<CursorPageResponseNotificationDto> get(
       @RequestParam String userId,
       @RequestParam(name = "direction", defaultValue = "DESC") String direction,
       @RequestParam(name = "cursor", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate cursor,
       @RequestParam(name = "after", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate after,
       @RequestParam(name = "limit", defaultValue = "20") Integer limit) {
 
-    CursorPageResponseNotificationDto page = notificationService.getNotifications(userId, direction,
+    CursorPageResponseNotificationDto page = notificationService.getByCursor(userId, direction,
         cursor, after, limit);
 
     return ResponseEntity.status(HttpStatus.OK)
@@ -44,12 +44,12 @@ public class NotificationController implements NotificationApi {
 
   @Override
   @PatchMapping("/{notificationId}")
-  public ResponseEntity<NotificationDto> checkNotificationById(
+  public ResponseEntity<NotificationDto> checkById(
       @PathVariable("notificationId") String notificationId,
       @Valid @RequestBody NotificationUpdateRequest request,
       @RequestHeader("Deokhugam-Request-User-ID") String userId) {
 
-    NotificationDto notificationDto = notificationService.checkNotificationById(notificationId,
+    NotificationDto notificationDto = notificationService.checkById(notificationId,
         request, userId);
 
     return ResponseEntity.status(HttpStatus.OK)
@@ -58,9 +58,9 @@ public class NotificationController implements NotificationApi {
 
   @Override
   @PatchMapping("/read-all")
-  public ResponseEntity<Void> checkAllNotification(
+  public ResponseEntity<Void> checkAll(
       @RequestHeader("Deokhugam-Request-User-ID") String userId) {
-    notificationService.checkAllNotification(userId);
+    notificationService.checkAll(userId);
     return ResponseEntity.status(HttpStatus.NO_CONTENT)
                          .build();
   }

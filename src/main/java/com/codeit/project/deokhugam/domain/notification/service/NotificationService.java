@@ -7,10 +7,10 @@ import java.time.LocalDate;
 
 public interface NotificationService {
 
-  CursorPageResponseNotificationDto getNotifications(String userId, String direction, LocalDate cursor,
+  CursorPageResponseNotificationDto getByCursor(String userId, String direction, LocalDate cursor,
       LocalDate after, Integer limit);
 
-  NotificationDto checkNotificationById(String notificationId, NotificationUpdateRequest request, String userId);
+  NotificationDto checkById(String notificationId, NotificationUpdateRequest request, String userId);
 
-  void checkAllNotification(String userId);
+  void checkAll(String userId);
 }

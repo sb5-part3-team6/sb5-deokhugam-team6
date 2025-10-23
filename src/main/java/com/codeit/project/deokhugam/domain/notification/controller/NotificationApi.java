@@ -22,7 +22,7 @@ public interface NotificationApi {
       @ApiResponse(responseCode = "400", description = "잘못된 요청 (정렬 방향 오류, 페이지네이션 파라미터 오류, 사용자 ID 누락)"),
       @ApiResponse(responseCode = "404", description = "사용자 정보 없음"),
       @ApiResponse(responseCode = "500", description = "서버 내부 오류")})
-  ResponseEntity<CursorPageResponseNotificationDto> getNotifications(
+  ResponseEntity<CursorPageResponseNotificationDto> get(
       @Parameter(description = "유저 ID") String userId,
       @Parameter(description = "정렬 방향") String direction,
       @Parameter(description = "페이지네이션 커서") LocalDate cursor,
@@ -36,7 +36,7 @@ public interface NotificationApi {
       @ApiResponse(responseCode = "403", description = "알림 수정 권한 없음"),
       @ApiResponse(responseCode = "404", description = "알림 정보 없음"),
       @ApiResponse(responseCode = "500", description = "서버 내부 오류")})
-  ResponseEntity<NotificationDto> checkNotificationById(
+  ResponseEntity<NotificationDto> checkById(
       @Parameter(description = "알림 ID") String notificationId,
       @Parameter(description = "알림 확인 여부") NotificationUpdateRequest request,
       @Parameter(description = "요청자 ID") String userId);
@@ -46,5 +46,5 @@ public interface NotificationApi {
       @ApiResponse(responseCode = "400", description = "잘못된 요청 (요청자 ID 누락)"),
       @ApiResponse(responseCode = "404", description = "알림 정보 없음"),
       @ApiResponse(responseCode = "500", description = "서버 내부 오류")})
-  ResponseEntity<Void> checkAllNotification(@Parameter(description = "유저 ID") String userId);
+  ResponseEntity<Void> checkAll(@Parameter(description = "유저 ID") String userId);
 }

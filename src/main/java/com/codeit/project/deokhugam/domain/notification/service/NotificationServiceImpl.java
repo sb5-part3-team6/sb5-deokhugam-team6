@@ -24,7 +24,7 @@ public class NotificationServiceImpl implements NotificationService {
   private final NotificationMapper notificationMapper;
 
   @Override
-  public CursorPageResponseNotificationDto getNotifications(String userId, String direction,
+  public CursorPageResponseNotificationDto getByCursor(String userId, String direction,
       LocalDate cursor, LocalDate after, Integer limit) {
 
     Long uid = Long.parseLong(userId);
@@ -56,7 +56,7 @@ public class NotificationServiceImpl implements NotificationService {
 
   @Override
   @Transactional
-  public NotificationDto checkNotificationById(String notificationId,
+  public NotificationDto checkById(String notificationId,
       NotificationUpdateRequest request, String userId) {
 
     Long nid = Long.parseLong(notificationId);
@@ -80,7 +80,7 @@ public class NotificationServiceImpl implements NotificationService {
 
   @Override
   @Transactional
-  public void checkAllNotification(String userId) {
+  public void checkAll(String userId) {
 
     Long uid = Long.parseLong(userId);
 

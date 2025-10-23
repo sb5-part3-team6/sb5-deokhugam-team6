@@ -2,7 +2,6 @@ package com.codeit.project.deokhugam.domain.review.repository;
 
 import com.codeit.project.deokhugam.domain.rank.entity.QRank;
 import com.codeit.project.deokhugam.domain.rank.entity.Rank;
-import com.codeit.project.deokhugam.domain.review.dto.ReviewPopularQueryParams;
 import com.codeit.project.deokhugam.domain.review.dto.ReviewQueryParams;
 import com.codeit.project.deokhugam.domain.review.entity.QReview;
 import com.codeit.project.deokhugam.domain.review.entity.Review;
@@ -18,7 +17,7 @@ import java.util.List;
 
 @RequiredArgsConstructor
 @Repository
-public class ReviewRepositoryCustom {
+public class ReviewRepositoryCustomImpl {
 
     private final JPAQueryFactory queryFactory;
 

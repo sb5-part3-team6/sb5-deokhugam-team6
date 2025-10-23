@@ -88,7 +88,7 @@ public class CommentServiceImpl implements CommentService{
     }
 
     @Override
-    public CursorPageResponseCommentDto getCommentsByCursor(Long reviewId, LocalDateTime after, Long cursor, int limit, String direction) {
+    public CursorPageResponseCommentDto getByCursor(Long reviewId, LocalDateTime after, Long cursor, int limit, String direction) {
         return commentRepository.findCommentsByCursor(reviewId, after, cursor, limit, direction);
     }
 

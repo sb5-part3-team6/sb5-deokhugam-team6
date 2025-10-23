@@ -55,7 +55,7 @@ class NotificationControllerTest {
   @Test
   @DisplayName("GET /api/notifications - 정상 조회")
   void getNotifications_success() throws Exception {
-    when(notificationService.getNotifications(anyString(), anyString(), nullable(LocalDate.class),
+    when(notificationService.getByCursor(anyString(), anyString(), nullable(LocalDate.class),
         nullable(LocalDate.class), anyInt())).thenReturn(samplePageResponse);
 
     mockMvc.perform(get("/api/notifications").queryParam("userId", "1")
@@ -88,7 +88,7 @@ class NotificationControllerTest {
   @DisplayName("PATCH /api/notifications/{id} - 단일 알림 확인")
   void checkNotificationById_success() throws Exception {
     when(
-        notificationService.checkNotificationById(anyString(), any(NotificationUpdateRequest.class),
+        notificationService.checkById(anyString(), any(NotificationUpdateRequest.class),
             anyString())).thenReturn(sampleNotification);
 
     NotificationUpdateRequest request = new NotificationUpdateRequest(true);

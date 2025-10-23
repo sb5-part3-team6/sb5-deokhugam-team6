@@ -13,6 +13,6 @@ public interface CommentService {
     void deleteSoft(Long id);
     void delete(Long id);
     CommentDto findById(Long id);
-    CursorPageResponseCommentDto getCommentsByCursor(Long reviewId, LocalDateTime after, Long cursor, int limit, String direction);
+    CursorPageResponseCommentDto getByCursor(Long reviewId, LocalDateTime after, Long cursor, int limit, String direction);
 
 }

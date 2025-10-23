@@ -19,20 +19,20 @@ public class CommentController {
     private final CommentService commentService;
 
     @PostMapping
-    public ResponseEntity<CommentDto> createComment(@RequestBody CommentCreateRequest req) {
+    public ResponseEntity<CommentDto> create(@RequestBody CommentCreateRequest req) {
         CommentDto saved = commentService.create(req);
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(saved);
     }
 
     @GetMapping("/{commentId}")
-    public ResponseEntity<CommentDto> findCommentById(@PathVariable Long commentId) {
+    public ResponseEntity<CommentDto> findById(@PathVariable Long commentId) {
         CommentDto comment = commentService.findById(commentId);
         return ResponseEntity.ok(comment);
     }
 
     @GetMapping
-    public ResponseEntity<CursorPageResponseCommentDto> getCommentsByCursor(
+    public ResponseEntity<CursorPageResponseCommentDto> getByCursor(
             @RequestParam Long reviewId,
             @RequestParam(required = false) LocalDateTime after,
             @RequestParam(required = false) Long cursor,
@@ -40,27 +40,27 @@ public class CommentController {
             @RequestParam(defaultValue = "DESC") String direction
     ) {
         CursorPageResponseCommentDto response =
-                commentService.getCommentsByCursor(reviewId, after, cursor, limit, direction);
+                commentService.getByCursor(reviewId, after, cursor, limit, direction);
 
         return ResponseEntity.ok(response);
     }
 
 
     @PutMapping("/{commentId}")
-    public ResponseEntity<CommentDto> updateComment(@PathVariable Long commentId, @RequestBody CommentUpdateRequest req) {
+    public ResponseEntity<CommentDto> update(@PathVariable Long commentId, @RequestBody CommentUpdateRequest req) {
         CommentUpdateRequest updated = new CommentUpdateRequest(req.content());
         CommentDto updatedComment = commentService.update(commentId, updated);
         return ResponseEntity.ok(updatedComment);
     }
 
     @DeleteMapping("/{commentId}")
-    public ResponseEntity<Void> deleteSoftComment(@PathVariable Long commentId) {
+    public ResponseEntity<Void> deleteSoft(@PathVariable Long commentId) {
         commentService.deleteSoft(commentId);
         return ResponseEntity.noContent().build();
     }
 
     @DeleteMapping("/{commentId}/hard")
-    public ResponseEntity<Void> deleteHardComment(@PathVariable Long commentId) {
+    public ResponseEntity<Void> deleteHard(@PathVariable Long commentId) {
         commentService.delete(commentId);
         return ResponseEntity.noContent().build();
     }
