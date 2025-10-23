@@ -1,8 +1,9 @@
 package com.codeit.project.deokhugam.domain.user.service;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -13,9 +14,14 @@ import com.codeit.project.deokhugam.domain.user.dto.UserLoginRequest;
 import com.codeit.project.deokhugam.domain.user.dto.UserRegisterRequest;
 import com.codeit.project.deokhugam.domain.user.dto.UserUpdateRequest;
 import com.codeit.project.deokhugam.domain.user.entity.User;
+import com.codeit.project.deokhugam.domain.user.exception.DeleteNotAllowedException;
+import com.codeit.project.deokhugam.domain.user.exception.EmailDuplicationException;
+import com.codeit.project.deokhugam.domain.user.exception.LoginInputInvalidException;
+import com.codeit.project.deokhugam.domain.user.exception.NicknameDuplicationException;
+import com.codeit.project.deokhugam.domain.user.exception.UserAlreadyDeletedException;
+import com.codeit.project.deokhugam.domain.user.exception.UserNotFoundException;
 import com.codeit.project.deokhugam.domain.user.repository.UserRepository;
 import java.time.LocalDateTime;
-import java.util.NoSuchElementException;
 import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -41,7 +47,7 @@ class UserServiceTest {
 
     when(userRepository.existsByEmail(request.email())).thenReturn(true);
 
-    IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
+    EmailDuplicationException exception = assertThrows(EmailDuplicationException.class, () -> {
       userService.create(request);
     });
 
@@ -58,7 +64,7 @@ class UserServiceTest {
     when(userRepository.existsByEmail(request.email())).thenReturn(false);
     when(userRepository.existsByNickname(request.nickname())).thenReturn(true);
 
-    IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
+    NicknameDuplicationException exception = assertThrows(NicknameDuplicationException.class, () -> {
       userService.create(request);
     });
 
@@ -102,11 +108,11 @@ class UserServiceTest {
 
     when(userRepository.findByEmail(request.email())).thenReturn(Optional.empty());
 
-    NoSuchElementException exception = assertThrows(NoSuchElementException.class, () -> {
+    LoginInputInvalidException exception = assertThrows(LoginInputInvalidException.class, () -> {
       userService.login(request);
     });
 
-    assertEquals("존재하지 않는 이메일입니다.", exception.getMessage());
+    assertEquals("이메일 또는 비밀번호를 확인해주세요.", exception.getMessage());
   }
 
   @Test
@@ -117,7 +123,7 @@ class UserServiceTest {
 
     when(userRepository.findByEmail(request.email())).thenReturn(Optional.of(userInDb));
 
-    IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
+    LoginInputInvalidException exception = assertThrows(LoginInputInvalidException.class, () -> {
       userService.login(request);
     });
 
@@ -155,12 +161,11 @@ class UserServiceTest {
 
     when(userRepository.findById(userLongId)).thenReturn(Optional.empty());
 
-    NoSuchElementException exception = assertThrows(NoSuchElementException.class, () -> {
+    UserNotFoundException exception = assertThrows(UserNotFoundException.class, () -> {
       userService.findById(userId);
     });
 
     assertEquals("사용자를 찾을 수 없습니다.", exception.getMessage());
-
     verify(userRepository).findById(userLongId);
   }
 
@@ -199,7 +204,7 @@ class UserServiceTest {
 
     when(userRepository.findById(userLongId)).thenReturn(Optional.empty());
 
-    NoSuchElementException exception = assertThrows(NoSuchElementException.class, () -> {
+    UserNotFoundException exception = assertThrows(UserNotFoundException.class, () -> {
       userService.update(userId, request);
     });
 
@@ -220,7 +225,7 @@ class UserServiceTest {
 
     when(userRepository.existsByNickname(duplicateNickname)).thenReturn(true);
 
-    IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
+    NicknameDuplicationException exception = assertThrows(NicknameDuplicationException.class, () -> {
       userService.update(userId, request);
     });
 
@@ -265,12 +270,31 @@ class UserServiceTest {
 
     when(userRepository.findById(userLongId)).thenReturn(Optional.empty());
 
-    NoSuchElementException exception = assertThrows(NoSuchElementException.class, () -> {
+    UserNotFoundException exception = assertThrows(UserNotFoundException.class, () -> {
       userService.softDelete(userId);
     });
 
     assertEquals("사용자를 찾을 수 없습니다.", exception.getMessage());
     verify(userRepository).findById(userLongId);
+  }
+
+  @Test
+  @DisplayName("사용자 논리 삭제 실패 - 이미 삭제된 사용자")
+  void softDelete_Fail_AlreadyDeleted() {
+    String userId = "1";
+    Long userLongId = 1L;
+
+    User mockUser = mock(User.class);
+    when(mockUser.getDeletedAt()).thenReturn(LocalDateTime.now());
+
+    when(userRepository.findById(userLongId)).thenReturn(Optional.of(mockUser));
+
+    UserAlreadyDeletedException exception = assertThrows(UserAlreadyDeletedException.class, () -> {
+      userService.softDelete(userId);
+    });
+
+    assertEquals("이미 삭제된 사용자입니다.", exception.getMessage());
+    verify(mockUser, never()).softDelete();
   }
 
   @Test
@@ -302,12 +326,28 @@ class UserServiceTest {
 
     when(userRepository.findById(userLongId)).thenReturn(Optional.of(mockUser));
 
-    IllegalStateException exception = assertThrows(IllegalStateException.class, () -> {
+    DeleteNotAllowedException exception = assertThrows(DeleteNotAllowedException.class, () -> {
       userService.hardDelete(userId);
     });
 
     assertEquals("Soft Delete가 수행되지 않았습니다.", exception.getMessage());
     verify(userRepository).findById(userLongId);
+  }
+
+  @Test
+  @DisplayName("사용자 영구 삭제 실패 - 존재하지 않는 사용자")
+  void hardDelete_Fail_UserNotFound() {
+    String userId = "99";
+    Long userLongId = 99L;
+
+    when(userRepository.findById(userLongId)).thenReturn(Optional.empty());
+
+    UserNotFoundException exception = assertThrows(UserNotFoundException.class, () -> {
+      userService.hardDelete(userId);
+    });
+
+    assertEquals("사용자를 찾을 수 없습니다.", exception.getMessage());
+    verify(userRepository, never()).delete(any(User.class));
   }
 
   @Test
