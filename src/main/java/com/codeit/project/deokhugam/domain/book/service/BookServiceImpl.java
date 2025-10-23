@@ -82,7 +82,7 @@ public class BookServiceImpl implements BookService {
     return bookMapper.toDto(updated,reviewCount,rating);
   }
 
-  //리뷰 가져오기 (?바로 레포지토리로 가져와도 되나?)
+  //리뷰 가져오기
   public double getAverageRating(Long bookId){
     double avg = reviewRepository.getAverageRating(bookId);
     return Math.round(avg * 10) / 10.0;

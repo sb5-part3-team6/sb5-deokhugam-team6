@@ -12,6 +12,7 @@ import com.querydsl.core.types.Order;
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
+import com.querydsl.core.types.dsl.MathExpressions;
 import com.querydsl.core.types.dsl.NumberExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import java.time.Instant;
@@ -32,7 +33,8 @@ public class BookQueryRepositoryImpl implements BookQueryRepository {
     QReview review = QReview.review;
 
     NumberExpression<Long> reviewCount = review.id.countDistinct().coalesce(0L);
-    NumberExpression<Double> ratingAvg = review.rating.avg().coalesce(0.0);
+    NumberExpression<Double> avgExpression = review.rating.avg().coalesce(0.0);
+    NumberExpression<Double> ratingAvg = MathExpressions.round(avgExpression, 1);
 
     //검색 조건
     BooleanBuilder where = new BooleanBuilder();
