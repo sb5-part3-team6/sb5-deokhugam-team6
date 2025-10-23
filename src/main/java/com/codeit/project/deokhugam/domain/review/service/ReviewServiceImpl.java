@@ -8,6 +8,7 @@ import com.codeit.project.deokhugam.domain.rank.repository.RankRepository;
 import com.codeit.project.deokhugam.domain.review.dto.*;
 import com.codeit.project.deokhugam.domain.review.entity.Review;
 import com.codeit.project.deokhugam.domain.review.entity.ReviewLike;
+import com.codeit.project.deokhugam.domain.review.mapper.ReviewMapper;
 import com.codeit.project.deokhugam.domain.review.repository.ReviewLikeRepository;
 import com.codeit.project.deokhugam.domain.review.repository.ReviewRepository;
 import com.codeit.project.deokhugam.domain.review.repository.ReviewRepositoryCustomImpl;
@@ -31,6 +32,7 @@ public class ReviewServiceImpl implements ReviewService {
     private final UserRepository userRepository;
     private final CommentRepository commentRepository;
     private final RankRepository rankRepository;
+    private final ReviewMapper reviewMapper;
 
     @Override
     public ReviewDto create(ReviewCreateRequest request) {
@@ -42,22 +44,7 @@ public class ReviewServiceImpl implements ReviewService {
             throw new IllegalArgumentException("이미 해당 책에 대한 리뷰가 존재합니다.");
 
         Review review = reviewRepository.save(new Review(user, book, request.content(), request.rating()));
-
-        return ReviewDto.builder()
-                .id(review.getId())
-                .bookId(book.getId())
-                .bookTitle(book.getTitle())
-                .bookThumbnailUrl(book.getThumbnailUrl())
-                .userId(user.getId())
-                .userNickname(user.getNickname())
-                .content(review.getContent())
-                .rating(review.getRating())
-                .likeCount(0)
-                .commentCount(0)
-                .likedByMe(false)
-                .createdAt(review.getCreatedAt())
-                .updatedAt(review.getUpdatedAt())
-                .build();
+        return reviewMapper.toDto(review,0,0,false);
     }
 
     @Override
@@ -90,25 +77,10 @@ public class ReviewServiceImpl implements ReviewService {
         }
 
         List<ReviewDto> content = reviewList.stream().map(review -> {
-            Book book = review.getBook();
             int likeCount = reviewLikeRepository.countByReviewId(review.getId());
             int commentCount =  commentRepository.countByReviewId(review.getId());
             boolean likedByMe = reviewLikeRepository.existsByReviewIdAndUserId(review.getId(), user.getId());
-            return ReviewDto.builder()
-                    .id(review.getId())
-                    .bookId(book.getId())
-                    .bookTitle(book.getTitle())
-                    .bookThumbnailUrl(book.getThumbnailUrl())
-                    .userId(review.getUser().getId())
-                    .userNickname(review.getUser().getNickname())
-                    .content(review.getContent())
-                    .rating(review.getRating())
-                    .likeCount(likeCount)
-                    .commentCount(commentCount)
-                    .likedByMe(likedByMe)
-                    .createdAt(review.getCreatedAt())
-                    .updatedAt(review.getUpdatedAt())
-                    .build();
+            return reviewMapper.toDto(review,likeCount,commentCount,likedByMe);
         }).toList();
 
         return PageResponse.builder()
@@ -129,21 +101,7 @@ public class ReviewServiceImpl implements ReviewService {
         int likeCount = reviewLikeRepository.countByReviewId(review.getId());
         int commentCount =  commentRepository.countByReviewId(review.getId());
 
-        return ReviewDto.builder()
-                .id(review.getId())
-                .bookId(review.getBook().getId())
-                .bookTitle(review.getBook().getTitle())
-                .bookThumbnailUrl(review.getBook().getThumbnailUrl())
-                .userId(review.getUser().getId())
-                .userNickname(user.getNickname())
-                .content(review.getContent())
-                .rating(review.getRating())
-                .likeCount(likeCount)
-                .commentCount(commentCount)
-                .likedByMe(likedByMe)
-                .createdAt(review.getCreatedAt())
-                .updatedAt(review.getUpdatedAt())
-                .build();
+        return reviewMapper.toDto(review,likeCount,commentCount,likedByMe);
     }
 
     public PageResponse popularList(ReviewPopularQueryParams params) {
@@ -164,27 +122,9 @@ public class ReviewServiceImpl implements ReviewService {
 
         List<PopularReviewDto> content = ranksList.stream().map(rank -> {
             Review review = verifyReviewExists(rank.getTargetId());
-            Book book = review.getBook();
             int likeCount = reviewLikeRepository.countByReviewId(review.getId());
             int commentCount =  commentRepository.countByReviewId(review.getId());
-            return PopularReviewDto.builder()
-                    .id(rank.getId())
-                    .reviewId(review.getId())
-                    .bookId(book.getId())
-                    .bookTitle(book.getTitle())
-                    .bookThumbnailUrl(book.getThumbnailUrl())
-                    .userId(review.getUser().getId())
-                    .userNickname(review.getUser().getNickname())
-                    .reviewContent(review.getContent())
-                    .reviewRating(review.getRating())
-                    .period(rank.getType())
-                    .rank(rank.getRankNo())
-                    .score(rank.getScore())
-                    .likeCount(likeCount)
-                    .commentCount(commentCount)
-                    .createdAt(review.getCreatedAt())
-                    .build();
-
+            return reviewMapper.toPopularDto(review, rank,likeCount,commentCount);
         }).toList();
 
         return PageResponse.builder()
@@ -206,27 +146,12 @@ public class ReviewServiceImpl implements ReviewService {
 
         review.update(request.content(), request.rating());
         reviewRepository.save(review);
-        Book book = review.getBook();
 
-        boolean likedByMe = reviewLikeRepository.existsByReviewIdAndUserId(review.getId(), user.getId());
         int likeCount = reviewLikeRepository.countByReviewId(review.getId());
         int commentCount =  commentRepository.countByReviewId(review.getId());
+        boolean likedByMe = reviewLikeRepository.existsByReviewIdAndUserId(review.getId(), user.getId());
 
-        return ReviewDto.builder()
-                .id(review.getId())
-                .bookId(book.getId())
-                .bookTitle(book.getTitle())
-                .bookThumbnailUrl(book.getThumbnailUrl())
-                .userId(user.getId())
-                .userNickname(user.getNickname())
-                .content(review.getContent())
-                .rating(review.getRating())
-                .likeCount(likeCount)
-                .commentCount(commentCount)
-                .likedByMe(likedByMe)
-                .createdAt(review.getCreatedAt())
-                .updatedAt(review.getUpdatedAt())
-                .build();
+        return reviewMapper.toDto(review,likeCount,commentCount,likedByMe);
     }
 
     @Override
