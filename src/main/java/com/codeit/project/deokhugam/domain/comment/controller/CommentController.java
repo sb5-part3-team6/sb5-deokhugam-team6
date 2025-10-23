@@ -3,65 +3,76 @@ package com.codeit.project.deokhugam.domain.comment.controller;
 import com.codeit.project.deokhugam.domain.comment.dto.CommentCreateRequest;
 import com.codeit.project.deokhugam.domain.comment.dto.CommentDto;
 import com.codeit.project.deokhugam.domain.comment.dto.CommentUpdateRequest;
-import com.codeit.project.deokhugam.domain.comment.dto.CursorPageResponseCommentDto;
 import com.codeit.project.deokhugam.domain.comment.service.CommentService;
+import com.codeit.project.deokhugam.global.common.dto.PageResponse;
+import java.time.LocalDateTime;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-
-import java.time.LocalDateTime;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/comments")
 public class CommentController {
-    private final CommentService commentService;
 
-    @PostMapping
-    public ResponseEntity<CommentDto> createComment(@RequestBody CommentCreateRequest req) {
-        CommentDto saved = commentService.create(req);
-        return ResponseEntity.status(HttpStatus.CREATED)
-                .body(saved);
-    }
+  private final CommentService commentService;
 
-    @GetMapping("/{commentId}")
-    public ResponseEntity<CommentDto> findCommentById(@PathVariable Long commentId) {
-        CommentDto comment = commentService.findById(commentId);
-        return ResponseEntity.ok(comment);
-    }
+  @PostMapping
+  public ResponseEntity<CommentDto> create(@RequestBody CommentCreateRequest req) {
+    CommentDto saved = commentService.create(req);
+    return ResponseEntity.status(HttpStatus.CREATED)
+                         .body(saved);
+  }
 
-    @GetMapping
-    public ResponseEntity<CursorPageResponseCommentDto> getCommentsByCursor(
-            @RequestParam Long reviewId,
-            @RequestParam(required = false) LocalDateTime after,
-            @RequestParam(required = false) Long cursor,
-            @RequestParam(defaultValue = "20") int limit,
-            @RequestParam(defaultValue = "DESC") String direction
-    ) {
-        CursorPageResponseCommentDto response =
-                commentService.getCommentsByCursor(reviewId, after, cursor, limit, direction);
+  @GetMapping("/{commentId}")
+  public ResponseEntity<CommentDto> findById(@PathVariable Long commentId) {
+    CommentDto comment = commentService.findById(commentId);
+    return ResponseEntity.ok(comment);
+  }
 
-        return ResponseEntity.ok(response);
-    }
+  @GetMapping
+  public ResponseEntity<PageResponse> getByCursor(
+      @RequestParam Long reviewId,
+      @RequestParam(required = false) LocalDateTime after,
+      @RequestParam(required = false) Long cursor,
+      @RequestParam(defaultValue = "20") int limit,
+      @RequestParam(defaultValue = "DESC") String direction
+  ) {
+    PageResponse response =
+        commentService.getByCursor(reviewId, after, cursor, limit, direction);
+
+    return ResponseEntity.ok(response);
+  }
 
 
-    @PutMapping("/{commentId}")
-    public ResponseEntity<CommentDto> updateComment(@PathVariable Long commentId, @RequestBody CommentUpdateRequest req) {
-        CommentUpdateRequest updated = new CommentUpdateRequest(req.content());
-        CommentDto updatedComment = commentService.update(commentId, updated);
-        return ResponseEntity.ok(updatedComment);
-    }
+  @PutMapping("/{commentId}")
+  public ResponseEntity<CommentDto> update(@PathVariable Long commentId,
+      @RequestBody CommentUpdateRequest req) {
+    CommentUpdateRequest updated = new CommentUpdateRequest(req.content());
+    CommentDto updatedComment = commentService.update(commentId, updated);
+    return ResponseEntity.ok(updatedComment);
+  }
 
-    @DeleteMapping("/{commentId}")
-    public ResponseEntity<Void> deleteSoftComment(@PathVariable Long commentId) {
-        commentService.deleteSoft(commentId);
-        return ResponseEntity.noContent().build();
-    }
+  @DeleteMapping("/{commentId}")
+  public ResponseEntity<Void> deleteSoft(@PathVariable Long commentId) {
+    commentService.deleteSoft(commentId);
+    return ResponseEntity.noContent()
+                         .build();
+  }
 
-    @DeleteMapping("/{commentId}/hard")
-    public ResponseEntity<Void> deleteHardComment(@PathVariable Long commentId) {
-        commentService.delete(commentId);
-        return ResponseEntity.noContent().build();
-    }
+  @DeleteMapping("/{commentId}/hard")
+  public ResponseEntity<Void> deleteHard(@PathVariable Long commentId) {
+    commentService.delete(commentId);
+    return ResponseEntity.noContent()
+                         .build();
+  }
 }

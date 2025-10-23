@@ -1,28 +1,27 @@
 package com.codeit.project.deokhugam.domain.comment.repository;
 
 import com.codeit.project.deokhugam.domain.comment.dto.CommentDto;
-import com.codeit.project.deokhugam.domain.comment.dto.CursorPageResponseCommentDto;
 import com.codeit.project.deokhugam.domain.comment.entity.Comment;
 import com.codeit.project.deokhugam.domain.comment.entity.QComment;
 import com.codeit.project.deokhugam.domain.user.entity.QUser;
+import com.codeit.project.deokhugam.global.common.dto.PageResponse;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.jpa.impl.JPAQueryFactory;
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Repository;
-
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Repository;
 
 @Repository
 @RequiredArgsConstructor
-public class CommentRepositoryImpl implements CommentRepositoryCustom {
+public class CommentRepositoryCustomImpl implements CommentRepositoryCustom {
 
     private final JPAQueryFactory queryFactory;
 
     @Override
-    public CursorPageResponseCommentDto findCommentsByCursor(
+    public PageResponse findCommentsByCursor(
             Long reviewId,
             LocalDateTime after,
             Long cursor,
@@ -89,10 +88,10 @@ public class CommentRepositoryImpl implements CommentRepositoryCustom {
                 .where(comment.review.id.eq(reviewId))
                 .fetchOne();
 
-        return new CursorPageResponseCommentDto(
+        return new PageResponse(
                 content,
                 nextCursor != null ? String.valueOf(nextCursor) : null,
-                nextAfter,
+                nextAfter.toString(),
                 limit,
                 totalElements,
                 hasNext

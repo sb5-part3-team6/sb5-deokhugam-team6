@@ -1,11 +1,10 @@
 package com.codeit.project.deokhugam.domain.comment.repository;
 
-import com.codeit.project.deokhugam.domain.comment.dto.CursorPageResponseCommentDto;
-
+import com.codeit.project.deokhugam.global.common.dto.PageResponse;
 import java.time.LocalDateTime;
 
 public interface CommentRepositoryCustom {
-    CursorPageResponseCommentDto findCommentsByCursor(
+    PageResponse findCommentsByCursor(
             Long reviewId,
             LocalDateTime after,
             Long cursor,

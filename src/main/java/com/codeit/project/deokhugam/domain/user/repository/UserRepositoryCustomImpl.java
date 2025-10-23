@@ -1,6 +1,5 @@
-package com.codeit.project.deokhugam.domain.user.repository.impl;
+package com.codeit.project.deokhugam.domain.user.repository;
 
-import com.codeit.project.deokhugam.domain.user.repository.UserRepositoryCustom;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 

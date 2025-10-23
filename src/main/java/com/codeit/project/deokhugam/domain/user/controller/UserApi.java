@@ -1,10 +1,10 @@
 package com.codeit.project.deokhugam.domain.user.controller;
 
-import com.codeit.project.deokhugam.domain.user.dto.CursorPageResponsePowerUserDto;
 import com.codeit.project.deokhugam.domain.user.dto.UserDto;
 import com.codeit.project.deokhugam.domain.user.dto.UserLoginRequest;
 import com.codeit.project.deokhugam.domain.user.dto.UserRegisterRequest;
 import com.codeit.project.deokhugam.domain.user.dto.UserUpdateRequest;
+import com.codeit.project.deokhugam.global.common.dto.PageResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -82,12 +82,12 @@ public interface UserApi {
   @Operation(summary = "파워 유저 목록 조회")
   @ApiResponses(
       value = {
-          @ApiResponse(responseCode = "200", description = "파워 유저 목록 조회 성공", content = @Content(schema = @Schema(implementation = CursorPageResponsePowerUserDto.class))),
+          @ApiResponse(responseCode = "200", description = "파워 유저 목록 조회 성공", content = @Content(schema = @Schema(implementation = PageResponse.class))),
           @ApiResponse(responseCode = "400", description = "잘못된 요청 (랭킹 기간 오류, 정렬 방향 오류 등)"),
           @ApiResponse(responseCode = "500", description = "서버 내부 오류")
       }
   )
-  ResponseEntity<CursorPageResponsePowerUserDto> findPowerUsers(
+  ResponseEntity<PageResponse> findPowerUsers(
       @RequestParam String period,
       @RequestParam String direction,
       @RequestParam LocalDate cursor,

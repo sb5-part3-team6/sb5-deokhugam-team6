@@ -15,5 +15,5 @@ public interface CommentMapper {
     @Mapping(source = "review.id", target = "reviewId")
     CommentDto toCommentDto(Comment comment);
 
-    List<CommentDto> toCommentDtoList(List<Comment> comments);
+    List<CommentDto> toDtoList(List<Comment> comments);
 }
