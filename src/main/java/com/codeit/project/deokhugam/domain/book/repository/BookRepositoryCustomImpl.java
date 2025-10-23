@@ -1,9 +1,7 @@
 package com.codeit.project.deokhugam.domain.book.repository;
 
 import com.codeit.project.deokhugam.domain.book.dto.BookDto;
-import com.codeit.project.deokhugam.domain.book.dto.BookOrderBy;
 import com.codeit.project.deokhugam.domain.book.dto.BookSearchRequest;
-import com.codeit.project.deokhugam.domain.book.dto.Direction;
 import com.codeit.project.deokhugam.domain.book.entity.QBook;
 import com.codeit.project.deokhugam.domain.review.entity.QReview;
 import com.querydsl.core.BooleanBuilder;

@@ -13,7 +13,7 @@ public record BookSearchRequest(String keyword, String orderBy, String direction
 
   public BookSearchRequest {
     if (limit == null) {
-      limit = 20;
+      limit = 50;
     }
   }
 }
