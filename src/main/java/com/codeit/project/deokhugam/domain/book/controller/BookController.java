@@ -75,7 +75,7 @@ public class BookController {
 
     @GetMapping
     public ResponseEntity<CursorPageResponseBookDto<BookDto>>search(
-        @ModelAttribute BookSearchRequest bookSearchReq
+        BookSearchRequest bookSearchReq
     ){
         CursorPageResponseBookDto<BookDto> searchBook= bookService.search(bookSearchReq);
         return ResponseEntity.status(HttpStatus.OK).body(searchBook);
