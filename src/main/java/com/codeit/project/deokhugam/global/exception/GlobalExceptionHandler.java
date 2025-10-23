@@ -1,7 +1,6 @@
 package com.codeit.project.deokhugam.global.exception;
 
 import com.codeit.project.deokhugam.global.common.dto.ErrorResponse;
-import com.codeit.project.deokhugam.global.enums.ErrorCode;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -24,19 +23,11 @@ public class GlobalExceptionHandler {
   public ResponseEntity<ErrorResponse> handleDeokhugamException(DeokhugamException exception) {
     log.error("커스텀 예외 발생: code={}, message={}", exception.getErrorCode(), exception.getMessage(),
         exception);
-    HttpStatus status = determineHttpStatus(exception);
-    ErrorResponse response = new ErrorResponse(exception, status.value());
-    return ResponseEntity.status(status)
+    ErrorResponse response = new ErrorResponse(exception, exception.getErrorCode()
+                                                                   .getHttpStatusCode()
+                                                                   .value());
+    return ResponseEntity.status(exception.getErrorCode()
+                                          .getHttpStatusCode())
                          .body(response);
-  }
-
-  private HttpStatus determineHttpStatus(DeokhugamException exception) {
-    ErrorCode errorCode = exception.getErrorCode();
-    return switch (errorCode) {
-      case NOTIFICATION_NOT_FOUND -> HttpStatus.NOT_FOUND;
-      case INVALID_USER_CREDENTIALS -> HttpStatus.FORBIDDEN;
-      case INVALID_REQUEST -> HttpStatus.BAD_REQUEST;
-      case INTERNAL_SERVER_ERROR -> HttpStatus.INTERNAL_SERVER_ERROR;
-    };
   }
 }
