@@ -27,8 +27,6 @@ public class CommentServiceImpl implements CommentService{
     private final ReviewRepository reviewRepository;
     private final CommentMapper commentMapper;
 
-    private final JPAQueryFactory queryFactory;
-
     @Override
     @Transactional
     public CommentDto create(CommentCreateRequest req) {
