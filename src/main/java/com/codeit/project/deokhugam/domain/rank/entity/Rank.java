@@ -20,10 +20,15 @@ public class Rank extends BaseEntity {
   private String target;
 
   private Long targetId;
+
   @Column(length = 10)
   private String type;
 
   private Integer rankNo;
 
   private BigDecimal score;
+
+  public void updateRankNo(Integer rankNo) {
+    this.rankNo = rankNo;
+  }
 }

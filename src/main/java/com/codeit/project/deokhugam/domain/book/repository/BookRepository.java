@@ -1,5 +1,8 @@
 package com.codeit.project.deokhugam.domain.book.repository;
 
-public interface BookRepository {
+import com.codeit.project.deokhugam.domain.book.entity.Book;
+import org.springframework.data.jpa.repository.JpaRepository;
+
+public interface BookRepository extends JpaRepository<Book, Long> {
 
 }
