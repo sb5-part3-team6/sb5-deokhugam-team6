@@ -31,4 +31,8 @@ public class Comment extends BaseEntity {
   public void softDelete(){
     super.softDelete();
   }
+  
+  public void updateContent(String content){
+    this.content = content;
+  }
 }

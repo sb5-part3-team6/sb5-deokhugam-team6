@@ -17,4 +17,6 @@ public interface BookRepository extends JpaRepository<Book,Long> {
       """)
   Optional<Book> findById(@Param("bookId")Long bookId);
 
+public interface BookRepository extends JpaRepository<Book, Long> {
+
 }

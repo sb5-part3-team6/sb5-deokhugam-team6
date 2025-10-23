@@ -24,15 +24,19 @@ public class Review extends BaseEntity {
   @ManyToOne
   @JoinColumn(name = "user_id", nullable = false)
   private User user;
+
   @ManyToOne
   @JoinColumn(name = "book_id", nullable = false)
   private Book book;
+
   @Column(length = 1024)
   private String content;
+
   @Column(nullable = false)
   private Integer rating;
 
-  public void softDelete(){
-    super.softDelete();
+  public void update(String content, Integer rating) {
+    this.content = content;
+    this.rating = rating;
   }
 }
