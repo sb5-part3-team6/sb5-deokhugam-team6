@@ -68,7 +68,7 @@ class UserControllerTest {
         .content(objectMapper.writeValueAsString(invalidRequest)));
 
     actions
-        .andExpect(status().isBadRequest()) // 400 Bad Request
+        .andExpect(status().isBadRequest())
         .andDo(print());
 
     verify(userService, never()).create(any(UserRegisterRequest.class));
@@ -86,7 +86,7 @@ class UserControllerTest {
         .content(objectMapper.writeValueAsString(invalidRequest)));
 
     actions
-        .andExpect(status().isBadRequest()) // 400 Bad Request
+        .andExpect(status().isBadRequest())
         .andDo(print());
 
     verify(userService, never()).create(any(UserRegisterRequest.class));
