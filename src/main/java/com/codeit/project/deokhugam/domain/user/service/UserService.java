@@ -73,6 +73,11 @@ public class UserService {
           throw new NoSuchElementException("사용자를 찾을 수 없습니다.");
         });
 
+    if(userRepository.existsByNickname(request.nickname())) {
+      log.error("이미 존재하는 닉네임, Nickname = {}", request.nickname());
+      throw new IllegalArgumentException("이미 존재하는 닉네임입니다.");
+    }
+
     findUser.updateNickname(request.nickname());
     return new UserDto(findUser.getId().toString(), findUser.getEmail(), findUser.getNickname(), findUser.getCreatedAt());
   }
