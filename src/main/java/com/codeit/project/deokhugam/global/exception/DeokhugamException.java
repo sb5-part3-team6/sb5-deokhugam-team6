@@ -1,6 +1,5 @@
 package com.codeit.project.deokhugam.global.exception;
 
-import com.codeit.project.deokhugam.global.enums.ErrorCode;
 import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
