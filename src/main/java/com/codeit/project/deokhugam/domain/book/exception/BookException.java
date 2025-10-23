@@ -4,8 +4,12 @@ import com.codeit.project.deokhugam.global.exception.ErrorCode;
 import com.codeit.project.deokhugam.global.exception.DeokhugamException;
 
 public class BookException extends DeokhugamException {
-
   public BookException(ErrorCode errorCode) {
     super(errorCode);
+  }
+
+  @Override
+  public BookErrorCode getErrorCode() {
+    return (BookErrorCode) super.getErrorCode();
   }
 }
