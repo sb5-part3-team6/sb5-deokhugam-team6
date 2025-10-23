@@ -11,6 +11,9 @@ import com.codeit.project.deokhugam.domain.book.mapper.BookMapper;
 import com.codeit.project.deokhugam.domain.book.repository.BookQueryRepository;
 import com.codeit.project.deokhugam.domain.book.repository.BookRepository;
 import com.codeit.project.deokhugam.domain.book.storage.FileStorage;
+import com.codeit.project.deokhugam.domain.comment.entity.Comment;
+import com.codeit.project.deokhugam.domain.comment.entity.repository.CommentRepository;
+import com.codeit.project.deokhugam.domain.review.entity.Review;
 import com.codeit.project.deokhugam.domain.review.repository.ReviewRepository;
 import java.time.LocalDate;
 import java.util.List;
@@ -28,6 +31,7 @@ public class BookServiceImpl implements BookService {
   private final FileStorage fileStorage;
   private final ReviewRepository reviewRepository;
   private final BookQueryRepository bookQueryRepository;
+  private final CommentRepository commentRepository;
 
   @Override
   @Transactional
@@ -142,7 +146,12 @@ public class BookServiceImpl implements BookService {
     Book book = bookRepository.findById(bookId)
         .orElseThrow(()-> new NoSuchElementException("도서가 존재하지 않습니다."));
     book.softDelete();
-
+    List<Review> reviews = reviewRepository.findByBookId(bookId);
+    reviews.forEach(review -> {
+      review.softDelete();
+      List<Comment> comments = commentRepository.findByReviewId(review.getId());
+      comments.forEach(Comment::softDelete);
+    });
     // TODO Review, Comment 소프트 삭제 고려
   }
 

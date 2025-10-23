@@ -1,6 +1,7 @@
 package com.codeit.project.deokhugam.domain.review.repository;
 
 import com.codeit.project.deokhugam.domain.review.entity.Review;
+import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -21,5 +22,7 @@ public interface ReviewRepository extends JpaRepository<Review,Integer> {
   and r.deletedAt IS NULL 
 """)
   Long getReviewCount(@Param("bookId")Long bookId);
+
+  List<Review> findByBookId(Long bookId);
 
 }

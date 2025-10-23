@@ -27,4 +27,8 @@ public class Comment extends BaseEntity {
   private User user;
   @Column(length = 1024)
   private String content;
+
+  public void softDelete(){
+    super.softDelete();
+  }
 }
