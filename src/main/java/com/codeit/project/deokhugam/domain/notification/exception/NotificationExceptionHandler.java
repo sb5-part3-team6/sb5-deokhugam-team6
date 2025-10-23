@@ -19,9 +19,11 @@ public class NotificationExceptionHandler {
       NotificationInvalidUserException exception) {
     log.error("알림 예외 발생: code={}, message={}", exception.getErrorCode(), exception.getMessage(),
         exception);
-    HttpStatus status = HttpStatus.FORBIDDEN;
-    ErrorResponse response = new ErrorResponse(exception, status.value());
-    return ResponseEntity.status(status)
+    ErrorResponse response = new ErrorResponse(exception, exception.getErrorCode()
+                                                                   .getHttpStatus()
+                                                                   .value());
+    return ResponseEntity.status(exception.getErrorCode()
+                                          .getHttpStatus())
                          .body(response);
   }
 
@@ -30,9 +32,11 @@ public class NotificationExceptionHandler {
       NotificationNotFoundException exception) {
     log.error("알림 예외 발생: code={}, message={}", exception.getErrorCode(), exception.getMessage(),
         exception);
-    HttpStatus status = HttpStatus.NOT_FOUND;
-    ErrorResponse response = new ErrorResponse(exception, status.value());
-    return ResponseEntity.status(status)
+    ErrorResponse response = new ErrorResponse(exception, exception.getErrorCode()
+                                                                   .getHttpStatus()
+                                                                   .value());
+    return ResponseEntity.status(exception.getErrorCode()
+                                          .getHttpStatus())
                          .body(response);
   }
 

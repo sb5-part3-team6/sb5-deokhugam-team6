@@ -10,8 +10,8 @@ public enum NotificationErrorCode implements ErrorCode {
   NOTIFICATION_NOT_FOUND("알림을 찾을 수 없습니다.", HttpStatus.NOT_FOUND),
   ;
 
-  private String message;
-  private HttpStatus httpStatus;
+  private final String message;
+  private final HttpStatus httpStatus;
 
   NotificationErrorCode(String message, HttpStatus httpStatus) {
     this.message = message;

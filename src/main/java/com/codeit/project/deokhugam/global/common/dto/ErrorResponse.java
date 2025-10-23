@@ -32,7 +32,7 @@ public record ErrorResponse(LocalDateTime timestamp, String code, String message
         LocalDateTime.now(),
         exception.getClass()
                  .getSimpleName(),
-        exception.getMessage(),
+        "",
         new HashMap<>(),
         exception.getClass()
                  .getSimpleName(),
