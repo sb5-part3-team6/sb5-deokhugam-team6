@@ -22,4 +22,8 @@ public class User extends BaseEntity {
   private String nickname;
   @Column(length = 20, nullable = false)
   private String password;
+
+  public void updateNickname(String nickname) {
+    this.nickname = nickname;
+  }
 }
