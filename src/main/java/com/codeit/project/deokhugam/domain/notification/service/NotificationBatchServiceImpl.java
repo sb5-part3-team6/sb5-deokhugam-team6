@@ -16,6 +16,8 @@ public class NotificationBatchServiceImpl implements NotificationBatchService {
   @Override
   @Transactional
   public void cleanBatch() {
-    log.info("알림 배치 동작 완료");
+
+    Long cnt = notificationRepository.deleteConfirmedOlderThanOneWeek();
+    log.info("알림 배치 동작 완료 삭제 수: " + cnt);
   }
 }

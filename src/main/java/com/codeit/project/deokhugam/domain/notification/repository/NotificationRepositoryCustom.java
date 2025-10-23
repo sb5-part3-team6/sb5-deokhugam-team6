@@ -7,4 +7,5 @@ import java.util.List;
 public interface NotificationRepositoryCustom {
   List<Notification> findNotificationsByUserId(Long userId, String direction, LocalDate cursor, LocalDate after, int limit);
   Long countByUserId(Long userId);
+  Long deleteConfirmedOlderThanOneWeek();
 }

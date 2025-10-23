@@ -6,6 +6,7 @@ import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
@@ -49,5 +50,15 @@ public class NotificationRepositoryCustomImpl implements NotificationRepositoryC
              .from(notification)
              .where(notification.user.id.eq(userId))
              .fetchOne();
+  }
+
+  @Override
+  public Long deleteConfirmedOlderThanOneWeek() {
+    LocalDateTime oneWeekAgo = LocalDateTime.now()
+                                            .minusWeeks(1);
+
+    return qf.delete(notification)
+             .where(notification.confirmed.isTrue(), notification.createdAt.loe(oneWeekAgo))
+             .execute();
   }
 }
