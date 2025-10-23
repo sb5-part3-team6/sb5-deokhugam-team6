@@ -1,6 +1,7 @@
 package com.codeit.project.deokhugam.domain.review.service;
 
 import com.codeit.project.deokhugam.domain.book.entity.Book;
+import com.codeit.project.deokhugam.domain.book.exception.BookNotFoundException;
 import com.codeit.project.deokhugam.domain.book.repository.BookRepository;
 import com.codeit.project.deokhugam.domain.comment.repository.CommentRepository;
 import com.codeit.project.deokhugam.domain.rank.entity.Rank;
@@ -183,8 +184,7 @@ public class ReviewServiceImpl implements ReviewService {
     }
 
     private Book verifyBookExists(Long bookId) {
-        return bookRepository.findById(bookId)
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 도서 입니다."));
+        return bookRepository.findById(bookId).orElseThrow(BookNotFoundException::new);
     }
 
     private Review verifyReviewExists(Long reviewId) {
