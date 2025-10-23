@@ -98,6 +98,7 @@ public class BookServiceImpl implements BookService {
         .orElseThrow(()->new NoSuchElementException("도서가 존재하지 않습니다."));
     long reviewCount = getReviewCount(book.getId());
     double rating = getAverageRating(book.getId());
+    // TODO mapper 변환 잘 되는지 한번 체크해보기
     return bookMapper.toDto(book,reviewCount,rating);
   }
 
@@ -141,6 +142,8 @@ public class BookServiceImpl implements BookService {
     Book book = bookRepository.findById(bookId)
         .orElseThrow(()-> new NoSuchElementException("도서가 존재하지 않습니다."));
     book.softDelete();
+
+    // TODO Review, Comment 소프트 삭제 고려
   }
 
   @Transactional
@@ -150,5 +153,7 @@ public class BookServiceImpl implements BookService {
         .orElseThrow(()-> new NoSuchElementException("도서가 존재하지 않습니다."));
     fileStorage.deleteThumbnailImage(book.getIsbn());
     bookRepository.deleteById(bookId);
+
+    // TODO Review, Comment 삭제 고려
   }
 }
