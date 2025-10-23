@@ -24,10 +24,10 @@ public class GlobalExceptionHandler {
     log.error("커스텀 예외 발생: code={}, message={}", exception.getErrorCode(), exception.getMessage(),
         exception);
     ErrorResponse response = new ErrorResponse(exception, exception.getErrorCode()
-                                                                   .getHttpStatusCode()
+                                                                   .getHttpStatus()
                                                                    .value());
     return ResponseEntity.status(exception.getErrorCode()
-                                          .getHttpStatusCode())
+                                          .getHttpStatus())
                          .body(response);
   }
 }
