@@ -8,6 +8,8 @@ import com.codeit.project.deokhugam.domain.rank.repository.RankRepository;
 import com.codeit.project.deokhugam.domain.review.dto.*;
 import com.codeit.project.deokhugam.domain.review.entity.Review;
 import com.codeit.project.deokhugam.domain.review.entity.ReviewLike;
+import com.codeit.project.deokhugam.domain.review.exception.ReviewAlreadyExistsException;
+import com.codeit.project.deokhugam.domain.review.exception.ReviewNotFoundException;
 import com.codeit.project.deokhugam.domain.review.mapper.ReviewMapper;
 import com.codeit.project.deokhugam.domain.review.repository.ReviewLikeRepository;
 import com.codeit.project.deokhugam.domain.review.repository.ReviewRepository;
@@ -41,7 +43,7 @@ public class ReviewServiceImpl implements ReviewService {
         Book book = verifyBookExists(request.bookId());
 
         if (reviewRepository.existsByUserIdAndBookId(user.getId(), book.getId()))
-            throw new IllegalArgumentException("이미 해당 책에 대한 리뷰가 존재합니다.");
+            throw new ReviewAlreadyExistsException();
 
         Review review = reviewRepository.save(new Review(user, book, request.content(), request.rating()));
         return reviewMapper.toDto(review,0,0,false);
@@ -186,8 +188,7 @@ public class ReviewServiceImpl implements ReviewService {
     }
 
     private Review verifyReviewExists(Long reviewId) {
-        return reviewRepository.findById(reviewId)
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 리뷰입니다."));
+        return reviewRepository.findById(reviewId).orElseThrow(ReviewNotFoundException::new);
     }
 
     private boolean toggleReviewLike(Review review, User user) {
