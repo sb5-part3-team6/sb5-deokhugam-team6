@@ -33,7 +33,7 @@ public class ReviewController {
         return ResponseEntity.ok(response);
     }
 
-    @GetMapping("/{reviewId}/like")
+    @GetMapping("/{reviewId}")
     public ResponseEntity<ReviewDto> detail(@PathVariable Long reviewId, @RequestHeader("Deokhugam-Request-User-ID") Long userId) {
         ReviewDto response = reviewService.detail(reviewId, userId);
         return ResponseEntity.ok(response);
@@ -45,7 +45,7 @@ public class ReviewController {
         return ResponseEntity.ok(response);
     }
 
-    @PatchMapping("/{reviewId}/like")
+    @PatchMapping("/{reviewId}")
     public ResponseEntity<ReviewDto> update(@PathVariable Long reviewId, @RequestHeader("Deokhugam-Request-User-ID") Long userId, @RequestBody ReviewUpdateRequest request) {
         ReviewDto response = reviewService.update(reviewId, userId, request);
         return ResponseEntity.ok(response);

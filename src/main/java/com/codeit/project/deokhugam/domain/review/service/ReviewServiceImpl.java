@@ -3,6 +3,8 @@ package com.codeit.project.deokhugam.domain.review.service;
 import com.codeit.project.deokhugam.domain.book.entity.Book;
 import com.codeit.project.deokhugam.domain.book.repository.BookRepository;
 import com.codeit.project.deokhugam.domain.comment.repository.CommentRepository;
+import com.codeit.project.deokhugam.domain.rank.entity.Rank;
+import com.codeit.project.deokhugam.domain.rank.repository.RankRepository;
 import com.codeit.project.deokhugam.domain.review.dto.*;
 import com.codeit.project.deokhugam.domain.review.entity.Review;
 import com.codeit.project.deokhugam.domain.review.entity.ReviewLike;
@@ -17,6 +19,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 @Service
@@ -28,6 +31,7 @@ public class ReviewServiceImpl implements ReviewService {
     private final BookRepository bookRepository;
     private final UserRepository userRepository;
     private final CommentRepository commentRepository;
+    private final RankRepository rankRepository;
 
     @Override
     public ReviewDto create(ReviewCreateRequest request) {
@@ -90,18 +94,19 @@ public class ReviewServiceImpl implements ReviewService {
             Book book = review.getBook();
             int likeCount = reviewLikeRepository.countByReviewId(review.getId());
             int commentCount =  commentRepository.countByReviewId(review.getId());
+            boolean likedByMe = reviewLikeRepository.existsByReviewIdAndUserId(review.getId(), user.getId());
             return ReviewDto.builder()
                     .id(review.getId())
                     .bookId(book.getId())
                     .bookTitle(book.getTitle())
                     .bookThumbnailUrl(book.getThumbnailUrl())
-                    .userId(user.getId())
-                    .userNickname(user.getNickname())
+                    .userId(review.getUser().getId())
+                    .userNickname(review.getUser().getNickname())
                     .content(review.getContent())
                     .rating(review.getRating())
                     .likeCount(likeCount)
                     .commentCount(commentCount)
-                    .likedByMe(false)
+                    .likedByMe(likedByMe)
                     .createdAt(review.getCreatedAt())
                     .updatedAt(review.getUpdatedAt())
                     .build();
@@ -110,19 +115,87 @@ public class ReviewServiceImpl implements ReviewService {
         return PageResponse.builder()
                 .content(content)
                 .nextCursor(nextCursor)
-                .size(reviewList.size() - 1)
+                .size(reviewList.size())
                 .totalElements(total)
                 .hasNext(hasNext)
                 .nextAfter(nextAfter)
                 .build();
     }
 
-    public void detail(Long reviewId, Long userId) {
+    public ReviewDto detail(Long reviewId, Long userId) {
+        User user = verifyUserExists(userId);
+        Review review = verifyReviewExists(reviewId);
 
+        boolean likedByMe = reviewLikeRepository.existsByReviewIdAndUserId(review.getId(), user.getId());
+        int likeCount = reviewLikeRepository.countByReviewId(review.getId());
+        int commentCount =  commentRepository.countByReviewId(review.getId());
+
+        return ReviewDto.builder()
+                .id(review.getId())
+                .bookId(review.getBook().getId())
+                .bookTitle(review.getBook().getTitle())
+                .bookThumbnailUrl(review.getBook().getThumbnailUrl())
+                .userId(review.getUser().getId())
+                .userNickname(user.getNickname())
+                .content(review.getContent())
+                .rating(review.getRating())
+                .likeCount(likeCount)
+                .commentCount(commentCount)
+                .likedByMe(likedByMe)
+                .createdAt(review.getCreatedAt())
+                .updatedAt(review.getUpdatedAt())
+                .build();
     }
 
-    public void popularList(ReviewPopularQueryParams params) {
+    public PageResponse popularList(ReviewPopularQueryParams params) {
 
+        List<Rank> ranksList = reviewRepositoryCustom.findRanksByType(params.period(), params.direction(), params.limit());
+
+        Long total = rankRepository.countAllByTypeForReview(params.period());
+        boolean hasNext = ranksList.size() > params.limit();
+        String nextCursor = null;
+        String nextAfter = null;
+
+        if(hasNext) {
+            Rank lastItem = ranksList.get(ranksList.size() - 1);
+            nextCursor = lastItem.getId().toString();
+            nextAfter = lastItem.getCreatedAt().toString();
+            ranksList.remove(lastItem);
+        }
+
+        List<PopularReviewDto> content = ranksList.stream().map(rank -> {
+            Review review = verifyReviewExists(rank.getTargetId());
+            Book book = review.getBook();
+            int likeCount = reviewLikeRepository.countByReviewId(review.getId());
+            int commentCount =  commentRepository.countByReviewId(review.getId());
+            return PopularReviewDto.builder()
+                    .id(rank.getId())
+                    .reviewId(review.getId())
+                    .bookId(book.getId())
+                    .bookTitle(book.getTitle())
+                    .bookThumbnailUrl(book.getThumbnailUrl())
+                    .userId(review.getUser().getId())
+                    .userNickname(review.getUser().getNickname())
+                    .reviewContent(review.getContent())
+                    .reviewRating(review.getRating())
+                    .period(rank.getType())
+                    .rank(rank.getRankNo())
+                    .score(rank.getScore())
+                    .likeCount(likeCount)
+                    .commentCount(commentCount)
+                    .createdAt(review.getCreatedAt())
+                    .build();
+
+        }).toList();
+
+        return PageResponse.builder()
+                .content(content)
+                .nextCursor(nextCursor)
+                .size(ranksList.size())
+                .totalElements(total)
+                .hasNext(hasNext)
+                .nextAfter(nextAfter)
+                .build();
     }
 
     @Override
@@ -133,9 +206,10 @@ public class ReviewServiceImpl implements ReviewService {
         if(!review.getUser().getId().equals(user.getId())) throw new IllegalArgumentException("리뷰를 삭제할 권한이 없습니다.");
 
         review.update(request.content(), request.rating());
+        reviewRepository.save(review);
         Book book = review.getBook();
 
-        Optional<ReviewLike> reviewLike = reviewLikeRepository.findByReviewIdAndUserId(review.getId(), user.getId());
+        boolean likedByMe = reviewLikeRepository.existsByReviewIdAndUserId(review.getId(), user.getId());
         int likeCount = reviewLikeRepository.countByReviewId(review.getId());
         int commentCount =  commentRepository.countByReviewId(review.getId());
 
@@ -150,7 +224,7 @@ public class ReviewServiceImpl implements ReviewService {
                 .rating(review.getRating())
                 .likeCount(likeCount)
                 .commentCount(commentCount)
-                .likedByMe(reviewLike.isPresent())
+                .likedByMe(likedByMe)
                 .createdAt(review.getCreatedAt())
                 .updatedAt(review.getUpdatedAt())
                 .build();
