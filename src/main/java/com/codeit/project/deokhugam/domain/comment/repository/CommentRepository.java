@@ -6,11 +6,15 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 
-public interface CommentRepository extends JpaRepository<Comment,Long>, CommentRepositoryCustom {
+public interface CommentRepository extends JpaRepository<Comment, Long>, CommentRepositoryCustom {
+
   List<Comment> findByReviewId(Long reviewId);
+
   @Modifying
   @Query("DELETE FROM Comment c WHERE c.review.id IN :reviewIds")
-  void bulkDeleteByReviewIds(List<Long> reviewId);{
+  void bulkDeleteByReviewIds(List<Long> reviewId);
+
   Integer countByReviewId(Long reviewId);
+
   void deleteAllByReviewId(Long reviewId);
 }

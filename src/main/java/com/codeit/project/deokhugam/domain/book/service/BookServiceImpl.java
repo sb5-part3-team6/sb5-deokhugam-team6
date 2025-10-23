@@ -7,7 +7,7 @@ import com.codeit.project.deokhugam.domain.book.dto.BookUpdateRequest;
 import com.codeit.project.deokhugam.domain.book.dto.CursorPageResponseBookDto;
 import com.codeit.project.deokhugam.domain.book.entity.Book;
 import com.codeit.project.deokhugam.domain.book.mapper.BookMapper;
-import com.codeit.project.deokhugam.domain.book.repository.BookQueryRepository;
+import com.codeit.project.deokhugam.domain.book.repository.BookRepositoryCustom;
 import com.codeit.project.deokhugam.domain.book.repository.BookRepository;
 import com.codeit.project.deokhugam.domain.book.storage.FileStorage;
 import com.codeit.project.deokhugam.domain.comment.entity.Comment;
@@ -29,7 +29,7 @@ public class BookServiceImpl implements BookService {
   private final BookRepository bookRepository;
   private final FileStorage fileStorage;
   private final ReviewRepository reviewRepository;
-  private final BookQueryRepository bookQueryRepository;
+  private final BookRepositoryCustom bookQueryRepository;
   private final CommentRepository commentRepository;
 
   @Override
@@ -108,7 +108,7 @@ public class BookServiceImpl implements BookService {
   @Transactional(readOnly = true)
   @Override
   public CursorPageResponseBookDto<BookDto> search(BookSearchRequest bookSearchReq) {
-    int pageSize = bookSearchReq.getLimit() == null ? 50 : bookSearchReq.getLimit();
+    int pageSize = bookSearchReq.limit() == null ? 50 : bookSearchReq.limit();
     List<BookDto> bookList = bookQueryRepository.findBooks(bookSearchReq,pageSize+1);
 
     boolean hasNext = bookList.size()>pageSize;
@@ -121,7 +121,7 @@ public class BookServiceImpl implements BookService {
     if(hasNext && !bookList.isEmpty()){
       BookDto last = bookList.get(bookList.size()-1);
 
-      switch (bookSearchReq.getOrderBy()) {
+      switch (bookSearchReq.orderBy()) {
         case TITLE -> nextCursor = last.title();
         case PUBLISHEDDATE -> nextCursor = last.publishedDate().toString();
         case RATING -> nextCursor = String.valueOf(last.rating());

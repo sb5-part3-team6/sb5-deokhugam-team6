@@ -1,11 +1,10 @@
-package com.codeit.project.deokhugam.domain.book.repository.impl;
+package com.codeit.project.deokhugam.domain.book.repository;
 
 import com.codeit.project.deokhugam.domain.book.dto.BookDto;
 import com.codeit.project.deokhugam.domain.book.dto.BookOrderBy;
 import com.codeit.project.deokhugam.domain.book.dto.BookSearchRequest;
 import com.codeit.project.deokhugam.domain.book.dto.Direction;
 import com.codeit.project.deokhugam.domain.book.entity.QBook;
-import com.codeit.project.deokhugam.domain.book.repository.BookQueryRepository;
 import com.codeit.project.deokhugam.domain.review.entity.QReview;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.Order;
@@ -23,7 +22,7 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 @RequiredArgsConstructor
-public class BookQueryRepositoryImpl implements BookQueryRepository {
+public class BookRepositoryCustomImpl implements BookRepositoryCustom {
   private final JPAQueryFactory jpaQueryFactory;
 
   @Override
@@ -41,13 +40,13 @@ public class BookQueryRepositoryImpl implements BookQueryRepository {
 
     //검색 조건
     BooleanBuilder where = new BooleanBuilder();
-    if(bookSearchReq.getKeyword()!=null && !bookSearchReq.getKeyword().isBlank()){
-      String keyword = "%"+bookSearchReq.getKeyword()+"%";
+    if(bookSearchReq.keyword()!=null && !bookSearchReq.keyword().isBlank()){
+      String keyword = "%"+bookSearchReq.keyword()+"%";
       where.and(
         book.title.containsIgnoreCase(keyword)
             .or(book.author.likeIgnoreCase(keyword))
             .or(book.isbn.likeIgnoreCase(keyword))
-          );
+          ).and(book.deletedAt.isNull());
     }
 
     //정렬조건
@@ -55,7 +54,7 @@ public class BookQueryRepositoryImpl implements BookQueryRepository {
     OrderSpecifier<?> secondaryOrder = getSecondaryOrder(book, bookSearchReq);
 
     //커서
-    if(bookSearchReq.getCursor() !=null && bookSearchReq.getAfter()!=null){
+    if(bookSearchReq.cursor() !=null && bookSearchReq.after()!=null){
       where.and(buildCursorPredicate(book,reviewCount, ratingAvg, bookSearchReq));
     }
 
@@ -85,9 +84,9 @@ public class BookQueryRepositoryImpl implements BookQueryRepository {
         .fetch();
   }
   private OrderSpecifier<?> getPrimaryOrder(QBook book,NumberExpression<Long> reviewCount, NumberExpression<Double> ratingAvg, BookSearchRequest req) {
-    Order order = req.getDirection() == Direction.ASC ? Order.ASC : Order.DESC;
+    Order order = req.direction() == Direction.ASC ? Order.ASC : Order.DESC;
 
-    return switch (req.getOrderBy()) {
+    return switch (req.orderBy()) {
       case TITLE -> new OrderSpecifier<>(order, book.title);
       case PUBLISHEDDATE -> new OrderSpecifier<>(order, book.publishedAt);
       case RATING -> new OrderSpecifier<>(order, ratingAvg);
@@ -96,7 +95,7 @@ public class BookQueryRepositoryImpl implements BookQueryRepository {
   }
 
   private OrderSpecifier<?> getSecondaryOrder(QBook book, BookSearchRequest req) {
-    Order order = req.getDirection() == Direction.ASC ? Order.ASC : Order.DESC;
+    Order order = req.direction() == Direction.ASC ? Order.ASC : Order.DESC;
     return new OrderSpecifier<>(order, book.createdAt);
   }
   private Comparable<?> parseCursorValue(BookOrderBy orderBy, String cursor) {
@@ -118,11 +117,11 @@ public class BookQueryRepositoryImpl implements BookQueryRepository {
       NumberExpression<Long> reviewCountExpr,
       NumberExpression<Double> ratingAvgExpr,
       BookSearchRequest req) {
-    BookOrderBy orderBy = req.getOrderBy();
-    Direction direction = req.getDirection();
+    BookOrderBy orderBy = req.orderBy();
+    Direction direction = req.direction();
 
-    Comparable<?> cursorValue = parseCursorValue(orderBy, req.getCursor());
-    LocalDateTime after = req.getAfter();
+    Comparable<?> cursorValue = parseCursorValue(orderBy, req.cursor());
+    LocalDateTime after = req.after();
 
     if (cursorValue == null || after == null) {
       return null;

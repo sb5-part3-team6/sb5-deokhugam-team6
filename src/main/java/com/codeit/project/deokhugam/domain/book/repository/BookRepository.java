@@ -6,7 +6,8 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-public interface BookRepository extends JpaRepository<Book,Long> {
+public interface BookRepository extends JpaRepository<Book, Long> {
+
   Boolean existsByisbn(String isbn);
 
   @Query("""
@@ -15,8 +16,5 @@ public interface BookRepository extends JpaRepository<Book,Long> {
       where b.id = :bookId
       and b.deletedAt IS NULL
       """)
-  Optional<Book> findById(@Param("bookId")Long bookId);
-
-public interface BookRepository extends JpaRepository<Book, Long> {
-
+  Optional<Book> findById(@Param("bookId") Long bookId);
 }
