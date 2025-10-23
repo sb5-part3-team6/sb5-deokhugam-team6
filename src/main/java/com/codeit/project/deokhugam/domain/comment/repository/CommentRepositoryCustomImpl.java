@@ -32,7 +32,6 @@ public class CommentRepositoryCustomImpl implements CommentRepositoryCustom {
         QUser user = QUser.user;
         boolean isAsc = "ASC".equalsIgnoreCase(direction);
 
-        // 1️⃣ 조건 빌더
         BooleanBuilder builder = new BooleanBuilder();
         builder.and(comment.review.id.eq(reviewId));
 
@@ -50,10 +49,8 @@ public class CommentRepositoryCustomImpl implements CommentRepositoryCustom {
             }
         }
 
-        // 2️⃣ 정렬
         OrderSpecifier<?> order = isAsc ? comment.createdAt.asc() : comment.createdAt.desc();
 
-        // 3️⃣ 댓글 조회 (limit + 1) -> 다음 페이지 판단
         List<Comment> comments = queryFactory
                 .selectFrom(comment)
                 .join(comment.user, user).fetchJoin()
@@ -68,7 +65,6 @@ public class CommentRepositoryCustomImpl implements CommentRepositoryCustom {
         Long nextCursor = hasNext ? comments.get(comments.size() - 1).getId() : null;
         LocalDateTime nextAfter = hasNext ? comments.get(comments.size() - 1).getCreatedAt() : null;
 
-        // 4️⃣ DTO 변환
         List<CommentDto> content = comments.stream()
                 .map(c -> new CommentDto(
                         c.getId(),
@@ -81,7 +77,6 @@ public class CommentRepositoryCustomImpl implements CommentRepositoryCustom {
                 ))
                 .collect(Collectors.toList());
 
-        // 5️⃣ totalElements 계산 (리뷰 전체 댓글 수)
         Long totalElements = queryFactory
                 .select(comment.count())
                 .from(comment)
@@ -91,7 +86,7 @@ public class CommentRepositoryCustomImpl implements CommentRepositoryCustom {
         return new PageResponse(
                 content,
                 nextCursor != null ? String.valueOf(nextCursor) : null,
-                nextAfter.toString(),
+                nextAfter != null ? nextAfter.toString() : null,
                 limit,
                 totalElements,
                 hasNext
