@@ -75,7 +75,7 @@ public interface UserApi {
       }
   )
   ResponseEntity<UserDto> update(
-      @Parameter(description = "User ID") @PathVariable String id,
+      @Parameter(description = "User ID") @PathVariable String userId,
       @RequestBody UserUpdateRequest request
   );
 
