@@ -88,10 +88,10 @@ public class BookQueryRepositoryImpl implements BookQueryRepository {
     Order order = req.getDirection() == Direction.ASC ? Order.ASC : Order.DESC;
 
     return switch (req.getOrderBy()) {
-      case title -> new OrderSpecifier<>(order, book.title);
-      case publishedDate -> new OrderSpecifier<>(order, book.publishedAt);
-      case rating -> new OrderSpecifier<>(order, ratingAvg);
-      case reviewCount -> new OrderSpecifier<>(order, reviewCount);
+      case TITLE -> new OrderSpecifier<>(order, book.title);
+      case PUBLISHEDDATE -> new OrderSpecifier<>(order, book.publishedAt);
+      case RATING -> new OrderSpecifier<>(order, ratingAvg);
+      case REVIEWCOUNT -> new OrderSpecifier<>(order, reviewCount);
     };
   }
 
@@ -101,13 +101,13 @@ public class BookQueryRepositoryImpl implements BookQueryRepository {
   }
   private Comparable<?> parseCursorValue(BookOrderBy orderBy, String cursor) {
     switch (orderBy) {
-      case title:
+      case TITLE:
         return cursor;
-      case publishedDate:
+      case PUBLISHEDDATE:
         return LocalDate.parse(cursor);
-      case rating:
+      case RATING:
         return  Double.valueOf(cursor);
-      case reviewCount:
+      case REVIEWCOUNT:
         return Long.valueOf(cursor);
       default:
         throw new IllegalArgumentException("Unknown orderBy: " + orderBy);
@@ -132,22 +132,22 @@ public class BookQueryRepositoryImpl implements BookQueryRepository {
     BooleanExpression primaryEq = null;
 
     switch (orderBy) {
-      case title -> {
+      case TITLE -> {
         String value = (String) cursorValue;
         primaryCmp = direction == Direction.ASC ? book.title.gt(value) : book.title.lt(value);
         primaryEq = book.title.eq(value);
       }
-      case publishedDate -> {
+      case PUBLISHEDDATE -> {
         LocalDate value = (LocalDate) cursorValue;
         primaryCmp = direction == Direction.ASC ? book.publishedAt.gt(value) : book.publishedAt.lt(value);
         primaryEq = book.publishedAt.eq(value);
       }
-      case rating -> {
+      case RATING -> {
         Double value = (Double) cursorValue;
         primaryCmp = direction == Direction.ASC ? ratingAvgExpr.gt(value) : ratingAvgExpr.lt(value);
         primaryEq = ratingAvgExpr.eq(value);
       }
-      case reviewCount -> {
+      case REVIEWCOUNT -> {
         Long value = (Long) cursorValue;
         primaryCmp = direction == Direction.ASC ? reviewCountExpr.gt(value) : reviewCountExpr.lt(value);
         primaryEq = reviewCountExpr.eq(value);
