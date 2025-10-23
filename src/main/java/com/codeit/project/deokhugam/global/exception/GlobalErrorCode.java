@@ -10,10 +10,10 @@ public enum GlobalErrorCode implements ErrorCode {
   INVALID_REQUEST("잘못된 요청입니다.", HttpStatus.BAD_REQUEST);
 
   private final String message;
-  private final HttpStatus httpStatusCode;
+  private final HttpStatus httpStatus;
 
-  GlobalErrorCode(String message, HttpStatus httpStatusCode) {
+  GlobalErrorCode(String message, HttpStatus httpStatus) {
     this.message = message;
-    this.httpStatusCode = httpStatusCode;
+    this.httpStatus = httpStatus;
   }
 }
