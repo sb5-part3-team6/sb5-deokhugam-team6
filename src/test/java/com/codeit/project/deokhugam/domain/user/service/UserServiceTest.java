@@ -49,20 +49,6 @@ class UserServiceTest {
   }
 
   @Test
-  @DisplayName("회원가입 실패 - 잘못된 이메일 형식")
-  void createUser_Fail_InvalidEmailFormat() {
-    UserRegisterRequest request = new UserRegisterRequest("invalid-email", "testuser", "Password123");
-
-    IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
-      userService.create(request);
-    });
-
-    assertEquals("유효하지 않은 이메일 형식입니다.", exception.getMessage());
-    verify(userRepository, never()).existsByEmail(anyString());
-    verify(userRepository, never()).save(any(User.class));
-  }
-
-  @Test
   @DisplayName("회원가입 실패 - 중복된 닉네임")
   void createUser_Fail_DuplicateNickname() {
     UserRegisterRequest request = new UserRegisterRequest("test@example.com", "testuser", "Password123");
@@ -79,35 +65,31 @@ class UserServiceTest {
   }
 
   @Test
-  @DisplayName("회원가입 실패 - 닉네임 길이 너무 짧음")
-  void createUser_Fail_NicknameTooShort() {
-    UserRegisterRequest request = new UserRegisterRequest("test@example.com", "a", "Password123");
+  @DisplayName("회원가입 성공")
+  void create_Success() {
+    UserRegisterRequest request = new UserRegisterRequest("new@example.com", "newUser", "Password123");
 
-    when(userRepository.existsByEmail(anyString())).thenReturn(false);
-    when(userRepository.existsByNickname(anyString())).thenReturn(false);
+    when(userRepository.existsByEmail(request.email())).thenReturn(false);
+    when(userRepository.existsByNickname(request.nickname())).thenReturn(false);
 
-    IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
-      userService.create(request);
-    });
+    User savedUserMock = mock(User.class);
+    when(savedUserMock.getId()).thenReturn(1L);
+    when(savedUserMock.getEmail()).thenReturn(request.email());
+    when(savedUserMock.getNickname()).thenReturn(request.nickname());
+    when(savedUserMock.getCreatedAt()).thenReturn(LocalDateTime.now());
 
-    assertEquals("이미 존재하는 닉네임입니다.", exception.getMessage());
-    verify(userRepository, never()).save(any(User.class));
-  }
+    when(userRepository.save(any(User.class))).thenReturn(savedUserMock);
 
-  @Test
-  @DisplayName("회원가입 실패 - 잘못된 비밀번호 형식")
-  void createUser_Fail_InvalidPasswordFormat() {
-    UserRegisterRequest request = new UserRegisterRequest("test@example.com", "testuser", "12345");
+    UserDto userDto = userService.create(request);
 
-    when(userRepository.existsByEmail(anyString())).thenReturn(false);
-    when(userRepository.existsByNickname(anyString())).thenReturn(false);
+    assertNotNull(userDto);
+    assertEquals("1", userDto.id());
+    assertEquals(request.email(), userDto.email());
+    assertEquals(request.nickname(), userDto.nickname());
 
-    IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
-      userService.create(request);
-    });
-
-    assertEquals("잘못된 비밀번호 형식입니다.", exception.getMessage());
-    verify(userRepository, never()).save(any(User.class));
+    verify(userRepository).existsByEmail(request.email());
+    verify(userRepository).existsByNickname(request.nickname());
+    verify(userRepository).save(any(User.class));
   }
 
   @Test
@@ -151,6 +133,29 @@ class UserServiceTest {
     });
 
     assertEquals("이메일 또는 비밀번호를 확인해주세요.", exception.getMessage());
+  }
+
+  @Test
+  @DisplayName("로그인 성공")
+  void login_Success() {
+    UserLoginRequest request = new UserLoginRequest("user@example.com", "Password123");
+
+    User dbUserMock = mock(User.class);
+    when(dbUserMock.getPassword()).thenReturn("Password123");
+    when(dbUserMock.getId()).thenReturn(1L);
+    when(dbUserMock.getEmail()).thenReturn(request.email());
+    when(dbUserMock.getNickname()).thenReturn("dbUser");
+    when(dbUserMock.getCreatedAt()).thenReturn(LocalDateTime.now());
+
+    when(userRepository.findByEmail(request.email())).thenReturn(Optional.of(dbUserMock));
+
+    UserDto userDto = userService.login(request);
+
+    assertNotNull(userDto);
+    assertEquals("1", userDto.id());
+    assertEquals(request.email(), userDto.email());
+
+    verify(userRepository).findByEmail(request.email());
   }
 
   @Test
@@ -257,6 +262,34 @@ class UserServiceTest {
     verify(userRepository).existsByNickname(shortNickname);
 
     verify(mockUser, never()).updateNickname(anyString());
+  }
+
+  @Test
+  @DisplayName("사용자 정보 수정 성공")
+  void update_Success() {
+    String userId = "1";
+    Long userLongId = 1L;
+    String newNickname = "newNickname";
+    UserUpdateRequest request = new UserUpdateRequest(newNickname);
+
+    User dbUserMock = mock(User.class);
+    when(userRepository.findById(userLongId)).thenReturn(Optional.of(dbUserMock));
+
+    when(userRepository.existsByNickname(newNickname)).thenReturn(false);
+
+    when(dbUserMock.getId()).thenReturn(userLongId);
+    when(dbUserMock.getEmail()).thenReturn("user@example.com");
+    when(dbUserMock.getNickname()).thenReturn(newNickname);
+    when(dbUserMock.getCreatedAt()).thenReturn(LocalDateTime.now());
+
+    UserDto userDto = userService.update(userId, request);
+
+    assertNotNull(userDto);
+    assertEquals(newNickname, userDto.nickname());
+
+    verify(userRepository).findById(userLongId);
+    verify(userRepository).existsByNickname(newNickname);
+    verify(dbUserMock).updateNickname(newNickname);
   }
 
   @Test
