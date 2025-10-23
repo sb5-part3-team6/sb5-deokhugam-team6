@@ -9,8 +9,10 @@ import com.codeit.project.deokhugam.domain.notification.repository.NotificationR
 import com.codeit.project.deokhugam.domain.review.entity.Review;
 import com.codeit.project.deokhugam.domain.user.entity.User;
 import com.codeit.project.deokhugam.global.config.QuerydslConfig;
+import com.querydsl.jpa.impl.JPAQueryFactory;
 import jakarta.persistence.EntityManager;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -32,6 +34,8 @@ class NotificationCustomRepositoryImplTest {
   @Autowired
   private NotificationRepositoryCustomImpl notificationRepositoryImpl;
 
+  private JPAQueryFactory queryFactory;
+
   private User user1;
   private User user2;
   private Book book;
@@ -39,6 +43,9 @@ class NotificationCustomRepositoryImplTest {
 
   @BeforeEach
   void setUp() {
+
+    queryFactory = new JPAQueryFactory(em);
+
     user1 = new User("user1@test.com", "user1", "pw1234");
     user2 = new User("user2@test.com", "user2", "pw5678");
     em.persist(user1);
@@ -145,5 +152,45 @@ class NotificationCustomRepositoryImplTest {
         "DESC", null, after, 50);
 
     assertThat(result).isEmpty();
+  }
+
+  @Test
+  @DisplayName("확인된 알림 중 1주일 이상 지난 알림을 삭제한다")
+  void deleteConfirmedOlderThanOneWeek() {
+
+    Notification n1 = new Notification(review, user1, "LIKE", "10일 전 알림", true);
+    em.persist(n1);
+    em.flush();
+    em.createQuery("UPDATE Notification n SET n.createdAt = :createdAt WHERE n.id = :id")
+      .setParameter("createdAt", LocalDateTime.now()
+                                              .minusDays(10))
+      .setParameter("id", n1.getId())
+      .executeUpdate();
+
+    Notification n2 = new Notification(review, user1, "LIKE", "8일 전 알림", true);
+    em.persist(n2);
+    em.flush();
+    em.createQuery("UPDATE Notification n SET n.createdAt = :createdAt WHERE n.id = :id")
+      .setParameter("createdAt", LocalDateTime.now()
+                                              .minusDays(8))
+      .setParameter("id", n2.getId())
+      .executeUpdate();
+
+    Notification n3 = new Notification(review, user1, "LIKE", "3일 전 알림", true);
+    em.persist(n3);
+    em.flush();
+    em.createQuery("UPDATE Notification n SET n.createdAt = :createdAt WHERE n.id = :id")
+      .setParameter("createdAt", LocalDateTime.now()
+                                              .minusDays(3))
+      .setParameter("id", n3.getId())
+      .executeUpdate();
+
+    notificationRepository.deleteConfirmedOlderThanOneWeek();
+
+    List<Notification> result = notificationRepository.findNotificationsByUserId(user1.getId(),
+        "DESC", null, null, 50);
+
+    assertThat(result)
+        .hasSize(31);
   }
 }
