@@ -1,8 +1,10 @@
 package com.codeit.project.deokhugam.domain.notification.service;
 
+import com.codeit.project.deokhugam.domain.notification.dto.NotificationCreateCommand;
 import com.codeit.project.deokhugam.domain.notification.dto.NotificationDto;
 import com.codeit.project.deokhugam.domain.notification.dto.NotificationUpdateRequest;
 import com.codeit.project.deokhugam.domain.notification.entity.Notification;
+import com.codeit.project.deokhugam.domain.notification.entity.NotificationType;
 import com.codeit.project.deokhugam.domain.notification.exception.NotificationInvalidUserException;
 import com.codeit.project.deokhugam.domain.notification.exception.NotificationNotFoundException;
 import com.codeit.project.deokhugam.domain.notification.mapper.NotificationMapper;
@@ -94,5 +96,26 @@ public class NotificationServiceImpl implements NotificationService {
     for (Notification notification : notifications) {
       notification.updateConfirmed(true);
     }
+  }
+
+  @Override
+  public void createNotification(NotificationType type, NotificationCreateCommand command) {
+    switch (type) {
+      case REVIEW_LIKED -> handleReviewLiked(command);
+      case REVIEW_COMMENTED -> handleReviewCommented(command);
+      case REVIEW_RANKED -> handleReviewRanked(command);
+    }
+  }
+
+  private void handleReviewLiked(NotificationCreateCommand command) {
+    // TODO 좋아요 시 알림 생성
+  }
+
+  private void handleReviewCommented(NotificationCreateCommand command) {
+    // TODO 리뷰 시 알림 생성
+  }
+
+  private void handleReviewRanked(NotificationCreateCommand command) {
+    // TODO 리뷰 랭킹 진입 시 알림 생성
   }
 }
