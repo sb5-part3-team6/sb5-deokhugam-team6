@@ -1,6 +1,5 @@
 package com.codeit.project.deokhugam.domain.notification.service;
 
-import com.codeit.project.deokhugam.domain.notification.dto.CursorPageResponseNotificationDto;
 import com.codeit.project.deokhugam.domain.notification.dto.NotificationDto;
 import com.codeit.project.deokhugam.domain.notification.dto.NotificationUpdateRequest;
 import com.codeit.project.deokhugam.domain.notification.entity.Notification;
@@ -9,6 +8,7 @@ import com.codeit.project.deokhugam.domain.notification.exception.NotificationNo
 import com.codeit.project.deokhugam.domain.notification.mapper.NotificationMapper;
 import com.codeit.project.deokhugam.domain.notification.repository.NotificationRepository;
 import com.codeit.project.deokhugam.domain.user.repository.UserRepository;
+import com.codeit.project.deokhugam.global.common.dto.PageResponse;
 import jakarta.transaction.Transactional;
 import java.time.LocalDate;
 import java.util.List;
@@ -24,7 +24,7 @@ public class NotificationServiceImpl implements NotificationService {
   private final NotificationMapper notificationMapper;
 
   @Override
-  public CursorPageResponseNotificationDto getByCursor(String userId, String direction,
+  public PageResponse getByCursor(String userId, String direction,
       LocalDate cursor, LocalDate after, Integer limit) {
 
     Long uid = Long.parseLong(userId);
@@ -43,15 +43,16 @@ public class NotificationServiceImpl implements NotificationService {
 
     boolean hasNext = notifications.size() >= fetchLimit;
 
-    return CursorPageResponseNotificationDto.builder()
-                                            .content(notifications.stream()
-                                                                  .map(notificationMapper::toDto)
-                                                                  .toList())
-                                            .nextCursor(nextCursor)
-                                            .size(notifications.size())
-                                            .hasNext(hasNext)
-                                            .totalElements(total)
-                                            .build();
+    return PageResponse.builder()
+                       .content(notifications.stream()
+                                             .map(notificationMapper::toDto)
+                                             .toList())
+                       .nextCursor(nextCursor)
+                       .nextAfter(nextCursor)
+                       .size(notifications.size())
+                       .hasNext(hasNext)
+                       .totalElements(total)
+                       .build();
   }
 
   @Override

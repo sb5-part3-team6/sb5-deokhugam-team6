@@ -1,9 +1,9 @@
 package com.codeit.project.deokhugam.domain.notification.controller;
 
-import com.codeit.project.deokhugam.domain.notification.dto.CursorPageResponseNotificationDto;
 import com.codeit.project.deokhugam.domain.notification.dto.NotificationDto;
 import com.codeit.project.deokhugam.domain.notification.dto.NotificationUpdateRequest;
 import com.codeit.project.deokhugam.domain.notification.service.NotificationService;
+import com.codeit.project.deokhugam.global.common.dto.PageResponse;
 import jakarta.validation.Valid;
 import java.time.LocalDate;
 import lombok.RequiredArgsConstructor;
@@ -28,14 +28,14 @@ public class NotificationController implements NotificationApi {
 
   @Override
   @GetMapping
-  public ResponseEntity<CursorPageResponseNotificationDto> get(
+  public ResponseEntity<PageResponse> get(
       @RequestParam String userId,
       @RequestParam(name = "direction", defaultValue = "DESC") String direction,
       @RequestParam(name = "cursor", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate cursor,
       @RequestParam(name = "after", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate after,
       @RequestParam(name = "limit", defaultValue = "20") Integer limit) {
 
-    CursorPageResponseNotificationDto page = notificationService.getByCursor(userId, direction,
+    PageResponse page = notificationService.getByCursor(userId, direction,
         cursor, after, limit);
 
     return ResponseEntity.status(HttpStatus.OK)

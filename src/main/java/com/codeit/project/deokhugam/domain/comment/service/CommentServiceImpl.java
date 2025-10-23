@@ -3,7 +3,6 @@ package com.codeit.project.deokhugam.domain.comment.service;
 import com.codeit.project.deokhugam.domain.comment.dto.CommentCreateRequest;
 import com.codeit.project.deokhugam.domain.comment.dto.CommentDto;
 import com.codeit.project.deokhugam.domain.comment.dto.CommentUpdateRequest;
-import com.codeit.project.deokhugam.domain.comment.dto.CursorPageResponseCommentDto;
 import com.codeit.project.deokhugam.domain.comment.entity.Comment;
 import com.codeit.project.deokhugam.domain.comment.mapper.CommentMapper;
 import com.codeit.project.deokhugam.domain.comment.repository.CommentRepository;
@@ -11,12 +10,12 @@ import com.codeit.project.deokhugam.domain.review.entity.Review;
 import com.codeit.project.deokhugam.domain.review.repository.ReviewRepository;
 import com.codeit.project.deokhugam.domain.user.entity.User;
 import com.codeit.project.deokhugam.domain.user.repository.UserRepository;
+import com.codeit.project.deokhugam.global.common.dto.PageResponse;
+import java.time.LocalDateTime;
+import java.util.NoSuchElementException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.time.LocalDateTime;
-import java.util.NoSuchElementException;
 
 @Service
 @RequiredArgsConstructor
@@ -88,7 +87,7 @@ public class CommentServiceImpl implements CommentService{
     }
 
     @Override
-    public CursorPageResponseCommentDto getByCursor(Long reviewId, LocalDateTime after, Long cursor, int limit, String direction) {
+    public PageResponse getByCursor(Long reviewId, LocalDateTime after, Long cursor, int limit, String direction) {
         return commentRepository.findCommentsByCursor(reviewId, after, cursor, limit, direction);
     }
 
