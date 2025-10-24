@@ -4,6 +4,9 @@ import com.codeit.project.deokhugam.domain.book.entity.Book;
 import com.codeit.project.deokhugam.domain.book.exception.BookNotFoundException;
 import com.codeit.project.deokhugam.domain.book.repository.BookRepository;
 import com.codeit.project.deokhugam.domain.comment.repository.CommentRepository;
+import com.codeit.project.deokhugam.domain.notification.dto.NotificationCreateCommand;
+import com.codeit.project.deokhugam.domain.notification.entity.NotificationType;
+import com.codeit.project.deokhugam.domain.notification.service.NotificationService;
 import com.codeit.project.deokhugam.domain.rank.entity.Rank;
 import com.codeit.project.deokhugam.domain.rank.repository.RankRepository;
 import com.codeit.project.deokhugam.domain.review.dto.*;
@@ -36,6 +39,7 @@ public class ReviewServiceImpl implements ReviewService {
     private final CommentRepository commentRepository;
     private final RankRepository rankRepository;
     private final ReviewMapper reviewMapper;
+    private final NotificationService notificationService;
 
     @Override
     public ReviewDto create(ReviewCreateRequest request) {
@@ -56,6 +60,11 @@ public class ReviewServiceImpl implements ReviewService {
         User user = verifyUserExists(userId);
         boolean reviewLike = toggleReviewLike(review, user);
 
+        notificationService.create(NotificationCreateCommand.builder()
+                                                            .type(NotificationType.REVIEW_LIKED)
+                                                            .reactor(user)
+                                                            .review(review)
+                                                            .build());
         return ReviewLikeDto.builder()
                 .reviewId(review.getId())
                 .userId(user.getId())

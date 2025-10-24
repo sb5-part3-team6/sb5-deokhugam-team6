@@ -6,6 +6,9 @@ import com.codeit.project.deokhugam.domain.comment.dto.CommentUpdateRequest;
 import com.codeit.project.deokhugam.domain.comment.entity.Comment;
 import com.codeit.project.deokhugam.domain.comment.mapper.CommentMapper;
 import com.codeit.project.deokhugam.domain.comment.repository.CommentRepository;
+import com.codeit.project.deokhugam.domain.notification.dto.NotificationCreateCommand;
+import com.codeit.project.deokhugam.domain.notification.entity.NotificationType;
+import com.codeit.project.deokhugam.domain.notification.service.NotificationService;
 import com.codeit.project.deokhugam.domain.review.entity.Review;
 import com.codeit.project.deokhugam.domain.review.repository.ReviewRepository;
 import com.codeit.project.deokhugam.domain.user.entity.User;
@@ -24,6 +27,7 @@ public class CommentServiceImpl implements CommentService{
     private final UserRepository userRepository;
     private final ReviewRepository reviewRepository;
     private final CommentMapper commentMapper;
+    private final NotificationService notificationService;
 
     @Override
     @Transactional
@@ -35,6 +39,14 @@ public class CommentServiceImpl implements CommentService{
 
         Comment comment = new Comment(reviewId, userId, req.content());
         commentRepository.save(comment);
+
+        notificationService.create(NotificationCreateCommand.builder()
+                                                            .type(NotificationType.REVIEW_COMMENTED)
+                                                            .reactor(userId)
+                                                            .review(reviewId)
+                                                            .data(comment.getContent())
+                                                            .build());
+
         return commentMapper.toCommentDto(comment);
     }
 
