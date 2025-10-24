@@ -37,7 +37,13 @@ public class BookRepositoryCustomImpl implements BookRepositoryCustom {
         .sum()
         .coalesce(0L);
 
-    NumberExpression<Double> avgExpression = review.rating.avg().coalesce(0.0);
+    NumberExpression<Double> avgExpression = Expressions.cases()
+        .when(review.deletedAt.isNull() .and(review.book.id.eq(book.id)))
+        .then(review.rating)
+        .otherwise((Integer) null)
+        .avg()
+        .coalesce(0.0);
+
     NumberExpression<Double> ratingAvg = Expressions.numberTemplate(
         Double.class,
         "ROUND({0}, 1)",
@@ -53,6 +59,8 @@ public class BookRepositoryCustomImpl implements BookRepositoryCustom {
             .or(book.author.containsIgnoreCase(keyword))
             .or(book.isbn.containsIgnoreCase(keyword))
           ).and(book.deletedAt.isNull());
+    }else{
+      where.and(book.deletedAt.isNull());
     }
 
     //정렬조건
