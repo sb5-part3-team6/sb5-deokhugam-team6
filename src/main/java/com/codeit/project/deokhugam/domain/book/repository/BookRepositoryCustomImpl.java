@@ -39,11 +39,11 @@ public class BookRepositoryCustomImpl implements BookRepositoryCustom {
     //검색 조건
     BooleanBuilder where = new BooleanBuilder();
     if(bookSearchReq.keyword()!=null && !bookSearchReq.keyword().isBlank()){
-      String keyword = "%"+bookSearchReq.keyword()+"%";
+      String keyword = bookSearchReq.keyword();
       where.and(
         book.title.containsIgnoreCase(keyword)
-            .or(book.author.likeIgnoreCase(keyword))
-            .or(book.isbn.likeIgnoreCase(keyword))
+            .or(book.author.containsIgnoreCase(keyword))
+            .or(book.isbn.containsIgnoreCase(keyword))
           ).and(book.deletedAt.isNull());
     }
 
