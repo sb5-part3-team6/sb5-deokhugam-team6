@@ -91,10 +91,4 @@ public class CommentServiceImpl implements CommentService{
         return commentRepository.findCommentsByCursor(reviewId, after, cursor, limit, direction);
     }
 
-    //    @Override
-//    @Transactional(readOnly = true)
-//    public List<CommentDto> findAll() {
-//        return commentMapper.toCommentDtoList(commentRepository.findAllWithUserAndReview());
-//    }
-
 }

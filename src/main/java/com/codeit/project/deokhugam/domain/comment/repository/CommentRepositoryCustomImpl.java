@@ -35,6 +35,8 @@ public class CommentRepositoryCustomImpl implements CommentRepositoryCustom {
         BooleanBuilder builder = new BooleanBuilder();
         builder.and(comment.review.id.eq(reviewId));
 
+        builder.and(comment.deletedAt.isNull());
+
         if (after != null && cursor != null) {
             if (isAsc) {
                 builder.and(
@@ -69,7 +71,7 @@ public class CommentRepositoryCustomImpl implements CommentRepositoryCustom {
                 .map(c -> new CommentDto(
                         c.getId(),
                         c.getReview().getId(),
-                        c.getUser().getId(),
+                        String.valueOf(c.getUser().getId()),
                         c.getUser().getNickname(),
                         c.getContent(),
                         c.getCreatedAt(),

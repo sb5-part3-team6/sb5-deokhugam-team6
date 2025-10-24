@@ -9,22 +9,28 @@ import java.time.LocalDateTime;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/comments")
-public class CommentController {
+public class CommentController implements CommentAPI {
 
   private final CommentService commentService;
+
+  @GetMapping
+  public ResponseEntity<PageResponse> getByCursor(
+          @RequestParam Long reviewId,
+          @RequestParam(defaultValue = "DESC") String direction,
+          @RequestParam(required = false) Long cursor,
+          @RequestParam(required = false) LocalDateTime after,
+          @RequestParam(defaultValue = "20") Integer limit
+  ) {
+    PageResponse response =
+            commentService.getByCursor(reviewId, after, cursor, limit, direction);
+
+    return ResponseEntity.ok(response);
+  }
 
   @PostMapping
   public ResponseEntity<CommentDto> create(@RequestBody CommentCreateRequest req) {
@@ -39,38 +45,25 @@ public class CommentController {
     return ResponseEntity.ok(comment);
   }
 
-  @GetMapping
-  public ResponseEntity<PageResponse> getByCursor(
-      @RequestParam Long reviewId,
-      @RequestParam(required = false) LocalDateTime after,
-      @RequestParam(required = false) Long cursor,
-      @RequestParam(defaultValue = "20") int limit,
-      @RequestParam(defaultValue = "DESC") String direction
-  ) {
-    PageResponse response =
-        commentService.getByCursor(reviewId, after, cursor, limit, direction);
-
-    return ResponseEntity.ok(response);
-  }
-
-
-  @PutMapping("/{commentId}")
+  @PatchMapping("/{commentId}")
   public ResponseEntity<CommentDto> update(@PathVariable Long commentId,
-      @RequestBody CommentUpdateRequest req) {
-    CommentUpdateRequest updated = new CommentUpdateRequest(req.content());
-    CommentDto updatedComment = commentService.update(commentId, updated);
+      @RequestBody CommentUpdateRequest req,
+      @RequestHeader("Deokhugam-Request-User-ID") String userId) {
+    CommentDto updatedComment = commentService.update(commentId, req);
     return ResponseEntity.ok(updatedComment);
   }
 
   @DeleteMapping("/{commentId}")
-  public ResponseEntity<Void> deleteSoft(@PathVariable Long commentId) {
+  public ResponseEntity<Void> deleteSoft(@PathVariable Long commentId,
+    @RequestHeader("Deokhugam-Request-User-ID") String userId) {
     commentService.deleteSoft(commentId);
     return ResponseEntity.noContent()
                          .build();
   }
 
   @DeleteMapping("/{commentId}/hard")
-  public ResponseEntity<Void> deleteHard(@PathVariable Long commentId) {
+  public ResponseEntity<Void> deleteHard(@PathVariable Long commentId,
+    @RequestHeader("Deokhugam-Request-User-ID") String userId) {
     commentService.delete(commentId);
     return ResponseEntity.noContent()
                          .build();
