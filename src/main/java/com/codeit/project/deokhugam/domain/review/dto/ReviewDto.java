@@ -6,11 +6,11 @@ import java.time.LocalDateTime;
 
 @Builder
 public record ReviewDto(
-        Long id,
-        Long bookId,
+        String id,
+        String bookId,
         String bookTitle,
         String bookThumbnailUrl,
-        Long userId,
+        String userId,
         String userNickname,
         String content,
         Integer rating,

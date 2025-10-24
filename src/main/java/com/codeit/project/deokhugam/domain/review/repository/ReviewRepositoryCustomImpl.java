@@ -43,6 +43,8 @@ public class ReviewRepositoryCustomImpl {
             where.and(review.id.lt(cursor));
         }
 
+        where.and(review.deletedAt.isNull());
+
         OrderSpecifier<?> orderSpecifier = makeOrderSpecifier(params.direction(), params.orderBy());
 
         return queryFactory.selectFrom(review)
