@@ -1,6 +1,6 @@
 package com.codeit.project.deokhugam.domain.book.entity;
 
-import com.codeit.project.deokhugam.global.entity.BaseEntity;
+import com.codeit.project.deokhugam.global.entity.BaseDeletableEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
@@ -14,7 +14,8 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Entity
 @Table(name = "books")
-public class Book extends BaseEntity {
+public class Book extends BaseDeletableEntity {
+
   @Column(length = 256)
   private String title;
   @Column(length = 256)
@@ -36,28 +37,24 @@ public class Book extends BaseEntity {
       String newDescription,
       String newPublisher,
       LocalDate newpublishedDate,
-      String newThumbnailImageUrl){
-    if(newTitle != null && !newTitle.equals(this.title)){
+      String newThumbnailImageUrl) {
+    if (newTitle != null && !newTitle.equals(this.title)) {
       this.title = newTitle;
     }
-    if(newAuthor != null && !newAuthor.equals(this.author)){
+    if (newAuthor != null && !newAuthor.equals(this.author)) {
       this.author = newAuthor;
     }
-    if(newDescription != null && !newDescription.equals(this.description)){
+    if (newDescription != null && !newDescription.equals(this.description)) {
       this.description = newDescription;
     }
-    if(newPublisher != null && !newPublisher.equals(this.publisher)){
+    if (newPublisher != null && !newPublisher.equals(this.publisher)) {
       this.publisher = newPublisher;
     }
-    if(newpublishedDate != null && !newpublishedDate.equals(this.publishedAt)){
+    if (newpublishedDate != null && !newpublishedDate.equals(this.publishedAt)) {
       this.publishedAt = newpublishedDate;
     }
-    if(newThumbnailImageUrl != null && !newThumbnailImageUrl.equals(this.thumbnailUrl)){
+    if (newThumbnailImageUrl != null && !newThumbnailImageUrl.equals(this.thumbnailUrl)) {
       this.thumbnailUrl = newThumbnailImageUrl;
     }
   }
-  public void softDelete(){
-    super.softDelete();
-  }
-
 }

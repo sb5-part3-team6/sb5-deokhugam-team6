@@ -32,15 +32,4 @@ public abstract class BaseEntity {
   @LastModifiedDate
   @Column(columnDefinition = "timestamp with time zone")
   private LocalDateTime updatedAt;
-
-  @Column(columnDefinition = "timestamp with time zone")
-  private LocalDateTime deletedAt;
-
-  public void softDelete() {
-    this.deletedAt = LocalDateTime.now();
-  }
-
-  public void restore() {
-    this.deletedAt = null;
-  }
 }
