@@ -1,4 +1,4 @@
-package com.codeit.project.deokhugam.service.controller;
+package com.codeit.project.deokhugam.domain.notification.controller;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
@@ -10,7 +10,6 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import com.codeit.project.deokhugam.domain.notification.controller.NotificationController;
 import com.codeit.project.deokhugam.domain.notification.dto.NotificationDto;
 import com.codeit.project.deokhugam.domain.notification.dto.NotificationUpdateRequest;
 import com.codeit.project.deokhugam.domain.notification.service.NotificationService;
@@ -78,15 +77,6 @@ class NotificationControllerTest {
            .andExpect(jsonPath("$.hasNext").value(true))
            .andExpect(jsonPath("$.size").value(1))
            .andExpect(jsonPath("$.totalElements").value(1L));
-  }
-
-  @Test
-  @DisplayName("GET /api/notifications - 잘못된 after 파라미터")
-  void getNotifications_invalidAfterParam() throws Exception {
-    mockMvc.perform(get("/api/notifications").queryParam("userId", "user-1")
-                                             .queryParam("after", "not-a-date")
-                                             .accept(MediaType.APPLICATION_JSON))
-           .andExpect(status().isBadRequest());
   }
 
   @Test

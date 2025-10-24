@@ -1,11 +1,9 @@
-package com.codeit.project.deokhugam.service.repository;
+package com.codeit.project.deokhugam.domain.notification.repository;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.codeit.project.deokhugam.domain.book.entity.Book;
 import com.codeit.project.deokhugam.domain.notification.entity.Notification;
-import com.codeit.project.deokhugam.domain.notification.repository.NotificationRepository;
-import com.codeit.project.deokhugam.domain.notification.repository.NotificationRepositoryCustomImpl;
 import com.codeit.project.deokhugam.domain.review.entity.Review;
 import com.codeit.project.deokhugam.domain.user.entity.User;
 import com.codeit.project.deokhugam.global.config.QuerydslConfig;
