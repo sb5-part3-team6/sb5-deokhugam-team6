@@ -9,7 +9,7 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class NotificationTask {
 
-  NotificationBatchService notificationBatchService;
+  private final NotificationBatchService notificationBatchService;
 
   @Scheduled(cron = "0 10 0 * * *")
   public void cleanBatch() {

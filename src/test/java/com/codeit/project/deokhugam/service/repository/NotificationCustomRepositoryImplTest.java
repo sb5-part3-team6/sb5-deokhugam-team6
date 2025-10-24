@@ -185,6 +185,9 @@ class NotificationCustomRepositoryImplTest {
       .setParameter("id", n3.getId())
       .executeUpdate();
 
+    em.flush();
+    em.clear();
+
     notificationRepository.deleteConfirmedOlderThanOneWeek();
 
     List<Notification> result = notificationRepository.findNotificationsByUserId(user1.getId(),
