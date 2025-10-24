@@ -1,12 +1,11 @@
 package com.codeit.project.deokhugam.domain.book.repository;
 
 import com.codeit.project.deokhugam.domain.book.dto.BookDto;
-import com.codeit.project.deokhugam.domain.book.dto.BookOrderBy;
 import com.codeit.project.deokhugam.domain.book.dto.BookSearchRequest;
-import com.codeit.project.deokhugam.domain.book.dto.Direction;
 import com.codeit.project.deokhugam.domain.book.entity.QBook;
 import com.codeit.project.deokhugam.domain.review.entity.QReview;
 import com.querydsl.core.BooleanBuilder;
+import com.querydsl.core.QueryFactory;
 import com.querydsl.core.types.Order;
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.Projections;
@@ -24,13 +23,20 @@ import org.springframework.stereotype.Repository;
 @RequiredArgsConstructor
 public class BookRepositoryCustomImpl implements BookRepositoryCustom {
   private final JPAQueryFactory jpaQueryFactory;
+  private final QueryFactory queryFactory;
 
   @Override
   public List<BookDto> findBooks(BookSearchRequest bookSearchReq, int pageSize) {
     QBook book = QBook.book;
     QReview review = QReview.review;
 
-    NumberExpression<Long> reviewCount = review.id.countDistinct().coalesce(0L);
+    NumberExpression<Long> reviewCount = Expressions.cases()
+        .when(review.deletedAt.isNull() .and(review.book.id.eq(book.id)))
+        .then(1L)
+        .otherwise(0L)
+        .sum()
+        .coalesce(0L);
+
     NumberExpression<Double> avgExpression = review.rating.avg().coalesce(0.0);
     NumberExpression<Double> ratingAvg = Expressions.numberTemplate(
         Double.class,
@@ -41,11 +47,11 @@ public class BookRepositoryCustomImpl implements BookRepositoryCustom {
     //검색 조건
     BooleanBuilder where = new BooleanBuilder();
     if(bookSearchReq.keyword()!=null && !bookSearchReq.keyword().isBlank()){
-      String keyword = "%"+bookSearchReq.keyword()+"%";
+      String keyword = bookSearchReq.keyword();
       where.and(
         book.title.containsIgnoreCase(keyword)
-            .or(book.author.likeIgnoreCase(keyword))
-            .or(book.isbn.likeIgnoreCase(keyword))
+            .or(book.author.containsIgnoreCase(keyword))
+            .or(book.isbn.containsIgnoreCase(keyword))
           ).and(book.deletedAt.isNull());
     }
 
@@ -84,29 +90,38 @@ public class BookRepositoryCustomImpl implements BookRepositoryCustom {
         .fetch();
   }
   private OrderSpecifier<?> getPrimaryOrder(QBook book,NumberExpression<Long> reviewCount, NumberExpression<Double> ratingAvg, BookSearchRequest req) {
-    Order order = req.direction() == Direction.ASC ? Order.ASC : Order.DESC;
+    Order order = switch (req.direction()){
+      case "ASC" -> Order.ASC;
+      case "DESC" -> Order.DESC;
+      default -> Order.DESC;
+    };
 
     return switch (req.orderBy()) {
-      case TITLE -> new OrderSpecifier<>(order, book.title);
-      case PUBLISHEDDATE -> new OrderSpecifier<>(order, book.publishedAt);
-      case RATING -> new OrderSpecifier<>(order, ratingAvg);
-      case REVIEWCOUNT -> new OrderSpecifier<>(order, reviewCount);
+      case "title" -> new OrderSpecifier<>(order, book.title);
+      case "publishedDate" -> new OrderSpecifier<>(order, book.publishedAt);
+      case "rating" -> new OrderSpecifier<>(order, ratingAvg);
+      case "reviewCount" -> new OrderSpecifier<>(order, reviewCount);
+      default -> new OrderSpecifier<>(order, book.title);
     };
   }
 
   private OrderSpecifier<?> getSecondaryOrder(QBook book, BookSearchRequest req) {
-    Order order = req.direction() == Direction.ASC ? Order.ASC : Order.DESC;
+    Order order = switch (req.direction()){
+      case "ASC" -> Order.ASC;
+      case "DESC" -> Order.DESC;
+      default -> Order.DESC;
+    };
     return new OrderSpecifier<>(order, book.createdAt);
   }
-  private Comparable<?> parseCursorValue(BookOrderBy orderBy, String cursor) {
+  private Comparable<?> parseCursorValue(String orderBy, String cursor) {
     switch (orderBy) {
-      case TITLE:
+      case "title":
         return cursor;
-      case PUBLISHEDDATE:
+      case "publishedDate":
         return LocalDate.parse(cursor);
-      case RATING:
+      case "rating":
         return  Double.valueOf(cursor);
-      case REVIEWCOUNT:
+      case "reviewCount":
         return Long.valueOf(cursor);
       default:
         throw new IllegalArgumentException("Unknown orderBy: " + orderBy);
@@ -117,8 +132,8 @@ public class BookRepositoryCustomImpl implements BookRepositoryCustom {
       NumberExpression<Long> reviewCountExpr,
       NumberExpression<Double> ratingAvgExpr,
       BookSearchRequest req) {
-    BookOrderBy orderBy = req.orderBy();
-    Direction direction = req.direction();
+    String orderBy = req.orderBy();
+    String direction = req.direction();
 
     Comparable<?> cursorValue = parseCursorValue(orderBy, req.cursor());
     LocalDateTime after = req.after();
@@ -131,31 +146,31 @@ public class BookRepositoryCustomImpl implements BookRepositoryCustom {
     BooleanExpression primaryEq = null;
 
     switch (orderBy) {
-      case TITLE -> {
+      case "title" -> {
         String value = (String) cursorValue;
-        primaryCmp = direction == Direction.ASC ? book.title.gt(value) : book.title.lt(value);
+        primaryCmp = direction == "ASC" ? book.title.gt(value) : book.title.lt(value);
         primaryEq = book.title.eq(value);
       }
-      case PUBLISHEDDATE -> {
+      case "publishedDate" -> {
         LocalDate value = (LocalDate) cursorValue;
-        primaryCmp = direction == Direction.ASC ? book.publishedAt.gt(value) : book.publishedAt.lt(value);
+        primaryCmp = direction == "ASC" ? book.publishedAt.gt(value) : book.publishedAt.lt(value);
         primaryEq = book.publishedAt.eq(value);
       }
-      case RATING -> {
+      case "rating" -> {
         Double value = (Double) cursorValue;
-        primaryCmp = direction == Direction.ASC ? ratingAvgExpr.gt(value) : ratingAvgExpr.lt(value);
+        primaryCmp = direction == "ASC" ? ratingAvgExpr.gt(value) : ratingAvgExpr.lt(value);
         primaryEq = ratingAvgExpr.eq(value);
       }
-      case REVIEWCOUNT -> {
+      case "reviewCount" -> {
         Long value = (Long) cursorValue;
-        primaryCmp = direction == Direction.ASC ? reviewCountExpr.gt(value) : reviewCountExpr.lt(value);
+        primaryCmp = direction == "ASC" ? reviewCountExpr.gt(value) : reviewCountExpr.lt(value);
         primaryEq = reviewCountExpr.eq(value);
       }
       default -> throw new IllegalArgumentException("Unsupported orderBy: " + orderBy);
     }
 
     BooleanExpression secondaryCmp = primaryEq.and(
-        direction == Direction.ASC ? book.createdAt.gt(after) : book.createdAt.lt(after)
+        direction == "ASC" ? book.createdAt.gt(after) : book.createdAt.lt(after)
     );
     return primaryCmp.or(secondaryCmp);
   }
