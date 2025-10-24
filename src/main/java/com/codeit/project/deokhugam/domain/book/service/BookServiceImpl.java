@@ -125,6 +125,7 @@ public class BookServiceImpl implements BookService {
         case "publishedDate" -> nextCursor = last.publishedDate().toString();
         case "rating" -> nextCursor = String.valueOf(last.rating());
         case "reviewCount" -> nextCursor = String.valueOf(last.reviewCount());
+        default -> nextCursor = last.title();
       }
       nextAfter = last.createdAt().toString();
     }
@@ -132,8 +133,8 @@ public class BookServiceImpl implements BookService {
         bookList,
         nextCursor,
         nextAfter,
-        String.valueOf(pageSize),
-        String.valueOf(bookList.size()),
+        pageSize,
+        bookList.size(),
         String.valueOf(hasNext)
     );
   }

@@ -6,8 +6,8 @@ public record CursorPageResponseBookDto <T>(
     List<T> content,
     String nextCursor,
     String nextAfter,
-    String sizeExpand,
-    String totalElements,
+    Integer size,
+    Integer totalElements,
     String hasNext
 ){
 
