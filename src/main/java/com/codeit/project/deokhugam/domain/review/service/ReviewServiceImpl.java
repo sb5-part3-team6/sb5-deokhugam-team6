@@ -74,9 +74,9 @@ public class ReviewServiceImpl implements ReviewService {
 
         if(hasNext) {
             Review lastItem = reviewList.get(reviewList.size() - 1);
-            nextCursor = lastItem.getId().toString();
-            nextAfter = lastItem.getCreatedAt().toString();
             reviewList.remove(lastItem);
+            nextCursor = reviewList.get(reviewList.size()-1).getId().toString();
+            nextAfter = reviewList.get(reviewList.size()-1).getCreatedAt().toString();
         }
 
         List<ReviewDto> content = reviewList.stream().map(review -> {

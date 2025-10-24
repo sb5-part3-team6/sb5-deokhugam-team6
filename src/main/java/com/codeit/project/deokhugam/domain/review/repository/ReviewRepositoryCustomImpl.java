@@ -38,11 +38,16 @@ public class ReviewRepositoryCustomImpl {
             where.and(keywordFilter);
         }
 
+        if (params.cursor() != null && !params.cursor().trim().isEmpty()) {
+            Long cursor = Long.parseLong(params.cursor());
+            where.and(review.id.lt(cursor));
+        }
+
         OrderSpecifier<?> orderSpecifier = makeOrderSpecifier(params.direction(), params.orderBy());
 
         return queryFactory.selectFrom(review)
                 .where(where)
-                .orderBy(orderSpecifier)
+                .orderBy(orderSpecifier, review.id.desc())
                 .limit(params.limit() + 1)
                 .fetch();
     }
