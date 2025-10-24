@@ -35,6 +35,6 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
 
   boolean existsByUserIdAndBookId(Long userId, Long bookId);
 
-  @Query("SELECT COUNT(r.id) FROM Review r")
-  Long countTotal();
+  @Query("SELECT COUNT(r.id) FROM Review r WHERE r.book.id = :bookId")
+  Long countTotal(Long bookId);
 }
