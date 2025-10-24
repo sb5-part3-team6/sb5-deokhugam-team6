@@ -26,8 +26,8 @@ public class NotificationServiceImpl implements NotificationService {
   private final NotificationMapper notificationMapper;
 
   @Override
-  public PageResponse getByCursor(String userId, String direction,
-      LocalDate cursor, LocalDate after, Integer limit) {
+  public PageResponse getByCursor(String userId, String direction, LocalDate cursor,
+      LocalDate after, Integer limit) {
 
     Long uid = Long.parseLong(userId);
 
@@ -59,8 +59,8 @@ public class NotificationServiceImpl implements NotificationService {
 
   @Override
   @Transactional
-  public NotificationDto checkById(String notificationId,
-      NotificationUpdateRequest request, String userId) {
+  public NotificationDto checkById(String notificationId, NotificationUpdateRequest request,
+      String userId) {
 
     Long nid = Long.parseLong(notificationId);
     Long uid = Long.parseLong(userId);
@@ -100,6 +100,7 @@ public class NotificationServiceImpl implements NotificationService {
 
   @Override
   public void createNotification(NotificationType type, NotificationCreateCommand command) {
+
     switch (type) {
       case REVIEW_LIKED -> handleReviewLiked(command);
       case REVIEW_COMMENTED -> handleReviewCommented(command);
@@ -108,14 +109,34 @@ public class NotificationServiceImpl implements NotificationService {
   }
 
   private void handleReviewLiked(NotificationCreateCommand command) {
-    // TODO 좋아요 시 알림 생성
+
+    String content = NotificationType.REVIEW_LIKED.formatContent(command.reactor()
+                                                                        .getNickname());
+    Notification notification = new Notification(command.review(), command.reviewOwner(),
+        NotificationType.REVIEW_LIKED.name(), content, false);
+    notificationRepository.save(notification);
   }
 
   private void handleReviewCommented(NotificationCreateCommand command) {
-    // TODO 리뷰 시 알림 생성
+
+    String content = NotificationType.REVIEW_COMMENTED.formatContent(command.reactor()
+                                                                            .getNickname());
+    Notification notification = new Notification(command.review(), command.reviewOwner(),
+        NotificationType.REVIEW_COMMENTED.name(), content, false);
+    notificationRepository.save(notification);
   }
 
   private void handleReviewRanked(NotificationCreateCommand command) {
-    // TODO 리뷰 랭킹 진입 시 알림 생성
+    // TODO 인기 순위 진입 시 알림 메세지 확인
+    String content;
+    if (command.rank() != null) {
+      content = String.format("리뷰가 인기 순위 %d위에 들었어요!", command.rank());
+    } else {
+      content = NotificationType.REVIEW_RANKED.formatContent();
+    }
+
+    Notification notification = new Notification(command.review(), command.reviewOwner(),
+        NotificationType.REVIEW_RANKED.name(), content, false);
+    notificationRepository.save(notification);
   }
 }
