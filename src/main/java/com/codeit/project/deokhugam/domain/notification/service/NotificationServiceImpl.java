@@ -1,6 +1,7 @@
 package com.codeit.project.deokhugam.domain.notification.service;
 
 import com.codeit.project.deokhugam.domain.notification.dto.NotificationCreateCommand;
+import com.codeit.project.deokhugam.domain.notification.dto.NotificationDeleteCommand;
 import com.codeit.project.deokhugam.domain.notification.dto.NotificationDto;
 import com.codeit.project.deokhugam.domain.notification.dto.NotificationUpdateRequest;
 import com.codeit.project.deokhugam.domain.notification.entity.Notification;
@@ -15,8 +16,10 @@ import jakarta.transaction.Transactional;
 import java.time.LocalDate;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class NotificationServiceImpl implements NotificationService {
@@ -108,11 +111,16 @@ public class NotificationServiceImpl implements NotificationService {
     }
   }
 
+  @Override
+  public void delete(NotificationDeleteCommand command){
+    // TODO 조금 더 고민하고 구현해야할듯
+  }
+
   private void handleReviewLiked(NotificationCreateCommand command) {
 
     String content = NotificationType.REVIEW_LIKED.formatContent(command.reactor()
                                                                         .getNickname());
-    Notification notification = new Notification(command.review(), command.reviewOwner(),
+    Notification notification = new Notification(command.review(), command.review().getUser(),
         NotificationType.REVIEW_LIKED.name(), content, false);
     notificationRepository.save(notification);
   }
@@ -129,7 +137,7 @@ public class NotificationServiceImpl implements NotificationService {
                                                                        .getNickname(), "");
     }
 
-    Notification notification = new Notification(command.review(), command.reviewOwner(),
+    Notification notification = new Notification(command.review(), command.review().getUser(),
         NotificationType.REVIEW_COMMENTED.name(), content, false);
     notificationRepository.save(notification);
   }
@@ -143,7 +151,7 @@ public class NotificationServiceImpl implements NotificationService {
       content = NotificationType.REVIEW_RANKED.formatContent();
     }
 
-    Notification notification = new Notification(command.review(), command.reviewOwner(),
+    Notification notification = new Notification(command.review(), command.review().getUser(),
         NotificationType.REVIEW_RANKED.name(), content, false);
     notificationRepository.save(notification);
   }
