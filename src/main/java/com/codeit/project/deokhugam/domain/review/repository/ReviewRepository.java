@@ -33,8 +33,8 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
   @Query("DELETE FROM Review r WHERE r.book.id = :bookId")
   void bulkDeleteByBookId(Long bookId);
 
-  boolean existsByUserIdAndBookId(Long userId, Long bookId);
+  Review findByUserIdAndBookId(Long userId, Long bookId);
 
-  @Query("SELECT COUNT(r.id) FROM Review r WHERE r.book.id = :bookId")
+  @Query("SELECT COUNT(r.id) FROM Review r WHERE r.book.id = :bookId AND r.deletedAt IS NULL")
   Long countTotal(Long bookId);
 }

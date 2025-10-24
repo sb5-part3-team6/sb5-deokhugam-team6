@@ -47,11 +47,20 @@ public class ReviewServiceImpl implements ReviewService {
         User user = verifyUserExists(request.userId());
         Book book = verifyBookExists(request.bookId());
 
-        if (reviewRepository.existsByUserIdAndBookId(user.getId(), book.getId()))
-            throw new ReviewAlreadyExistsException();
+        // 중복된 리뷰가 있는지 확인
+        Review review = reviewRepository.findByUserIdAndBookId(user.getId(), book.getId());
 
-        Review review = reviewRepository.save(new Review(user, book, request.content(), request.rating()));
-        return reviewMapper.toDto(review,0,0,false);
+        if(review == null){ // 중복된 리뷰가 없다면
+            Review newReview = reviewRepository.save(new Review(user, book, request.content(), request.rating())); // 리뷰 등록
+            return reviewMapper.toDto(newReview,0,0,false);
+        } else { // 중복된 리뷰가 있는데
+            if(review.getDeletedAt() != null){ // 그게 소프트 삭제 된 리뷰라면
+                hardDelete(review.getId(), user.getId()); // 완전히 삭제해버림
+                Review newReview = reviewRepository.save(new Review(user, book, request.content(), request.rating())); // 리뷰 등록
+                return reviewMapper.toDto(newReview,0,0,false);
+            }
+            throw new ReviewAlreadyExistsException(); // 삭제된 리뷰가 아니라면 예외 처리 던지기
+        }
     }
 
     @Override
