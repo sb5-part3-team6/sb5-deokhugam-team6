@@ -16,11 +16,11 @@ import lombok.NoArgsConstructor;
 @Table(name = "users")
 public class User extends BaseEntity {
 
-  @Column(length = 50, unique = true, nullable = false)
+  @Column(length = 300, unique = true, nullable = false)
   private String email;
-  @Column(length = 10, unique = true, nullable = false)
+  @Column(length = 50, unique = true, nullable = false)
   private String nickname;
-  @Column(length = 20, nullable = false)
+  @Column(length = 300, nullable = false)
   private String password;
 
   public void updateNickname(String nickname) {

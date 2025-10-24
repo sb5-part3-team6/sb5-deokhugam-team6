@@ -16,12 +16,12 @@ import lombok.NoArgsConstructor;
 @Table(name = "ranks")
 public class Rank extends BaseEntity {
 
-  @Column(length = 10, nullable = false)
+  @Column(length = 20, nullable = false)
   private String target;
 
   private Long targetId;
 
-  @Column(length = 10)
+  @Column(length = 20)
   private String type;
 
   private Integer rankNo;

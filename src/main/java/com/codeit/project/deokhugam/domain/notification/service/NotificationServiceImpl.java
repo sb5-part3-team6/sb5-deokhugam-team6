@@ -1,8 +1,11 @@
 package com.codeit.project.deokhugam.domain.notification.service;
 
+import com.codeit.project.deokhugam.domain.notification.dto.NotificationCreateCommand;
+import com.codeit.project.deokhugam.domain.notification.dto.NotificationDeleteCommand;
 import com.codeit.project.deokhugam.domain.notification.dto.NotificationDto;
 import com.codeit.project.deokhugam.domain.notification.dto.NotificationUpdateRequest;
 import com.codeit.project.deokhugam.domain.notification.entity.Notification;
+import com.codeit.project.deokhugam.domain.notification.entity.NotificationType;
 import com.codeit.project.deokhugam.domain.notification.exception.NotificationInvalidUserException;
 import com.codeit.project.deokhugam.domain.notification.exception.NotificationNotFoundException;
 import com.codeit.project.deokhugam.domain.notification.mapper.NotificationMapper;
@@ -13,8 +16,10 @@ import jakarta.transaction.Transactional;
 import java.time.LocalDate;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class NotificationServiceImpl implements NotificationService {
@@ -24,8 +29,8 @@ public class NotificationServiceImpl implements NotificationService {
   private final NotificationMapper notificationMapper;
 
   @Override
-  public PageResponse getByCursor(String userId, String direction,
-      LocalDate cursor, LocalDate after, Integer limit) {
+  public PageResponse getByCursor(String userId, String direction, LocalDate cursor,
+      LocalDate after, Integer limit) {
 
     Long uid = Long.parseLong(userId);
 
@@ -57,8 +62,8 @@ public class NotificationServiceImpl implements NotificationService {
 
   @Override
   @Transactional
-  public NotificationDto checkById(String notificationId,
-      NotificationUpdateRequest request, String userId) {
+  public NotificationDto checkById(String notificationId, NotificationUpdateRequest request,
+      String userId) {
 
     Long nid = Long.parseLong(notificationId);
     Long uid = Long.parseLong(userId);
@@ -94,5 +99,60 @@ public class NotificationServiceImpl implements NotificationService {
     for (Notification notification : notifications) {
       notification.updateConfirmed(true);
     }
+  }
+
+  @Override
+  public void create(NotificationCreateCommand command) {
+
+    switch (command.type()) {
+      case REVIEW_LIKED -> handleReviewLiked(command);
+      case REVIEW_COMMENTED -> handleReviewCommented(command);
+      case REVIEW_RANKED -> handleReviewRanked(command);
+    }
+  }
+
+  @Override
+  public void delete(NotificationDeleteCommand command){
+    // TODO 조금 더 고민하고 구현해야할듯
+  }
+
+  private void handleReviewLiked(NotificationCreateCommand command) {
+
+    String content = NotificationType.REVIEW_LIKED.formatContent(command.reactor()
+                                                                        .getNickname());
+    Notification notification = new Notification(command.review(), command.review().getUser(),
+        NotificationType.REVIEW_LIKED.name(), content, false);
+    notificationRepository.save(notification);
+  }
+
+  private void handleReviewCommented(NotificationCreateCommand command) {
+
+    String content;
+    if (command.data() != null) {
+      content = NotificationType.REVIEW_COMMENTED.formatContent(command.reactor()
+                                                                       .getNickname(),
+          command.data());
+    } else {
+      content = NotificationType.REVIEW_COMMENTED.formatContent(command.reactor()
+                                                                       .getNickname(), "");
+    }
+
+    Notification notification = new Notification(command.review(), command.review().getUser(),
+        NotificationType.REVIEW_COMMENTED.name(), content, false);
+    notificationRepository.save(notification);
+  }
+
+  private void handleReviewRanked(NotificationCreateCommand command) {
+    // TODO 인기 순위 진입 시 알림 메세지 확인
+    String content;
+    if (command.data() != null) {
+      content = String.format("리뷰가 인기 순위 %s위에 들었어요!", command.data());
+    } else {
+      content = NotificationType.REVIEW_RANKED.formatContent();
+    }
+
+    Notification notification = new Notification(command.review(), command.review().getUser(),
+        NotificationType.REVIEW_RANKED.name(), content, false);
+    notificationRepository.save(notification);
   }
 }
