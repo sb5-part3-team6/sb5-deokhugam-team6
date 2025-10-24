@@ -32,7 +32,7 @@ public class MDCLoggingInterceptor implements HandlerInterceptor {
     MDC.put(REQUEST_ID, requestId);
     MDC.put(REQUEST_METHOD, request.getMethod());
     MDC.put(REQUEST_URI, request.getRequestURI());
-    MDC.put(CLIENT_IP, clientIp);
+    MDC.put(CLIENT_IP, clientIp != null ? clientIp : "UNKNOWN");
 
     // 응답 헤더에 요청 ID 추가
     response.setHeader(REQUEST_ID_HEADER, requestId);
