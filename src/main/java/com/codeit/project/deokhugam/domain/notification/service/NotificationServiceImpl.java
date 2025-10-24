@@ -99,9 +99,9 @@ public class NotificationServiceImpl implements NotificationService {
   }
 
   @Override
-  public void createNotification(NotificationType type, NotificationCreateCommand command) {
+  public void create(NotificationCreateCommand command) {
 
-    switch (type) {
+    switch (command.type()) {
       case REVIEW_LIKED -> handleReviewLiked(command);
       case REVIEW_COMMENTED -> handleReviewCommented(command);
       case REVIEW_RANKED -> handleReviewRanked(command);
@@ -119,8 +119,16 @@ public class NotificationServiceImpl implements NotificationService {
 
   private void handleReviewCommented(NotificationCreateCommand command) {
 
-    String content = NotificationType.REVIEW_COMMENTED.formatContent(command.reactor()
-                                                                            .getNickname());
+    String content;
+    if (command.data() != null) {
+      content = NotificationType.REVIEW_COMMENTED.formatContent(command.reactor()
+                                                                       .getNickname(),
+          command.data());
+    } else {
+      content = NotificationType.REVIEW_COMMENTED.formatContent(command.reactor()
+                                                                       .getNickname(), "");
+    }
+
     Notification notification = new Notification(command.review(), command.reviewOwner(),
         NotificationType.REVIEW_COMMENTED.name(), content, false);
     notificationRepository.save(notification);
@@ -129,8 +137,8 @@ public class NotificationServiceImpl implements NotificationService {
   private void handleReviewRanked(NotificationCreateCommand command) {
     // TODO 인기 순위 진입 시 알림 메세지 확인
     String content;
-    if (command.rank() != null) {
-      content = String.format("리뷰가 인기 순위 %d위에 들었어요!", command.rank());
+    if (command.data() != null) {
+      content = String.format("리뷰가 인기 순위 %s위에 들었어요!", command.data());
     } else {
       content = NotificationType.REVIEW_RANKED.formatContent();
     }

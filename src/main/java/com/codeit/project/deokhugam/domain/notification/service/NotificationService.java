@@ -1,6 +1,7 @@
 package com.codeit.project.deokhugam.domain.notification.service;
 
 import com.codeit.project.deokhugam.domain.notification.dto.NotificationCreateCommand;
+import com.codeit.project.deokhugam.domain.notification.dto.NotificationDeleteCommand;
 import com.codeit.project.deokhugam.domain.notification.dto.NotificationDto;
 import com.codeit.project.deokhugam.domain.notification.dto.NotificationUpdateRequest;
 import com.codeit.project.deokhugam.domain.notification.entity.NotificationType;
@@ -17,5 +18,7 @@ public interface NotificationService {
 
   void checkAll(String userId);
 
-  void createNotification(NotificationType type, NotificationCreateCommand command);
+  void create(NotificationCreateCommand command);
+
+  void delete(NotificationDeleteCommand command);
 }

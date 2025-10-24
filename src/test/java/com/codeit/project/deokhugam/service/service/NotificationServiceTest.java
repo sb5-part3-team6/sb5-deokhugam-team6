@@ -68,8 +68,8 @@ class NotificationServiceTest {
     notification = new Notification(new Review(), user, "", "", false);
     ReflectionTestUtils.setField(notification, "id", 1L);
 
-    notificationDto = new NotificationDto("1", "1", "1", "Test Notification",
-        "", false, LocalDateTime.now(), LocalDateTime.now());
+    notificationDto = new NotificationDto("1", "1", "1", "Test Notification", "", false,
+        LocalDateTime.now(), LocalDateTime.now());
   }
 
   @Test
@@ -78,8 +78,8 @@ class NotificationServiceTest {
     given(notificationRepository.findById(1L)).willReturn(Optional.of(notification));
     given(notificationMapper.toDto(notification)).willReturn(notificationDto);
 
-    NotificationDto result = notificationService.checkById("1",
-        new NotificationUpdateRequest(true), "1");
+    NotificationDto result = notificationService.checkById("1", new NotificationUpdateRequest(true),
+        "1");
 
     assertThat(notification.getConfirmed()).isTrue();
     assertThat(result).isEqualTo(notificationDto);
@@ -92,9 +92,8 @@ class NotificationServiceTest {
   void updateNotificationById_NotFound() {
     given(notificationRepository.findById(1L)).willReturn(Optional.empty());
 
-    assertThatThrownBy(
-        () -> notificationService.checkById("1", new NotificationUpdateRequest(true),
-            "2")).isInstanceOf(NotificationNotFoundException.class);
+    assertThatThrownBy(() -> notificationService.checkById("1", new NotificationUpdateRequest(true),
+        "2")).isInstanceOf(NotificationNotFoundException.class);
   }
 
   @Test
@@ -102,9 +101,8 @@ class NotificationServiceTest {
   void updateNotificationById_InvalidUser() {
     given(notificationRepository.findById(1L)).willReturn(Optional.of(notification));
 
-    assertThatThrownBy(
-        () -> notificationService.checkById("1", new NotificationUpdateRequest(true),
-            "2")).isInstanceOf(NotificationInvalidUserException.class);
+    assertThatThrownBy(() -> notificationService.checkById("1", new NotificationUpdateRequest(true),
+        "2")).isInstanceOf(NotificationInvalidUserException.class);
   }
 
   @Test
@@ -128,8 +126,7 @@ class NotificationServiceTest {
   void getNotifications_ReturnsNull() {
     LocalDate after = LocalDate.now()
                                .minusDays(1);
-    PageResponse result = notificationService.getByCursor("1", "DESC",
-        after, after, 20);
+    PageResponse result = notificationService.getByCursor("1", "DESC", after, after, 20);
 
     assertThat(result).isNotNull();
   }
@@ -141,9 +138,11 @@ class NotificationServiceTest {
                                                                  .reviewOwner(reviewOwner)
                                                                  .review(review)
                                                                  .reactor(user)
+                                                                 .type(
+                                                                     NotificationType.REVIEW_LIKED)
                                                                  .build();
 
-    notificationService.createNotification(NotificationType.REVIEW_LIKED, command);
+    notificationService.create(command);
 
     ArgumentCaptor<Notification> captor = ArgumentCaptor.forClass(Notification.class);
     verify(notificationRepository).save(captor.capture());
@@ -163,9 +162,11 @@ class NotificationServiceTest {
                                                                  .reviewOwner(reviewOwner)
                                                                  .review(review)
                                                                  .reactor(user)
+                                                                 .type(
+                                                                     NotificationType.REVIEW_COMMENTED)
                                                                  .build();
 
-    notificationService.createNotification(NotificationType.REVIEW_COMMENTED, command);
+    notificationService.create(command);
 
     ArgumentCaptor<Notification> captor = ArgumentCaptor.forClass(Notification.class);
     verify(notificationRepository).save(captor.capture());
@@ -182,9 +183,11 @@ class NotificationServiceTest {
                                                                  .reviewOwner(reviewOwner)
                                                                  .review(review)
                                                                  .rank(3)
+                                                                 .type(
+                                                                     NotificationType.REVIEW_RANKED)
                                                                  .build();
 
-    notificationService.createNotification(NotificationType.REVIEW_RANKED, command);
+    notificationService.create(command);
 
     ArgumentCaptor<Notification> captor = ArgumentCaptor.forClass(Notification.class);
     verify(notificationRepository).save(captor.capture());
