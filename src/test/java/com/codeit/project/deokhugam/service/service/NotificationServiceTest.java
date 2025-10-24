@@ -135,7 +135,6 @@ class NotificationServiceTest {
   @DisplayName("리뷰 좋아요 알림 생성 성공")
   void createReviewLikedNotification_success() {
     NotificationCreateCommand command = NotificationCreateCommand.builder()
-                                                                 .reviewOwner(reviewOwner)
                                                                  .review(review)
                                                                  .reactor(user)
                                                                  .type(
@@ -159,7 +158,6 @@ class NotificationServiceTest {
   @DisplayName("리뷰 댓글 알림 생성 성공")
   void createReviewCommentedNotification_success() {
     NotificationCreateCommand command = NotificationCreateCommand.builder()
-                                                                 .reviewOwner(reviewOwner)
                                                                  .review(review)
                                                                  .reactor(user)
                                                                  .type(
@@ -180,9 +178,8 @@ class NotificationServiceTest {
   @DisplayName("리뷰 랭킹 진입 알림 생성 성공")
   void createReviewRankedNotification_success() {
     NotificationCreateCommand command = NotificationCreateCommand.builder()
-                                                                 .reviewOwner(reviewOwner)
                                                                  .review(review)
-                                                                 .rank(3)
+                                                                 .data("3")
                                                                  .type(
                                                                      NotificationType.REVIEW_RANKED)
                                                                  .build();
