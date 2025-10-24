@@ -12,7 +12,7 @@ DROP TABLE IF EXISTS ranks;
 CREATE TABLE users
 (
     id         BIGSERIAL PRIMARY KEY,
-    email      VARCHAR(300) UNIQUE,
+    email      VARCHAR(300) UNIQUE      NOT NULL,
     nickname   VARCHAR(50) UNIQUE       NOT NULL,
     password   VARCHAR(300)             NOT NULL,
     created_at timestamp with time zone NOT NULL,
