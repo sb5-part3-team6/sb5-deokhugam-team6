@@ -67,7 +67,7 @@ public class ReviewServiceImpl implements ReviewService {
         List<Review> reviewList = reviewRepositoryCustom.list(params);
         User user = verifyUserExists(userId);
 
-        Long total = reviewRepository.countTotal();
+        Long total = reviewRepository.countTotal(params.bookId());
         boolean hasNext = reviewList.size() > params.limit();
         String nextCursor = null;
         String nextAfter = null;
