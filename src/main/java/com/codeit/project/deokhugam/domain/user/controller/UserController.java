@@ -67,9 +67,11 @@ public class UserController implements UserApi {
   }
 
   @Override
+  @GetMapping("/api/users/power")
   public ResponseEntity<PageResponse> findPowerUsers(String period,
       String direction, LocalDate cursor, LocalDate after, Integer limit) {
-    return null;
+    return ResponseEntity.status(HttpStatus.OK)
+                         .body(userService.getRank());
   }
 
   @Override
