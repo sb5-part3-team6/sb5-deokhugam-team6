@@ -5,6 +5,7 @@ import com.codeit.project.deokhugam.domain.book.dto.BookSearchRequest;
 import com.codeit.project.deokhugam.domain.book.entity.QBook;
 import com.codeit.project.deokhugam.domain.review.entity.QReview;
 import com.querydsl.core.BooleanBuilder;
+import com.querydsl.core.QueryFactory;
 import com.querydsl.core.types.Order;
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.Projections;
@@ -22,13 +23,20 @@ import org.springframework.stereotype.Repository;
 @RequiredArgsConstructor
 public class BookRepositoryCustomImpl implements BookRepositoryCustom {
   private final JPAQueryFactory jpaQueryFactory;
+  private final QueryFactory queryFactory;
 
   @Override
   public List<BookDto> findBooks(BookSearchRequest bookSearchReq, int pageSize) {
     QBook book = QBook.book;
     QReview review = QReview.review;
 
-    NumberExpression<Long> reviewCount = review.id.countDistinct().coalesce(0L);
+    NumberExpression<Long> reviewCount = Expressions.cases()
+        .when(review.deletedAt.isNull() .and(review.book.id.eq(book.id)))
+        .then(1L)
+        .otherwise(0L)
+        .sum()
+        .coalesce(0L);
+
     NumberExpression<Double> avgExpression = review.rating.avg().coalesce(0.0);
     NumberExpression<Double> ratingAvg = Expressions.numberTemplate(
         Double.class,
@@ -87,7 +95,6 @@ public class BookRepositoryCustomImpl implements BookRepositoryCustom {
       case "DESC" -> Order.DESC;
       default -> Order.DESC;
     };
-//    Order order = req.direction() == "ASC" ? Order.ASC : Order.DESC;
 
     return switch (req.orderBy()) {
       case "title" -> new OrderSpecifier<>(order, book.title);
