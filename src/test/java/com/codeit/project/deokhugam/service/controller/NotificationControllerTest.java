@@ -16,7 +16,6 @@ import com.codeit.project.deokhugam.domain.notification.dto.NotificationUpdateRe
 import com.codeit.project.deokhugam.domain.notification.service.NotificationService;
 import com.codeit.project.deokhugam.global.common.dto.PageResponse;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
@@ -51,7 +50,8 @@ class NotificationControllerTest {
   void setup() {
     sampleNotification = new NotificationDto("1", "1", "101",
         "Clean Code", "좋은 책이에요", true,
-        LocalDateTime.now().minusDays(1), LocalDateTime.now());
+        LocalDateTime.now()
+                     .minusDays(1), LocalDateTime.now());
 
     samplePageResponse = new PageResponse(List.of(sampleNotification),
         "nextCursor", "1", 1, 1L, true);
@@ -60,8 +60,8 @@ class NotificationControllerTest {
   @Test
   @DisplayName("GET /api/notifications - 정상 조회")
   void getNotifications_success() throws Exception {
-    when(notificationService.getByCursor(anyString(), anyString(), nullable(LocalDate.class),
-        nullable(LocalDate.class), anyInt())).thenReturn(samplePageResponse);
+    when(notificationService.getByCursor(anyString(), anyString(), nullable(String.class),
+        nullable(String.class), anyInt())).thenReturn(samplePageResponse);
 
     mockMvc.perform(get("/api/notifications").queryParam("userId", "1")
                                              .contentType(MediaType.APPLICATION_JSON))

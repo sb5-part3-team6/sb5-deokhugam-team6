@@ -19,8 +19,6 @@ import com.codeit.project.deokhugam.domain.notification.service.NotificationServ
 import com.codeit.project.deokhugam.domain.review.entity.Review;
 import com.codeit.project.deokhugam.domain.user.entity.User;
 import com.codeit.project.deokhugam.domain.user.repository.UserRepository;
-import com.codeit.project.deokhugam.global.common.dto.PageResponse;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -119,16 +117,6 @@ class NotificationServiceTest {
 
     assertThat(notification.getConfirmed()).isTrue();
     verify(notificationRepository).findAllByUserIdAndConfirmedFalse(1L);
-  }
-
-  @Test
-  @DisplayName("알림 조회 - getNotifications 호출")
-  void getNotifications_ReturnsNull() {
-    LocalDate after = LocalDate.now()
-                               .minusDays(1);
-    PageResponse result = notificationService.getByCursor("1", "DESC", after, after, 20);
-
-    assertThat(result).isNotNull();
   }
 
   @Test
