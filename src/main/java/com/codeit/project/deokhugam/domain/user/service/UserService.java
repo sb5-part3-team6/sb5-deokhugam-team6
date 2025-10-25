@@ -37,9 +37,6 @@ public class UserService {
 
   private final UserRepository userRepository;
   private final RankService rankService;
-  private final ReviewRepository reviewRepository;
-  private final ReviewLikeRepository reviewLikeRepository;
-  private final CommentRepository commentRepository;
 
   @Transactional
   public UserDto create(UserRegisterRequest request) {
@@ -138,6 +135,7 @@ public class UserService {
     }
   }
 
+  @Transactional(readOnly = true)
   public PageResponse getRank(String direction, LocalDate cursor, LocalDate after, Integer limit) {
     List<Rank> ranks = rankService.findRank(RankSearchCommand.builder()
         .target(RankTarget.USER)
@@ -145,7 +143,7 @@ public class UserService {
         .direction(direction)
         .cusor(cursor.toString())
         .after(after.toString())
-        .limit(Long.parseLong(limit.toString()))
+        .limit(Long.valueOf(limit))
         .build());
 
     List<PowerUserDto> content = new ArrayList<>();
@@ -172,8 +170,8 @@ public class UserService {
         .content(content)
         .nextCursor(null)
         .nextAfter(null)
-        .size(10)
-        .totalElements(10L)
+        .size(content.size())
+        .totalElements(Long.valueOf(content.size()))
         .hasNext(false)
         .build();
   }
