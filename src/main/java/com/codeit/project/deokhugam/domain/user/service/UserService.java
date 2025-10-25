@@ -153,7 +153,6 @@ public class UserService {
       User user = userRepository.findById(rank.getTargetId())
           .orElseThrow(() -> new UserNotFoundException().withId(rank.getTargetId().toString()));
 
-      // TODO : 조회한 user의 reviewScoreSum, likeCount, commentCount 계산 후 PowerUserDto에 매핑
       PowerUserDto powerUser = PowerUserDto.builder()
           .userId(user.getId().toString())
           .nickname(user.getNickname())
