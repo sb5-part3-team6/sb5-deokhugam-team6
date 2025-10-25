@@ -1,7 +1,9 @@
 package com.codeit.project.deokhugam.domain.user.dto;
 
 import com.codeit.project.deokhugam.domain.rank.entity.RankType;
+import lombok.Builder;
 
+@Builder
 public record PowerUserDto(
     String userId,
     String nickname,

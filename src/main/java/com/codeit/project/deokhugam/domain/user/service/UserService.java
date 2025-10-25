@@ -1,10 +1,14 @@
 package com.codeit.project.deokhugam.domain.user.service;
 
+import com.codeit.project.deokhugam.domain.comment.repository.CommentRepository;
 import com.codeit.project.deokhugam.domain.rank.dto.RankSearchCommand;
 import com.codeit.project.deokhugam.domain.rank.entity.Rank;
 import com.codeit.project.deokhugam.domain.rank.entity.RankTarget;
 import com.codeit.project.deokhugam.domain.rank.entity.RankType;
 import com.codeit.project.deokhugam.domain.rank.service.RankService;
+import com.codeit.project.deokhugam.domain.review.repository.ReviewLikeRepository;
+import com.codeit.project.deokhugam.domain.review.repository.ReviewRepository;
+import com.codeit.project.deokhugam.domain.user.dto.PowerUserDto;
 import com.codeit.project.deokhugam.domain.user.dto.UserDto;
 import com.codeit.project.deokhugam.domain.user.dto.UserLoginRequest;
 import com.codeit.project.deokhugam.domain.user.dto.UserRegisterRequest;
@@ -19,6 +23,7 @@ import com.codeit.project.deokhugam.domain.user.exception.UserNotFoundException;
 import com.codeit.project.deokhugam.domain.user.repository.UserRepository;
 import com.codeit.project.deokhugam.global.common.dto.PageResponse;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -32,6 +37,9 @@ public class UserService {
 
   private final UserRepository userRepository;
   private final RankService rankService;
+  private final ReviewRepository reviewRepository;
+  private final ReviewLikeRepository reviewLikeRepository;
+  private final CommentRepository commentRepository;
 
   @Transactional
   public UserDto create(UserRegisterRequest request) {
@@ -140,8 +148,34 @@ public class UserService {
         .limit(Long.parseLong(limit.toString()))
         .build());
 
+    List<PowerUserDto> content = new ArrayList<>();
+    for(Rank rank : ranks) {
+      User user = userRepository.findById(rank.getTargetId())
+          .orElseThrow(() -> new UserNotFoundException().withId(rank.getTargetId().toString()));
+
+      // TODO : 조회한 user의 reviewScoreSum, likeCount, commentCount 계산 후 PowerUserDto에 매핑
+      PowerUserDto powerUser = PowerUserDto.builder()
+          .userId(user.getId().toString())
+          .nickname(user.getNickname())
+          .period(RankType.ALL_TIME)
+          .createdAt(rank.getCreatedAt().toString())
+          .rank(rank.getRankNo())
+          .score(Integer.parseInt(rank.getScore().toString()))
+          .reviewScoreSum(null)
+          .likeCount(null)
+          .commentCount(null)
+          .build();
+
+      content.add(powerUser);
+    }
+
     return PageResponse.builder()
-                       .content(ranks)
-                       .build();
+        .content(content)
+        .nextCursor(null)
+        .nextAfter(null)
+        .size(10)
+        .totalElements(10L)
+        .hasNext(false)
+        .build();
   }
 }
