@@ -2,6 +2,8 @@ package com.codeit.project.deokhugam.domain.user.service;
 
 import com.codeit.project.deokhugam.domain.rank.dto.RankSearchCommand;
 import com.codeit.project.deokhugam.domain.rank.entity.Rank;
+import com.codeit.project.deokhugam.domain.rank.entity.RankTarget;
+import com.codeit.project.deokhugam.domain.rank.entity.RankType;
 import com.codeit.project.deokhugam.domain.rank.service.RankService;
 import com.codeit.project.deokhugam.domain.user.dto.UserDto;
 import com.codeit.project.deokhugam.domain.user.dto.UserLoginRequest;
@@ -16,6 +18,7 @@ import com.codeit.project.deokhugam.domain.user.exception.UserAlreadyDeletedExce
 import com.codeit.project.deokhugam.domain.user.exception.UserNotFoundException;
 import com.codeit.project.deokhugam.domain.user.repository.UserRepository;
 import com.codeit.project.deokhugam.global.common.dto.PageResponse;
+import java.time.LocalDate;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -127,12 +130,18 @@ public class UserService {
     }
   }
 
-  public PageResponse getRank() {
+  public PageResponse getRank(String direction, LocalDate cursor, LocalDate after, Integer limit) {
     List<Rank> ranks = rankService.findRank(RankSearchCommand.builder()
-                                                             .build()); // 나중에 파라미터만 맞춰 채워서 호출
+        .target(RankTarget.USER)
+        .type(RankType.ALL_TIME)
+        .direction(direction)
+        .cusor(cursor.toString())
+        .after(after.toString())
+        .limit(Long.parseLong(limit.toString()))
+        .build());
 
     return PageResponse.builder()
                        .content(ranks)
-                       .build(); // 필요한 Dto에 매핑해서 반환
+                       .build();
   }
 }

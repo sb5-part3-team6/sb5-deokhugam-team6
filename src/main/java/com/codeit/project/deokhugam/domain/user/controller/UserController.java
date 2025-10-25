@@ -73,7 +73,7 @@ public class UserController implements UserApi {
   public ResponseEntity<PageResponse> findPowerUsers(String period,
       String direction, LocalDate cursor, LocalDate after, Integer limit) {
     return ResponseEntity.status(HttpStatus.OK)
-                         .body(userService.getRank());
+                         .body(userService.getRank(direction, cursor, after, limit));
   }
 
   @Override
