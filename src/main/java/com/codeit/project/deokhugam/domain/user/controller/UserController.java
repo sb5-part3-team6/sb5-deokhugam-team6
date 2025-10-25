@@ -17,16 +17,18 @@ import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
+@RequestMapping("/api/users")
 @RequiredArgsConstructor
 public class UserController implements UserApi {
 
   private final UserService userService;
 
   @Override
-  @PostMapping("/api/users")
+  @PostMapping("/")
   public ResponseEntity<UserDto> register(@Valid @RequestBody UserRegisterRequest request) {
     UserDto response = userService.create(request);
     return ResponseEntity.status(HttpStatus.CREATED)
@@ -34,7 +36,7 @@ public class UserController implements UserApi {
   }
 
   @Override
-  @PostMapping("/api/users/login")
+  @PostMapping("/login")
   public ResponseEntity<UserDto> login(@Valid @RequestBody UserLoginRequest request) {
     UserDto response = userService.login(request);
     return ResponseEntity.status(HttpStatus.OK)
@@ -42,7 +44,7 @@ public class UserController implements UserApi {
   }
 
   @Override
-  @GetMapping("/api/users/{userId}")
+  @GetMapping("/{userId}")
   public ResponseEntity<UserDto> find(@PathVariable String userId) {
     UserDto response = userService.findById(userId);
     return ResponseEntity.status(HttpStatus.OK)
@@ -50,7 +52,7 @@ public class UserController implements UserApi {
   }
 
   @Override
-  @DeleteMapping("/api/users/{userId}")
+  @DeleteMapping("/{userId}")
   public ResponseEntity<Void> softDelete(@PathVariable String userId) {
     userService.softDelete(userId);
     return ResponseEntity.status(HttpStatus.NO_CONTENT)
@@ -58,7 +60,7 @@ public class UserController implements UserApi {
   }
 
   @Override
-  @PatchMapping("/api/users/{userId}")
+  @PatchMapping("/{userId}")
   public ResponseEntity<UserDto> update(@PathVariable String userId,
       @Valid @RequestBody UserUpdateRequest request) {
     UserDto response = userService.update(userId, request);
@@ -67,7 +69,7 @@ public class UserController implements UserApi {
   }
 
   @Override
-  @GetMapping("/api/users/power")
+  @GetMapping("/power")
   public ResponseEntity<PageResponse> findPowerUsers(String period,
       String direction, LocalDate cursor, LocalDate after, Integer limit) {
     return ResponseEntity.status(HttpStatus.OK)
@@ -75,7 +77,7 @@ public class UserController implements UserApi {
   }
 
   @Override
-  @DeleteMapping("/api/users/{userId}/hard")
+  @DeleteMapping("/{userId}/hard")
   public ResponseEntity<Void> hardDelete(@PathVariable String userId) {
     userService.hardDelete(userId);
     return ResponseEntity.status(HttpStatus.NO_CONTENT)
