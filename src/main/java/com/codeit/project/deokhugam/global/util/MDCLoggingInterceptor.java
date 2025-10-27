@@ -16,6 +16,7 @@ public class MDCLoggingInterceptor implements HandlerInterceptor {
   public static final String CLIENT_IP = "ip";
 
   public static final String REQUEST_ID_HEADER = "Deokhugam-Request-ID";
+  public static final String REQUEST_USER_ID_HEADER = "Deokhugam-Request-User-ID";
   // TODO : 유저 ID 추가
 
   @Override
@@ -26,6 +27,8 @@ public class MDCLoggingInterceptor implements HandlerInterceptor {
                            .toString()
                            .replaceAll("-", "");
 
+    String userId = request.getHeader(REQUEST_USER_ID_HEADER);
+
     String clientIp = getClientIp(request);
 
     // MDC에 컨텍스트 정보 추가
@@ -33,6 +36,7 @@ public class MDCLoggingInterceptor implements HandlerInterceptor {
     MDC.put(REQUEST_METHOD, request.getMethod());
     MDC.put(REQUEST_URI, request.getRequestURI());
     MDC.put(CLIENT_IP, clientIp != null ? clientIp : "UNKNOWN");
+    MDC.put("userId", userId != null ? userId : "UNKNOWN");
 
     // 응답 헤더에 요청 ID 추가
     response.setHeader(REQUEST_ID_HEADER, requestId);
