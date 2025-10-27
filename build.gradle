@@ -36,6 +36,9 @@ dependencies {
     //WebClient
     implementation 'org.springframework.boot:spring-boot-starter-webflux'
 
+    // XML Passer
+    implementation 'com.fasterxml.jackson.dataformat:jackson-dataformat-xml'
+
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
 //    implementation 'io.micrometer:micrometer-registry-prometheus'    // 나중에 커스텀 메트릭 전송용
 
