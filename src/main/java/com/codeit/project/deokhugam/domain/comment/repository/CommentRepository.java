@@ -17,6 +17,8 @@ public interface CommentRepository extends JpaRepository<Comment, Long>, Comment
 
   Integer countByReviewId(Long reviewId);
 
+  Integer countByReviewIdAndDeletedAtIsNull(Long reviewId);
+
   @Transactional @Modifying
   void deleteAllByReviewId(Long reviewId);
 }
