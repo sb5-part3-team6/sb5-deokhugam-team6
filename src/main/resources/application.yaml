@@ -32,6 +32,9 @@ external:
       client-id: ${NAVER_CLIENT_ID}
       client-secret: ${NAVER_CLIENT_SECRET}
 
+ocr-space:
+  api-key: "K85373604788957"
+
 info:
   name: Deokhugam
   version: 1.0.0
