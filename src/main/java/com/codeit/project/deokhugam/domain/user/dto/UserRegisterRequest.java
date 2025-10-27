@@ -17,7 +17,7 @@ public record UserRegisterRequest(
 
     @NotBlank(message = "비밀번호는 필수입니다.")
     @Pattern(
-        regexp = "^(?=.*[a-zA-Z])(?=.*\\d)[a-zA-Z\\d]{8,}$",
+        regexp = "^(?=.*[a-zA-Z])(?=.*\\d)[a-zA-Z\\d!@#$%^&*()_+\\-=\\[\\]{};':\"|,.<>\\/?]{8,}$",
         message = "비밀번호는 8자 이상이, 영문과 숫자를 포함해야 합니다.")
     String password
 

@@ -33,6 +33,14 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
     implementation 'com.querydsl:querydsl-jpa:5.1.0:jakarta'
 
+    //WebClient
+    implementation 'org.springframework.boot:spring-boot-starter-webflux'
+
+    // XML Passer
+    implementation 'jakarta.xml.bind:jakarta.xml.bind-api:4.0.0'
+    implementation 'org.glassfish.jaxb:jaxb-runtime:4.0.2'
+
+
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
 //    implementation 'io.micrometer:micrometer-registry-prometheus'    // 나중에 커스텀 메트릭 전송용
 
