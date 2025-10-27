@@ -4,6 +4,7 @@ import com.codeit.project.deokhugam.domain.book.dto.BookDto;
 import com.codeit.project.deokhugam.domain.book.dto.BookSearchRequest;
 import com.codeit.project.deokhugam.domain.book.dto.BookStatDto;
 import com.codeit.project.deokhugam.domain.book.entity.QBook;
+import com.codeit.project.deokhugam.domain.rank.entity.RankType;
 import com.codeit.project.deokhugam.domain.review.entity.QReview;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.QueryFactory;
@@ -14,6 +15,7 @@ import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.core.types.dsl.NumberExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
+import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -24,6 +26,7 @@ import org.springframework.stereotype.Repository;
 @Repository
 @RequiredArgsConstructor
 public class BookRepositoryCustomImpl implements BookRepositoryCustom {
+
   private final JPAQueryFactory jpaQueryFactory;
   private final QueryFactory queryFactory;
 
@@ -33,18 +36,23 @@ public class BookRepositoryCustomImpl implements BookRepositoryCustom {
     QReview review = QReview.review;
 
     NumberExpression<Long> reviewCount = Expressions.cases()
-        .when(review.deletedAt.isNull() .and(review.book.id.eq(book.id)))
-        .then(1L)
-        .otherwise(0L)
-        .sum()
-        .coalesce(0L);
+                                                    .when(review.deletedAt.isNull()
+                                                                          .and(review.book.id.eq(
+                                                                              book.id)))
+                                                    .then(1L)
+                                                    .otherwise(0L)
+                                                    .sum()
+                                                    .coalesce(0L);
 
     NumberExpression<Double> avgExpression = Expressions.cases()
-        .when(review.deletedAt.isNull() .and(review.book.id.eq(book.id)))
-        .then(review.rating)
-        .otherwise((Integer) null)
-        .avg()
-        .coalesce(0.0);
+                                                        .when(review.deletedAt.isNull()
+                                                                              .and(
+                                                                                  review.book.id.eq(
+                                                                                      book.id)))
+                                                        .then(review.rating)
+                                                        .otherwise((Integer) null)
+                                                        .avg()
+                                                        .coalesce(0.0);
 
     NumberExpression<Double> ratingAvg = Expressions.numberTemplate(
         Double.class,
@@ -54,28 +62,28 @@ public class BookRepositoryCustomImpl implements BookRepositoryCustom {
 
     //검색 조건
     BooleanBuilder where = new BooleanBuilder();
-    if(bookSearchReq.keyword()!=null && !bookSearchReq.keyword().isBlank()){
+    if (bookSearchReq.keyword() != null && !bookSearchReq.keyword()
+                                                         .isBlank()) {
       String keyword = bookSearchReq.keyword();
       where.and(
-        book.title.containsIgnoreCase(keyword)
-            .or(book.author.containsIgnoreCase(keyword))
-            .or(book.isbn.containsIgnoreCase(keyword))
-          ).and(book.deletedAt.isNull());
-    }else{
+               book.title.containsIgnoreCase(keyword)
+                         .or(book.author.containsIgnoreCase(keyword))
+                         .or(book.isbn.containsIgnoreCase(keyword))
+           )
+           .and(book.deletedAt.isNull());
+    } else {
       where.and(book.deletedAt.isNull());
     }
 
     //정렬조건
-    OrderSpecifier<?> primaryOrder = getPrimaryOrder(book,reviewCount, ratingAvg,bookSearchReq);
+    OrderSpecifier<?> primaryOrder = getPrimaryOrder(book, reviewCount, ratingAvg, bookSearchReq);
     OrderSpecifier<?> secondaryOrder = getSecondaryOrder(book, bookSearchReq);
     OrderSpecifier<?> tertiaryOrder = gettertiaryOrder(book, bookSearchReq);
 
     //커서
-    if(bookSearchReq.cursor() !=null && bookSearchReq.after()!=null){
-      where.and(buildCursorPredicate(book,reviewCount, ratingAvg, bookSearchReq));
+    if (bookSearchReq.cursor() != null && bookSearchReq.after() != null) {
+      where.and(buildCursorPredicate(book, reviewCount, ratingAvg, bookSearchReq));
     }
-
-
 
     return jpaQueryFactory
         .select(Projections.constructor(BookDto.class,
@@ -93,23 +101,25 @@ public class BookRepositoryCustomImpl implements BookRepositoryCustom {
             book.updatedAt
         ))
         .from(book)
-        .leftJoin(review).on(review.book.eq(book))
+        .leftJoin(review)
+        .on(review.book.eq(book))
         .where(where)
         .groupBy(book.id)
         .orderBy(primaryOrder, secondaryOrder, tertiaryOrder)
-        .limit(pageSize+1)
+        .limit(pageSize + 1)
         .fetch();
   }
-  private OrderSpecifier<?> getPrimaryOrder(QBook book,NumberExpression<Long> reviewCount, NumberExpression<Double> ratingAvg, BookSearchRequest req) {
-    Order order = switch (req.direction()){
+
+  private OrderSpecifier<?> getPrimaryOrder(QBook book, NumberExpression<Long> reviewCount,
+      NumberExpression<Double> ratingAvg, BookSearchRequest req) {
+    Order order = switch (req.direction()) {
       case "ASC" -> Order.ASC;
       case "DESC" -> Order.DESC;
       default -> Order.DESC;
     };
 
     return switch (req.orderBy()) {
-      case "title" ->
-        new OrderSpecifier<>(order, book.title.lower());
+      case "title" -> new OrderSpecifier<>(order, book.title.lower());
       case "publishedDate" -> new OrderSpecifier<>(order, book.publishedAt);
       case "rating" -> new OrderSpecifier<>(order, ratingAvg);
       case "reviewCount" -> new OrderSpecifier<>(order, reviewCount);
@@ -118,7 +128,7 @@ public class BookRepositoryCustomImpl implements BookRepositoryCustom {
   }
 
   private OrderSpecifier<?> getSecondaryOrder(QBook book, BookSearchRequest req) {
-    Order order = switch (req.direction()){
+    Order order = switch (req.direction()) {
       case "ASC" -> Order.ASC;
       case "DESC" -> Order.DESC;
       default -> Order.DESC;
@@ -127,7 +137,7 @@ public class BookRepositoryCustomImpl implements BookRepositoryCustom {
   }
 
   private OrderSpecifier<?> gettertiaryOrder(QBook book, BookSearchRequest req) {
-    Order order = switch (req.direction()){
+    Order order = switch (req.direction()) {
       case "ASC" -> Order.ASC;
       case "DESC" -> Order.DESC;
       default -> Order.DESC;
@@ -142,7 +152,7 @@ public class BookRepositoryCustomImpl implements BookRepositoryCustom {
       case "publishedDate":
         return LocalDate.parse(cursor);
       case "rating":
-        return  Double.valueOf(cursor);
+        return Double.valueOf(cursor);
       case "reviewCount":
         return Long.valueOf(cursor);
       default:
@@ -198,32 +208,33 @@ public class BookRepositoryCustomImpl implements BookRepositoryCustom {
   }
 
   @Override
-  public List<BookStatDto> getDailyStats() {
-    LocalDate yesterday = LocalDate.now()
-                                   .minusDays(1);
-    LocalDateTime startDateTime = yesterday.atStartOfDay();
-    LocalDateTime endDateTime = yesterday.atTime(LocalTime.MAX);
+  public List<BookStatDto> getStatsByPeriod(RankType type) {
+    LocalDateTime startDateTime = null;
+    LocalDateTime endDateTime = null;
 
-    return getStats(startDateTime, endDateTime);
-  }
-
-  @Override
-  public List<BookStatDto> getWeeklyStats() {
-    // TODO 주간 날짜 통합
-    LocalDate yesterday = LocalDate.now()
-                                   .minusWeeks(1);
-    LocalDateTime startDateTime = yesterday.atStartOfDay();
-    LocalDateTime endDateTime = yesterday.atTime(LocalTime.MAX);
-
-    return getStats(startDateTime, endDateTime);
-  }
-
-  @Override
-  public List<BookStatDto> getMonthlyStats() {
     LocalDate today = LocalDate.now();
-    LocalDateTime startDateTime = today.withDayOfMonth(1)
-                                       .atStartOfDay();
-    LocalDateTime endDateTime = today.atTime(LocalTime.MAX);
+
+    switch (type) {
+      case DAILY -> {
+        LocalDate yesterday = today.minusDays(1);
+        startDateTime = yesterday.atStartOfDay();
+        endDateTime = yesterday.atTime(LocalTime.MAX);
+      }
+      case WEEKLY -> {
+        LocalDate startOfLastWeek = today.with(DayOfWeek.MONDAY);
+        startDateTime = startOfLastWeek.atStartOfDay();
+        endDateTime = today.atTime(LocalTime.MAX);
+      }
+      case MONTHLY -> {
+        LocalDate firstDayOfLastMonth = today.withDayOfMonth(1);
+        startDateTime = firstDayOfLastMonth.atStartOfDay();
+        endDateTime = today.atTime(LocalTime.MAX);
+      }
+      case ALL_TIME -> {
+        startDateTime = null;
+        endDateTime = null;
+      }
+    }
 
     return getStats(startDateTime, endDateTime);
   }
@@ -231,6 +242,12 @@ public class BookRepositoryCustomImpl implements BookRepositoryCustom {
   private List<BookStatDto> getStats(LocalDateTime startDateTime, LocalDateTime endDateTime) {
     QBook book = QBook.book;
     QReview review = QReview.review;
+
+    BooleanExpression dateCondition = null;
+
+    if (startDateTime != null && endDateTime != null) {
+      dateCondition = review.createdAt.between(startDateTime, endDateTime);
+    }
 
     return jpaQueryFactory
         .select(Projections.constructor(BookStatDto.class,
@@ -241,8 +258,9 @@ public class BookRepositoryCustomImpl implements BookRepositoryCustom {
         .from(book)
         .innerJoin(review)
         .on(review.book.id.eq(book.id)
-                          .and(review.createdAt.between(startDateTime, endDateTime)))
-        .where(book.createdAt.between(startDateTime, endDateTime))
+                          .and(review.deletedAt.isNull())
+                          .and(dateCondition != null ? dateCondition : Expressions.TRUE))
+        .where(book.deletedAt.isNull())
         .groupBy(book.id)
         .fetch();
   }

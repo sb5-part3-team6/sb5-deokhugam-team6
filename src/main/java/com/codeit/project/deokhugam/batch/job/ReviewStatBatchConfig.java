@@ -1,14 +1,13 @@
 package com.codeit.project.deokhugam.batch.job;
 
-import com.codeit.project.deokhugam.batch.processor.review.DailyStatProcessor;
-import com.codeit.project.deokhugam.batch.processor.review.MonthlyStatProcessor;
-import com.codeit.project.deokhugam.batch.processor.review.WeeklyStatProcessor;
-import com.codeit.project.deokhugam.batch.reader.review.DailyStatReader;
-import com.codeit.project.deokhugam.batch.reader.review.MonthlyStatReader;
-import com.codeit.project.deokhugam.batch.reader.review.WeeklyStatReader;
+import com.codeit.project.deokhugam.batch.processor.ReviewStatProcessor;
+import com.codeit.project.deokhugam.batch.reader.ReviewStatReader;
 import com.codeit.project.deokhugam.batch.writer.StatWriter;
 import com.codeit.project.deokhugam.domain.rank.entity.Rank;
+import com.codeit.project.deokhugam.domain.rank.entity.RankTarget;
+import com.codeit.project.deokhugam.domain.rank.entity.RankType;
 import com.codeit.project.deokhugam.domain.review.dto.ReviewStatDto;
+import com.codeit.project.deokhugam.domain.review.repository.ReviewStatRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
@@ -26,23 +25,15 @@ public class ReviewStatBatchConfig {
 
   private final JobRepository jobRepository;
   private final PlatformTransactionManager transactionManager;
-
-  private final DailyStatReader dailyStatReader;
-  private final WeeklyStatReader weeklyStatReader;
-  private final MonthlyStatReader monthlyStatReader;
-
-  private final DailyStatProcessor dailyStatProcessor;
-  private final WeeklyStatProcessor weeklyStatProcessor;
-  private final MonthlyStatProcessor monthlyStatProcessor;
-
+  private final ReviewStatRepository reviewStatRepository;
   private final StatWriter statWriter;
 
   @Bean
   public Step dailyReviewStatStep() {
     return new StepBuilder("dailyReviewStatStep", jobRepository)
         .<ReviewStatDto, Rank>chunk(100, transactionManager)
-        .reader(dailyStatReader)
-        .processor(dailyStatProcessor)
+        .reader(new ReviewStatReader(reviewStatRepository, RankType.DAILY))
+        .processor(new ReviewStatProcessor(RankType.DAILY, RankTarget.REVIEW))
         .writer(statWriter)
         .build();
   }
@@ -51,8 +42,8 @@ public class ReviewStatBatchConfig {
   public Step weeklyReviewStatStep() {
     return new StepBuilder("weeklyReviewStatStep", jobRepository)
         .<ReviewStatDto, Rank>chunk(100, transactionManager)
-        .reader(weeklyStatReader)
-        .processor(weeklyStatProcessor)
+        .reader(new ReviewStatReader(reviewStatRepository, RankType.WEEKLY))
+        .processor(new ReviewStatProcessor(RankType.WEEKLY, RankTarget.REVIEW))
         .writer(statWriter)
         .build();
   }
@@ -61,8 +52,8 @@ public class ReviewStatBatchConfig {
   public Step monthlyReviewStatStep() {
     return new StepBuilder("monthlyReviewStatStep", jobRepository)
         .<ReviewStatDto, Rank>chunk(100, transactionManager)
-        .reader(monthlyStatReader)
-        .processor(monthlyStatProcessor)
+        .reader(new ReviewStatReader(reviewStatRepository, RankType.MONTHLY))
+        .processor(new ReviewStatProcessor(RankType.MONTHLY, RankTarget.REVIEW))
         .writer(statWriter)
         .build();
   }

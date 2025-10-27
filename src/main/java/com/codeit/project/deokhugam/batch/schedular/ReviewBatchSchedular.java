@@ -14,30 +14,31 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class ReviewBatchSchedular {
 
-    private final JobLauncher jobLauncher;
-    private final Job dailyReviewStatJob;
-    private final Job weeklyReviewStatJob;
-    private final Job monthlyReviewStatJob;
+  private final JobLauncher jobLauncher;
+  private final Job dailyReviewStatJob;
+  private final Job weeklyReviewStatJob;
+  private final Job monthlyReviewStatJob;
 
-    @Scheduled(cron = "0 0 * * * ?", zone = "Asia/Seoul")
-    public void runAllJobs() {
-        runJob(dailyReviewStatJob, "dailyReview");
-        runJob(weeklyReviewStatJob, "weeklyReview");
-        runJob(monthlyReviewStatJob, "monthlyReview");
+  //    @Scheduled(cron = "0 0 * * * ?", zone = "Asia/Seoul")
+  @Scheduled(initialDelay = 1000, fixedDelay = 1000 * 60 * 60)
+  public void runAllJobs() {
+    runJob(dailyReviewStatJob, "dailyReview");
+    runJob(weeklyReviewStatJob, "weeklyReview");
+    runJob(monthlyReviewStatJob, "monthlyReview");
+  }
+
+  private void runJob(Job job, String name) {
+    try {
+      JobParameters jobParameters = new JobParametersBuilder()
+          .addString("requestDate", String.valueOf(System.currentTimeMillis()))
+          .addString("jobName", name)
+          .toJobParameters();
+
+      jobLauncher.run(job, jobParameters);
+      log.info("{} batch job 이 성공적으로 실행되었습니다.", name);
+
+    } catch (Exception e) {
+      log.error("{} batch job 실패", name, e);
     }
-
-    private void runJob(Job job, String name) {
-        try {
-            JobParameters jobParameters = new JobParametersBuilder()
-                    .addString("requestDate", String.valueOf(System.currentTimeMillis()))
-                    .addString("jobName", name)
-                    .toJobParameters();
-
-            jobLauncher.run(job, jobParameters);
-            log.info("{} batch job 이 성공적으로 실행되었습니다.", name);
-
-        } catch (Exception e) {
-            log.error("{} batch job 실패", name, e);
-        }
-    }
+  }
 }

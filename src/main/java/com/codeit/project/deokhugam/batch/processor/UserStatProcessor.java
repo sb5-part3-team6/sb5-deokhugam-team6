@@ -1,4 +1,4 @@
-package com.codeit.project.deokhugam.batch.processor.user;
+package com.codeit.project.deokhugam.batch.processor;
 
 import com.codeit.project.deokhugam.domain.rank.entity.Rank;
 import com.codeit.project.deokhugam.domain.rank.entity.RankTarget;

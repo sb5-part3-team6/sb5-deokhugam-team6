@@ -1,4 +1,4 @@
-package com.codeit.project.deokhugam.batch.processor.book;
+package com.codeit.project.deokhugam.batch.processor;
 
 import com.codeit.project.deokhugam.domain.book.dto.BookStatDto;
 import com.codeit.project.deokhugam.domain.rank.entity.Rank;

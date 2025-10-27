@@ -17,8 +17,8 @@ public class UserBatchSchedular {
   private final JobLauncher jobLauncher;
   private final Job monthlyUserStatJob;
 
-  @Scheduled(cron = "0 0 * * * ?", zone = "Asia/Seoul")
-//  @Scheduled(initialDelay = 1000, fixedDelay = 1000 * 60 * 60)
+//  @Scheduled(cron = "0 0 * * * ?", zone = "Asia/Seoul")
+  @Scheduled(initialDelay = 1000, fixedDelay = 1000 * 60 * 60)
   public void runAllJobs() {
     runJob(monthlyUserStatJob, "monthlyUser");
   }

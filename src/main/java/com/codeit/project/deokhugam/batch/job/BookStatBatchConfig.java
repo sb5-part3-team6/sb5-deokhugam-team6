@@ -1,7 +1,7 @@
 package com.codeit.project.deokhugam.batch.job;
 
-import com.codeit.project.deokhugam.batch.processor.book.BookStatProcessor;
-import com.codeit.project.deokhugam.batch.reader.book.BookStatReader;
+import com.codeit.project.deokhugam.batch.processor.BookStatProcessor;
+import com.codeit.project.deokhugam.batch.reader.BookStatReader;
 import com.codeit.project.deokhugam.batch.writer.StatWriter;
 import com.codeit.project.deokhugam.domain.book.dto.BookStatDto;
 import com.codeit.project.deokhugam.domain.book.repository.BookRepository;

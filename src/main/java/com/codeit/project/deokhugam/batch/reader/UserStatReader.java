@@ -1,4 +1,4 @@
-package com.codeit.project.deokhugam.batch.reader.user;
+package com.codeit.project.deokhugam.batch.reader;
 
 import com.codeit.project.deokhugam.domain.rank.entity.RankType;
 import com.codeit.project.deokhugam.domain.user.dto.UserStatDto;
@@ -27,12 +27,14 @@ public class UserStatReader implements ItemReader<UserStatDto> {
   public UserStatDto read() {
     if (iterator == null) {
       switch (rankType) {
-        case DAILY -> iterator = userRepository.getDailyStats()
+        case DAILY -> iterator = userRepository.getStatsByPeriod(RankType.DAILY)
                                                .iterator();
-        case WEEKLY -> iterator = userRepository.getWeeklyStats()
+        case WEEKLY -> iterator = userRepository.getStatsByPeriod(RankType.WEEKLY)
                                                 .iterator();
-        case MONTHLY -> iterator = userRepository.getMonthlyStats()
+        case MONTHLY -> iterator = userRepository.getStatsByPeriod(RankType.MONTHLY)
                                                  .iterator();
+        case ALL_TIME -> iterator = userRepository.getStatsByPeriod(RankType.ALL_TIME)
+                                                  .iterator();
         default -> throw new IllegalArgumentException("Unsupported RankType: " + rankType);
       }
     }

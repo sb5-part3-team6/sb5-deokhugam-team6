@@ -1,7 +1,7 @@
 package com.codeit.project.deokhugam.batch.job;
 
-import com.codeit.project.deokhugam.batch.processor.user.UserStatProcessor;
-import com.codeit.project.deokhugam.batch.reader.user.UserStatReader;
+import com.codeit.project.deokhugam.batch.processor.UserStatProcessor;
+import com.codeit.project.deokhugam.batch.reader.UserStatReader;
 import com.codeit.project.deokhugam.batch.writer.StatWriter;
 import com.codeit.project.deokhugam.domain.rank.entity.Rank;
 import com.codeit.project.deokhugam.domain.rank.entity.RankTarget;
