@@ -29,6 +29,26 @@ public class UserStatBatchConfig {
   private final StatWriter statWriter;
 
   @Bean
+  public Step dailyUserStatStep() {
+    return new StepBuilder("dailyUserStatStep", jobRepository)
+        .<UserStatDto, Rank>chunk(100, transactionManager)
+        .reader(new UserStatReader(userRepository, RankType.DAILY))
+        .processor(new UserStatProcessor(RankType.DAILY, RankTarget.USER))
+        .writer(statWriter)
+        .build();
+  }
+
+  @Bean
+  public Step weeklyUserStatStep() {
+    return new StepBuilder("weeklyUserStatStep", jobRepository)
+        .<UserStatDto, Rank>chunk(100, transactionManager)
+        .reader(new UserStatReader(userRepository, RankType.WEEKLY))
+        .processor(new UserStatProcessor(RankType.WEEKLY, RankTarget.USER))
+        .writer(statWriter)
+        .build();
+  }
+
+  @Bean
   public Step monthlyUserStatStep() {
     return new StepBuilder("monthlyUserStatStep", jobRepository)
         .<UserStatDto, Rank>chunk(100, transactionManager)
@@ -38,12 +58,45 @@ public class UserStatBatchConfig {
         .build();
   }
 
+  @Bean
+  public Step allTimeUserStatStep() {
+    return new StepBuilder("allTimeUserStatStep", jobRepository)
+        .<UserStatDto, Rank>chunk(100, transactionManager)
+        .reader(new UserStatReader(userRepository, RankType.ALL_TIME))
+        .processor(new UserStatProcessor(RankType.ALL_TIME, RankTarget.USER))
+        .writer(statWriter)
+        .build();
+  }
+
+  @Bean
+  public Job dailyUserStatJob() {
+    return new JobBuilder("dailyUserStatJob", jobRepository)
+        .incrementer(new RunIdIncrementer())
+        .start(dailyUserStatStep())
+        .build();
+  }
+
+  @Bean
+  public Job weeklyUserStatJob() {
+    return new JobBuilder("weeklyUserStatJob", jobRepository)
+        .incrementer(new RunIdIncrementer())
+        .start(weeklyUserStatStep())
+        .build();
+  }
 
   @Bean
   public Job monthlyUserStatJob() {
     return new JobBuilder("monthlyUserStatJob", jobRepository)
         .incrementer(new RunIdIncrementer())
         .start(monthlyUserStatStep())
+        .build();
+  }
+
+  @Bean
+  public Job allTimeUserStatJob() {
+    return new JobBuilder("allTimeUserStatJob", jobRepository)
+        .incrementer(new RunIdIncrementer())
+        .start(allTimeUserStatStep())
         .build();
   }
 }

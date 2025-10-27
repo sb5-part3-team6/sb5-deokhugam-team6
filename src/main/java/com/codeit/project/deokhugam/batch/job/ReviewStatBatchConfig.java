@@ -59,6 +59,16 @@ public class ReviewStatBatchConfig {
   }
 
   @Bean
+  public Step allTimeReviewStatStep() {
+    return new StepBuilder("allTimeReviewStatStep", jobRepository)
+        .<ReviewStatDto, Rank>chunk(100, transactionManager)
+        .reader(new ReviewStatReader(reviewStatRepository, RankType.ALL_TIME))
+        .processor(new ReviewStatProcessor(RankType.MONTHLY, RankTarget.REVIEW))
+        .writer(statWriter)
+        .build();
+  }
+
+  @Bean
   public Job dailyReviewStatJob() {
     return new JobBuilder("dailyReviewStatJob", jobRepository)
         .incrementer(new RunIdIncrementer())
@@ -79,6 +89,14 @@ public class ReviewStatBatchConfig {
     return new JobBuilder("monthlyReviewStatJob", jobRepository)
         .incrementer(new RunIdIncrementer())
         .start(monthlyReviewStatStep())
+        .build();
+  }
+
+  @Bean
+  public Job allTimeReviewStatJob() {
+    return new JobBuilder("allTimeReviewStatJob", jobRepository)
+        .incrementer(new RunIdIncrementer())
+        .start(allTimeReviewStatStep())
         .build();
   }
 }

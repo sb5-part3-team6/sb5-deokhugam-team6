@@ -15,12 +15,18 @@ import org.springframework.stereotype.Component;
 public class BookBatchSchedular {
 
   private final JobLauncher jobLauncher;
+  private final Job dailyBookStatJob;
+  private final Job weeklyBookStatJob;
   private final Job monthlyBookStatJob;
+  private final Job allTimeBookStatJob;
 
 //  @Scheduled(cron = "0 0 * * * ?", zone = "Asia/Seoul")
   @Scheduled(initialDelay = 1000, fixedDelay = 1000 * 60 * 60)
   public void runAllJobs() {
     runJob(monthlyBookStatJob, "monthlyBook");
+    runJob(dailyBookStatJob, "dailyBook");
+    runJob(weeklyBookStatJob, "weeklyBook");
+    runJob(allTimeBookStatJob, "allTimeBook");
   }
 
   private void runJob(Job job, String name) {

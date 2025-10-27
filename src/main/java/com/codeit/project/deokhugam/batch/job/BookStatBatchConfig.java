@@ -29,6 +29,26 @@ public class BookStatBatchConfig {
   private final StatWriter statWriter;
 
   @Bean
+  public Step dailyBookStatStep() {
+    return new StepBuilder("dailyBookStatStep", jobRepository)
+        .<BookStatDto, Rank>chunk(100, transactionManager)
+        .reader(new BookStatReader(bookRepository, RankType.DAILY))
+        .processor(new BookStatProcessor(RankType.DAILY, RankTarget.BOOK))
+        .writer(statWriter)
+        .build();
+  }
+
+  @Bean
+  public Step weeklyBookStatStep() {
+    return new StepBuilder("weeklyBookStatStep", jobRepository)
+        .<BookStatDto, Rank>chunk(100, transactionManager)
+        .reader(new BookStatReader(bookRepository, RankType.WEEKLY))
+        .processor(new BookStatProcessor(RankType.WEEKLY, RankTarget.BOOK))
+        .writer(statWriter)
+        .build();
+  }
+
+  @Bean
   public Step monthlyBookStatStep() {
     return new StepBuilder("monthlyBookStatStep", jobRepository)
         .<BookStatDto, Rank>chunk(100, transactionManager)
@@ -38,12 +58,45 @@ public class BookStatBatchConfig {
         .build();
   }
 
+  @Bean
+  public Step allTimeBookStatStep() {
+    return new StepBuilder("allTimeBookStatStep", jobRepository)
+        .<BookStatDto, Rank>chunk(100, transactionManager)
+        .reader(new BookStatReader(bookRepository, RankType.ALL_TIME))
+        .processor(new BookStatProcessor(RankType.ALL_TIME, RankTarget.BOOK))
+        .writer(statWriter)
+        .build();
+  }
+
+  @Bean
+  public Job dailyBookStatJob() {
+    return new JobBuilder("dailyBookStatJob", jobRepository)
+        .incrementer(new RunIdIncrementer())
+        .start(dailyBookStatStep())
+        .build();
+  }
+
+  @Bean
+  public Job weeklyBookStatJob() {
+    return new JobBuilder("weeklyBookStatJob", jobRepository)
+        .incrementer(new RunIdIncrementer())
+        .start(weeklyBookStatStep())
+        .build();
+  }
 
   @Bean
   public Job monthlyBookStatJob() {
     return new JobBuilder("monthlyBookStatJob", jobRepository)
         .incrementer(new RunIdIncrementer())
         .start(monthlyBookStatStep())
+        .build();
+  }
+
+  @Bean
+  public Job allTimeBookStatJob() {
+    return new JobBuilder("allTimeBookStatJob", jobRepository)
+        .incrementer(new RunIdIncrementer())
+        .start(allTimeBookStatStep())
         .build();
   }
 }

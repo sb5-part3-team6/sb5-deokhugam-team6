@@ -18,13 +18,15 @@ public class ReviewBatchSchedular {
   private final Job dailyReviewStatJob;
   private final Job weeklyReviewStatJob;
   private final Job monthlyReviewStatJob;
+  private final Job allTimeReviewStatJob;
 
-  //    @Scheduled(cron = "0 0 * * * ?", zone = "Asia/Seoul")
+//  @Scheduled(cron = "0 0 * * * ?", zone = "Asia/Seoul")
   @Scheduled(initialDelay = 1000, fixedDelay = 1000 * 60 * 60)
   public void runAllJobs() {
     runJob(dailyReviewStatJob, "dailyReview");
     runJob(weeklyReviewStatJob, "weeklyReview");
     runJob(monthlyReviewStatJob, "monthlyReview");
+    runJob(allTimeReviewStatJob, "allTimeReview");
   }
 
   private void runJob(Job job, String name) {
