@@ -82,7 +82,8 @@ public class CommentRepositoryCustomImpl implements CommentRepositoryCustom {
         Long totalElements = queryFactory
                 .select(comment.count())
                 .from(comment)
-                .where(comment.review.id.eq(reviewId))
+                .where(comment.review.id.eq(reviewId)
+                                        .and(comment.deletedAt.isNull()))
                 .fetchOne();
 
         return new PageResponse(

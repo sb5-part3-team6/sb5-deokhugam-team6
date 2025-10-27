@@ -114,7 +114,7 @@ public class ReviewServiceImpl implements ReviewService {
 
         boolean likedByMe = reviewLikeRepository.existsByReviewIdAndUserId(review.getId(), user.getId());
         int likeCount = reviewLikeRepository.countByReviewId(review.getId());
-        int commentCount =  commentRepository.countByReviewId(review.getId());
+        int commentCount =  commentRepository.countByReviewIdAndDeletedAtIsNull(review.getId());
 
         return reviewMapper.toDto(review,likeCount,commentCount,likedByMe);
     }
