@@ -16,7 +16,7 @@ import java.util.stream.Collectors;
 @Component
 @StepScope
 @RequiredArgsConstructor
-public class StatWriter implements ItemWriter<Rank> {
+public class RankWriter implements ItemWriter<Rank> {
 
     private final RankRepository rankRepository;
 
