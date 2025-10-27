@@ -1,21 +1,29 @@
 package com.codeit.project.deokhugam.openapi.dto;
 
-import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
-import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
-import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
+import jakarta.xml.bind.annotation.XmlAccessType;
+import jakarta.xml.bind.annotation.XmlAccessorType;
+import jakarta.xml.bind.annotation.XmlElement;
+import jakarta.xml.bind.annotation.XmlRootElement;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 import java.util.List;
 
 @Getter
-@JacksonXmlRootElement(localName = "rss")
+@NoArgsConstructor
+@XmlRootElement(name = "rss")
+@XmlAccessorType(XmlAccessType.FIELD)
 public class NaverBookRss {
+
+    @XmlElement(name = "channel")
     private Channel channel;
 
+
     @Getter
+    @NoArgsConstructor
+    @XmlAccessorType(XmlAccessType.FIELD)
     public static class Channel {
-        @JacksonXmlElementWrapper(useWrapping = false)
-        @JacksonXmlProperty(localName = "item")
+        @XmlElement(name = "item")
         private List<Item> items;
     }
 }

@@ -37,13 +37,15 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-webflux'
 
     // XML Passer
-    implementation 'com.fasterxml.jackson.dataformat:jackson-dataformat-xml'
+    implementation 'jakarta.xml.bind:jakarta.xml.bind-api:4.0.0'
+    implementation 'org.glassfish.jaxb:jaxb-runtime:4.0.2'
+
 
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
 //    implementation 'io.micrometer:micrometer-registry-prometheus'    // 나중에 커스텀 메트릭 전송용
 
     implementation 'org.mapstruct:mapstruct:1.6.3'
-//    implementation 'org.springframework.boot:spring-boot-starter-batch'    // 추후 배치 고려
+    implementation 'org.springframework.boot:spring-boot-starter-batch'    // 추후 배치 고려
 
     compileOnly 'org.projectlombok:lombok'
     developmentOnly 'org.springframework.boot:spring-boot-devtools'

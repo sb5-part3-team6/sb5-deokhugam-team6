@@ -1,9 +1,9 @@
 package com.codeit.project.deokhugam.openapi.api;
 
-import com.codeit.project.deokhugam.domain.book.dto.BookDto;
 import com.codeit.project.deokhugam.domain.book.dto.BookResponse;
 import com.codeit.project.deokhugam.openapi.dto.NaverBookRss;
-import com.fasterxml.jackson.dataformat.xml.XmlMapper;
+import jakarta.xml.bind.JAXBContext;
+import jakarta.xml.bind.Unmarshaller;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -12,9 +12,9 @@ import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 
+import java.io.StringReader;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.util.List;
 
 @Slf4j
 @Component
@@ -28,7 +28,6 @@ public class NaverBookApiClient {
     private String clientSecret;
 
     private final @Qualifier("naverWebClient") WebClient naverWebClient;
-    private final XmlMapper xmlMapper;
 
     public BookResponse fetchBooks(String isbn) {
         String rss = naverWebClient.get()
@@ -47,23 +46,23 @@ public class NaverBookApiClient {
 
         return response.getChannel().getItems().stream()
                 .map(item -> BookResponse.builder()
-                        .title(item.title())
-                        .author(item.author())
-                        .description(item.description())
-                        .publisher(item.publisher())
-                        .publishedDate(LocalDate.parse(item.pubdate(), DateTimeFormatter.ofPattern("yyyyMMdd")))
-                        .isbn(item.isbn())
-                        .thumbnailImage(item.image())
+                        .title(item.getTitle())
+                        .author(item.getAuthor())
+                        .description(item.getDescription())
+                        .publisher(item.getPublisher())
+                        .publishedDate(LocalDate.parse(item.getPubdate(), DateTimeFormatter.ofPattern("yyyyMMdd")))
+                        .isbn(item.getIsbn())
+                        .thumbnailImage(item.getImage())
                         .build()
                 ).findFirst().get();
     }
 
     private NaverBookRss parseXml(String xml) {
         try {
-            xmlMapper.configure(com.fasterxml.jackson.databind.DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-            return xmlMapper.readValue(xml, NaverBookRss.class);
+            JAXBContext context = JAXBContext.newInstance(NaverBookRss.class);
+            Unmarshaller unmarshaller = context.createUnmarshaller();
+            return (NaverBookRss) unmarshaller.unmarshal(new StringReader(xml));
         } catch (Exception e) {
-            log.error("XML 파싱 실패: {}", xml, e);
             throw new RuntimeException("XML 파싱 실패", e);
         }
     }
