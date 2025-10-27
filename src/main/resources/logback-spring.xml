@@ -4,7 +4,7 @@
 
   <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
     <encoder>
-      <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} %clr(%-5level) %clr(%X{requestId:-NO-REQ-ID}){magenta} %clr(%X{ip:-NO-IP}){cyan} %clr(%X{userId:-ANONYMOUS}){yellow} [%thread] %logger{36} - %msg%n</pattern>
+      <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} %clr(%-5level) %clr(%X{requestId:-NO-REQ-ID}){magenta} %clr(%X{ip:-NO-IP}){cyan} %clr(%X{userId:-UNKNOWN}){yellow} [%thread] %logger{36} - %msg%n</pattern>
 
     </encoder>
   </appender>
