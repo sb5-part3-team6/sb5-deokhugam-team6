@@ -125,7 +125,11 @@ public class BookRepositoryCustomImpl implements BookRepositoryCustom {
   }
 
   private OrderSpecifier<?> gettertiaryOrder(QBook book, BookSearchRequest req) {
-    Order order ="DESC".equalsIgnoreCase(req.orderBy()) ? Order.DESC : Order.ASC;
+    Order order = switch (req.direction()){
+      case "ASC" -> Order.ASC;
+      case "DESC" -> Order.DESC;
+      default -> Order.DESC;
+    };
     return new OrderSpecifier<>(order, book.id);
   }
 
