@@ -66,6 +66,7 @@ public class BookRepositoryCustomImpl implements BookRepositoryCustom {
     //정렬조건
     OrderSpecifier<?> primaryOrder = getPrimaryOrder(book,reviewCount, ratingAvg,bookSearchReq);
     OrderSpecifier<?> secondaryOrder = getSecondaryOrder(book, bookSearchReq);
+    OrderSpecifier<?> tertiaryOrder = gettertiaryOrder(book, bookSearchReq);
 
     //커서
     if(bookSearchReq.cursor() !=null && bookSearchReq.after()!=null){
@@ -93,7 +94,7 @@ public class BookRepositoryCustomImpl implements BookRepositoryCustom {
         .leftJoin(review).on(review.book.eq(book))
         .where(where)
         .groupBy(book.id)
-        .orderBy(primaryOrder, secondaryOrder)
+        .orderBy(primaryOrder, secondaryOrder, tertiaryOrder)
         .limit(pageSize+1)
         .fetch();
   }
@@ -105,7 +106,8 @@ public class BookRepositoryCustomImpl implements BookRepositoryCustom {
     };
 
     return switch (req.orderBy()) {
-      case "title" -> new OrderSpecifier<>(order, book.title);
+      case "title" ->
+        new OrderSpecifier<>(order, book.title.lower());
       case "publishedDate" -> new OrderSpecifier<>(order, book.publishedAt);
       case "rating" -> new OrderSpecifier<>(order, ratingAvg);
       case "reviewCount" -> new OrderSpecifier<>(order, reviewCount);
@@ -121,6 +123,12 @@ public class BookRepositoryCustomImpl implements BookRepositoryCustom {
     };
     return new OrderSpecifier<>(order, book.createdAt);
   }
+
+  private OrderSpecifier<?> gettertiaryOrder(QBook book, BookSearchRequest req) {
+    Order order ="DESC".equalsIgnoreCase(req.orderBy()) ? Order.DESC : Order.ASC;
+    return new OrderSpecifier<>(order, book.id);
+  }
+
   private Comparable<?> parseCursorValue(String orderBy, String cursor) {
     switch (orderBy) {
       case "title":
