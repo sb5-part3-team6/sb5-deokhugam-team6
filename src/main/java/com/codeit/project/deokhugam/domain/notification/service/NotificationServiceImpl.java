@@ -12,11 +12,14 @@ import com.codeit.project.deokhugam.domain.notification.mapper.NotificationMappe
 import com.codeit.project.deokhugam.domain.notification.repository.NotificationRepository;
 import com.codeit.project.deokhugam.domain.user.repository.UserRepository;
 import com.codeit.project.deokhugam.global.common.dto.PageResponse;
-import jakarta.transaction.Transactional;
-import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDate;
+import java.util.List;
 
 @Slf4j
 @Service
@@ -104,6 +107,7 @@ public class NotificationServiceImpl implements NotificationService {
   }
 
   @Override
+  @Transactional(propagation = Propagation.REQUIRES_NEW)
   public void create(NotificationCreateCommand command) {
 
     switch (command.type()) {

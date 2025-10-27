@@ -4,14 +4,12 @@ import com.codeit.project.deokhugam.domain.book.entity.Book;
 import com.codeit.project.deokhugam.domain.book.exception.BookNotFoundException;
 import com.codeit.project.deokhugam.domain.book.repository.BookRepository;
 import com.codeit.project.deokhugam.domain.comment.repository.CommentRepository;
-import com.codeit.project.deokhugam.domain.notification.dto.NotificationCreateCommand;
-import com.codeit.project.deokhugam.domain.notification.entity.NotificationType;
-import com.codeit.project.deokhugam.domain.notification.service.NotificationService;
 import com.codeit.project.deokhugam.domain.rank.entity.Rank;
 import com.codeit.project.deokhugam.domain.rank.repository.RankRepository;
 import com.codeit.project.deokhugam.domain.review.dto.*;
 import com.codeit.project.deokhugam.domain.review.entity.Review;
 import com.codeit.project.deokhugam.domain.review.entity.ReviewLike;
+import com.codeit.project.deokhugam.domain.review.event.ReviewLikedEvent;
 import com.codeit.project.deokhugam.domain.review.exception.ReviewAlreadyExistsException;
 import com.codeit.project.deokhugam.domain.review.exception.ReviewNotFoundException;
 import com.codeit.project.deokhugam.domain.review.mapper.ReviewMapper;
@@ -22,7 +20,9 @@ import com.codeit.project.deokhugam.domain.user.entity.User;
 import com.codeit.project.deokhugam.domain.user.repository.UserRepository;
 import com.codeit.project.deokhugam.global.common.dto.PageResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
@@ -39,41 +39,35 @@ public class ReviewServiceImpl implements ReviewService {
     private final CommentRepository commentRepository;
     private final RankRepository rankRepository;
     private final ReviewMapper reviewMapper;
-    private final NotificationService notificationService;
+    private final ApplicationEventPublisher eventPublisher;
 
     @Override
     public ReviewDto create(ReviewCreateRequest request) {
 
         User user = verifyUserExists(request.userId());
         Book book = verifyBookExists(request.bookId());
-
-        // 중복된 리뷰가 있는지 확인
         Review review = reviewRepository.findByUserIdAndBookId(user.getId(), book.getId());
 
-        if(review == null){ // 중복된 리뷰가 없다면
-            Review newReview = reviewRepository.save(new Review(user, book, request.content(), request.rating())); // 리뷰 등록
+        if(review == null) {
+            Review newReview = reviewRepository.save(new Review(user, book, request.content(), request.rating()));
             return reviewMapper.toDto(newReview,0,0,false);
-        } else { // 중복된 리뷰가 있는데
-            if(review.getDeletedAt() != null){ // 그게 소프트 삭제 된 리뷰라면
-                hardDelete(review.getId(), user.getId()); // 완전히 삭제해버림
-                Review newReview = reviewRepository.save(new Review(user, book, request.content(), request.rating())); // 리뷰 등록
+        } else {
+            if(review.getDeletedAt() != null){
+                hardDelete(review.getId(), user.getId());
+                Review newReview = reviewRepository.save(new Review(user, book, request.content(), request.rating()));
                 return reviewMapper.toDto(newReview,0,0,false);
             }
-            throw new ReviewAlreadyExistsException(); // 삭제된 리뷰가 아니라면 예외 처리 던지기
+            throw new ReviewAlreadyExistsException();
         }
     }
 
     @Override
+    @Transactional
     public ReviewLikeDto createLike(Long reviewId, Long userId) {
         Review review = verifyReviewExists(reviewId);
         User user = verifyUserExists(userId);
         boolean reviewLike = toggleReviewLike(review, user);
 
-        notificationService.create(NotificationCreateCommand.builder()
-                                                            .type(NotificationType.REVIEW_LIKED)
-                                                            .reactor(user)
-                                                            .review(review)
-                                                            .build());
         return ReviewLikeDto.builder()
                 .reviewId(review.getId())
                 .userId(user.getId())
@@ -214,8 +208,12 @@ public class ReviewServiceImpl implements ReviewService {
 
         if (maybeLike.isPresent()) {
             reviewLikeRepository.delete(maybeLike.get());
+            //TODO: 관련 알림 삭제 - NotificationRepository.delete()
             return false;
         }
+
+        ReviewLikedEvent event = new ReviewLikedEvent(review, user);
+        eventPublisher.publishEvent(event);
 
         reviewLikeRepository.save(new ReviewLike(review, user));
         return true;
