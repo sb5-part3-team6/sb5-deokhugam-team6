@@ -17,12 +17,6 @@ spring:
       ddl-auto: validate
     open-in-view: false
 
-  batch:
-    job:
-      enabled: false
-    jdbc:
-      initialize-schema: always
-
 management:
   endpoints:
     web:
