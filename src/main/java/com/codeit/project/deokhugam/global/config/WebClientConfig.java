@@ -18,4 +18,11 @@ public class WebClientConfig {
                 .baseUrl("https://openapi.naver.com")
                 .build();
     }
+
+    @Bean
+    public WebClient ocrSpaceWebClient(WebClient.Builder builder) {
+        return builder
+            .baseUrl("https://api.ocr.space")
+            .build();
+    }
 }
