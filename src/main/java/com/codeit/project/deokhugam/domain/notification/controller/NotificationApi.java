@@ -10,7 +10,6 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import java.time.LocalDate;
 import org.springframework.http.ResponseEntity;
 
 @Tag(name = "알림 관리", description = "알림 관련 API")
@@ -25,8 +24,8 @@ public interface NotificationApi {
   ResponseEntity<PageResponse> get(
       @Parameter(description = "유저 ID") String userId,
       @Parameter(description = "정렬 방향") String direction,
-      @Parameter(description = "페이지네이션 커서") LocalDate cursor,
-      @Parameter(description = "보조 커서") LocalDate after,
+      @Parameter(description = "페이지네이션 커서") String cursor,
+      @Parameter(description = "보조 커서") String after,
       @Parameter(description = "페이지 크기") Integer limit);
 
   @Operation(summary = "알림 읽음 상태 업데이트")

@@ -1,7 +1,7 @@
 package com.codeit.project.deokhugam.domain.user.entity;
 
 
-import com.codeit.project.deokhugam.global.entity.BaseEntity;
+import com.codeit.project.deokhugam.global.entity.BaseDeletableEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
@@ -14,7 +14,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Entity
 @Table(name = "users")
-public class User extends BaseEntity {
+public class User extends BaseDeletableEntity {
 
   @Column(length = 300, unique = true, nullable = false)
   private String email;

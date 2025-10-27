@@ -5,7 +5,6 @@ import com.codeit.project.deokhugam.domain.notification.entity.QNotification;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.jpa.impl.JPAQueryFactory;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -20,22 +19,17 @@ public class NotificationRepositoryCustomImpl implements NotificationRepositoryC
 
   @Override
   public List<Notification> findNotificationsByUserId(Long userId, String direction,
-      LocalDate cursor, LocalDate after, int limit) {
+      String cursor, String after, int limit) {
 
     BooleanBuilder builder = new BooleanBuilder();
     builder.and(notification.user.id.eq(userId));
 
     if (cursor != null) {
-      builder.and(notification.createdAt.lt(cursor.atStartOfDay()));
+      builder.and(notification.id.lt(Long.parseLong(cursor)));
     }
 
-    if (after != null && cursor != after) {
-      // TODO : 프로토 타입 cursor = after던데 체크 필요
-      builder.and(notification.createdAt.gt(after.atStartOfDay()));
-    }
-
-    OrderSpecifier<?> order = "ASC".equalsIgnoreCase(direction) ? notification.createdAt.asc()
-        : notification.createdAt.desc();
+    OrderSpecifier<?> order = "ASC".equalsIgnoreCase(direction) ? notification.id.asc()
+        : notification.id.desc();
 
     return qf.selectFrom(notification)
              .where(builder)

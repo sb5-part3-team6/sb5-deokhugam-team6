@@ -2,7 +2,7 @@ package com.codeit.project.deokhugam.domain.review.entity;
 
 import com.codeit.project.deokhugam.domain.book.entity.Book;
 import com.codeit.project.deokhugam.domain.user.entity.User;
-import com.codeit.project.deokhugam.global.entity.BaseEntity;
+import com.codeit.project.deokhugam.global.entity.BaseDeletableEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.JoinColumn;
@@ -19,7 +19,7 @@ import lombok.NoArgsConstructor;
 @Entity
 @Table(name = "reviews",
     uniqueConstraints = @UniqueConstraint(columnNames = {"user_id", "book_id"}))
-public class Review extends BaseEntity {
+public class Review extends BaseDeletableEntity {
 
   @ManyToOne
   @JoinColumn(name = "user_id", nullable = false)

@@ -59,7 +59,6 @@ CREATE TABLE review_likes
     user_id    BIGINT                   NOT NULL,
     created_at timestamp with time zone NOT NULL,
     updated_at timestamp with time zone,
-    deleted_at timestamp with time zone,
     CONSTRAINT fk_review_likes_review FOREIGN KEY (review_id)
         REFERENCES reviews (id),
     CONSTRAINT fk_review_likes_user FOREIGN KEY (user_id)
@@ -92,7 +91,6 @@ CREATE TABLE notifications
     confirmed  BOOLEAN DEFAULT false,
     created_at timestamp with time zone NOT NULL,
     updated_at timestamp with time zone,
-    deleted_at timestamp with time zone,
     CONSTRAINT fk_notifications_review FOREIGN KEY (review_id)
         REFERENCES reviews (id),
     CONSTRAINT fk_notifications_user FOREIGN KEY (user_id)
@@ -108,8 +106,7 @@ CREATE TABLE ranks
     rank_no    INT,
     score      DECIMAL,
     created_at timestamp with time zone NOT NULL,
-    updated_at timestamp with time zone,
-    deleted_at timestamp with time zone
+    updated_at timestamp with time zone
 );
 
 COMMENT

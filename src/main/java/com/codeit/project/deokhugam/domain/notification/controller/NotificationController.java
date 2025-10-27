@@ -5,9 +5,7 @@ import com.codeit.project.deokhugam.domain.notification.dto.NotificationUpdateRe
 import com.codeit.project.deokhugam.domain.notification.service.NotificationService;
 import com.codeit.project.deokhugam.global.common.dto.PageResponse;
 import jakarta.validation.Valid;
-import java.time.LocalDate;
 import lombok.RequiredArgsConstructor;
-import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -30,9 +28,9 @@ public class NotificationController implements NotificationApi {
   @GetMapping
   public ResponseEntity<PageResponse> get(
       @RequestParam String userId,
-      @RequestParam(name = "direction", defaultValue = "DESC") String direction,
-      @RequestParam(name = "cursor", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate cursor,
-      @RequestParam(name = "after", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate after,
+      @RequestParam(name = "direction", defaultValue = "ASC") String direction,
+      @RequestParam(name = "cursor", required = false) String cursor,
+      @RequestParam(name = "after", required = false) String after,
       @RequestParam(name = "limit", defaultValue = "20") Integer limit) {
 
     PageResponse page = notificationService.getByCursor(userId, direction,

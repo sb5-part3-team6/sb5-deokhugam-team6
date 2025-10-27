@@ -31,24 +31,27 @@ public class NotificationServiceImpl implements NotificationService {
   private final NotificationMapper notificationMapper;
 
   @Override
-  public PageResponse getByCursor(String userId, String direction, LocalDate cursor,
-      LocalDate after, Integer limit) {
+  public PageResponse getByCursor(String userId, String direction, String cursor, String after,
+      Integer limit) {
 
     Long uid = Long.parseLong(userId);
 
     int fetchLimit = limit != null ? limit : 20;
 
     List<Notification> notifications = notificationRepository.findNotificationsByUserId(uid,
-        direction, cursor, after, fetchLimit);
+        direction, cursor, after, fetchLimit + 1);
 
     Long total = notificationRepository.countByUserId(uid);
 
-    String nextCursor = notifications.isEmpty() ? null : notifications.get(notifications.size() - 1)
-                                                                      .getCreatedAt()
-                                                                      .toLocalDate()
+    int idx = notifications.size() > fetchLimit ? fetchLimit - 1 : notifications.size() - 1;
+    String nextCursor = notifications.isEmpty() ? null : notifications.get(idx)
+                                                                      .getId()
                                                                       .toString();
 
-    boolean hasNext = notifications.size() >= fetchLimit;
+    boolean hasNext = notifications.size() > fetchLimit;
+    if(hasNext){
+      notifications.remove(notifications.size()-1);
+    }
 
     return PageResponse.builder()
                        .content(notifications.stream()
@@ -56,7 +59,7 @@ public class NotificationServiceImpl implements NotificationService {
                                              .toList())
                        .nextCursor(nextCursor)
                        .nextAfter(nextCursor)
-                       .size(notifications.size())
+                       .size(fetchLimit)
                        .hasNext(hasNext)
                        .totalElements(total)
                        .build();
@@ -115,7 +118,7 @@ public class NotificationServiceImpl implements NotificationService {
   }
 
   @Override
-  public void delete(NotificationDeleteCommand command){
+  public void delete(NotificationDeleteCommand command) {
     // TODO 조금 더 고민하고 구현해야할듯
   }
 
@@ -123,7 +126,8 @@ public class NotificationServiceImpl implements NotificationService {
 
     String content = NotificationType.REVIEW_LIKED.formatContent(command.reactor()
                                                                         .getNickname());
-    Notification notification = new Notification(command.review(), command.review().getUser(),
+    Notification notification = new Notification(command.review(), command.review()
+                                                                          .getUser(),
         NotificationType.REVIEW_LIKED.name(), content, false);
     notificationRepository.save(notification);
   }
@@ -140,7 +144,8 @@ public class NotificationServiceImpl implements NotificationService {
                                                                        .getNickname(), "");
     }
 
-    Notification notification = new Notification(command.review(), command.review().getUser(),
+    Notification notification = new Notification(command.review(), command.review()
+                                                                          .getUser(),
         NotificationType.REVIEW_COMMENTED.name(), content, false);
     notificationRepository.save(notification);
   }
@@ -154,7 +159,8 @@ public class NotificationServiceImpl implements NotificationService {
       content = NotificationType.REVIEW_RANKED.formatContent();
     }
 
-    Notification notification = new Notification(command.review(), command.review().getUser(),
+    Notification notification = new Notification(command.review(), command.review()
+                                                                          .getUser(),
         NotificationType.REVIEW_RANKED.name(), content, false);
     notificationRepository.save(notification);
   }

@@ -2,6 +2,7 @@ package com.codeit.project.deokhugam.domain.book.service;
 
 import com.codeit.project.deokhugam.domain.book.dto.BookCreateRequest;
 import com.codeit.project.deokhugam.domain.book.dto.BookDto;
+import com.codeit.project.deokhugam.domain.book.dto.BookPopularRequest;
 import com.codeit.project.deokhugam.domain.book.dto.BookSearchRequest;
 import com.codeit.project.deokhugam.domain.book.dto.BookUpdateRequest;
 import com.codeit.project.deokhugam.domain.book.dto.CursorPageResponseBookDto;
@@ -137,6 +138,11 @@ public class BookServiceImpl implements BookService {
         bookList.size(),
         String.valueOf(hasNext)
     );
+  }
+
+  @Override
+  public CursorPageResponseBookDto<BookDto> poplarList(BookPopularRequest bookPopularReq) {
+    return null;
   }
 
   @Transactional
