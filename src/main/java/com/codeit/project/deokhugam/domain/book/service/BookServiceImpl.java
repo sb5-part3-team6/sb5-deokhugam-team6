@@ -8,7 +8,6 @@ import com.codeit.project.deokhugam.domain.book.dto.BookUpdateRequest;
 import com.codeit.project.deokhugam.domain.book.dto.CursorPageResponseBookDto;
 import com.codeit.project.deokhugam.domain.book.entity.Book;
 import com.codeit.project.deokhugam.domain.book.mapper.BookMapper;
-import com.codeit.project.deokhugam.domain.book.repository.BookRepositoryCustom;
 import com.codeit.project.deokhugam.domain.book.repository.BookRepository;
 import com.codeit.project.deokhugam.domain.book.storage.FileStorage;
 import com.codeit.project.deokhugam.domain.comment.entity.Comment;
@@ -26,27 +25,27 @@ import org.springframework.web.multipart.MultipartFile;
 @Service
 @RequiredArgsConstructor
 public class BookServiceImpl implements BookService {
+
   private final BookMapper bookMapper;
   private final BookRepository bookRepository;
   private final FileStorage fileStorage;
   private final ReviewRepository reviewRepository;
-  private final BookRepositoryCustom bookQueryRepository;
   private final CommentRepository commentRepository;
 
   @Override
   @Transactional
   public BookDto create(BookCreateRequest bookData, MultipartFile thumbnailImage) {
-    if(bookRepository.existsByisbn(bookData.isbn())){
+    if (bookRepository.existsByisbn(bookData.isbn())) {
       throw new IllegalArgumentException("바코드가 중복되어 요청하신 ISBN을 사용할 수 없습니다. 다른 ISBN을 사용해주세요.");
     }
 
     String thumbnailImageUrl = null;
-    if(thumbnailImage!=null && !thumbnailImage.isEmpty()){
+    if (thumbnailImage != null && !thumbnailImage.isEmpty()) {
       fileStorage.saveThumbnailImage(bookData.isbn(), thumbnailImage);
       thumbnailImageUrl = fileStorage.getThumbnailImage(bookData.isbn());
     }
     //리뷰갯수 평점 넣어야 함
-    Book book =new Book(
+    Book book = new Book(
         bookData.title(),
         bookData.author(),
         bookData.description(),
@@ -65,10 +64,10 @@ public class BookServiceImpl implements BookService {
   @Override
   public BookDto update(Long bookId, BookUpdateRequest bookData, MultipartFile thumbnailImage) {
     Book book = bookRepository.findById(bookId)
-        .orElseThrow(()-> new NoSuchElementException("도서가 존재하지 않습니다."));
+                              .orElseThrow(() -> new NoSuchElementException("도서가 존재하지 않습니다."));
 
     String newThumbnailImageUrl = book.getThumbnailUrl();
-    if(thumbnailImage!=null && !thumbnailImage.isEmpty()){
+    if (thumbnailImage != null && !thumbnailImage.isEmpty()) {
       fileStorage.saveThumbnailImage(book.getIsbn(), thumbnailImage);
       newThumbnailImageUrl = fileStorage.getThumbnailImage(book.getIsbn());
     }
@@ -79,18 +78,20 @@ public class BookServiceImpl implements BookService {
     String newPublisher = bookData.publisher();
     LocalDate newpublishedDate = bookData.publishedDate();
 
-    book.update(newTitle,newAuthor,newDescription,newPublisher,newpublishedDate,newThumbnailImageUrl);
+    book.update(newTitle, newAuthor, newDescription, newPublisher, newpublishedDate,
+        newThumbnailImageUrl);
     Book updated = bookRepository.save(book);
     long reviewCount = getReviewCount(updated.getId());
     double rating = getAverageRating(updated.getId());
-    return bookMapper.toDto(updated,reviewCount,rating);
+    return bookMapper.toDto(updated, reviewCount, rating);
   }
 
   //리뷰 가져오기
-  public double getAverageRating(Long bookId){
+  public double getAverageRating(Long bookId) {
     double avg = reviewRepository.getAverageRating(bookId);
     return Math.round(avg * 10) / 10.0;
   }
+
   public Long getReviewCount(Long bookId) {
     return reviewRepository.getReviewCount(bookId);
   }
@@ -99,36 +100,37 @@ public class BookServiceImpl implements BookService {
   @Override
   public BookDto findById(Long bookId) {
     Book book = bookRepository.findById(bookId)
-        .orElseThrow(()->new NoSuchElementException("도서가 존재하지 않습니다."));
+                              .orElseThrow(() -> new NoSuchElementException("도서가 존재하지 않습니다."));
     long reviewCount = getReviewCount(book.getId());
     double rating = getAverageRating(book.getId());
-    return bookMapper.toDto(book,reviewCount,rating);
+    return bookMapper.toDto(book, reviewCount, rating);
   }
 
   @Transactional(readOnly = true)
   @Override
   public CursorPageResponseBookDto<BookDto> search(BookSearchRequest bookSearchReq) {
     int pageSize = bookSearchReq.limit() == null ? 50 : bookSearchReq.limit();
-    List<BookDto> bookList = bookQueryRepository.findBooks(bookSearchReq,pageSize+1);
+    List<BookDto> bookList = bookRepository.findBooks(bookSearchReq, pageSize + 1);
 
-    boolean hasNext = bookList.size()>pageSize;
-    bookList = hasNext ? bookList.subList(0,pageSize): bookList;
-
+    boolean hasNext = bookList.size() > pageSize;
+    bookList = hasNext ? bookList.subList(0, pageSize) : bookList;
 
     String nextCursor = null;
     String nextAfter = null;
 
-    if(hasNext && !bookList.isEmpty()){
-      BookDto last = bookList.get(bookList.size()-1);
+    if (hasNext && !bookList.isEmpty()) {
+      BookDto last = bookList.get(bookList.size() - 1);
 
       switch (bookSearchReq.orderBy()) {
         case "title" -> nextCursor = last.title();
-        case "publishedDate" -> nextCursor = last.publishedDate().toString();
+        case "publishedDate" -> nextCursor = last.publishedDate()
+                                                 .toString();
         case "rating" -> nextCursor = String.valueOf(last.rating());
         case "reviewCount" -> nextCursor = String.valueOf(last.reviewCount());
         default -> nextCursor = last.title();
       }
-      nextAfter = last.createdAt().toString();
+      nextAfter = last.createdAt()
+                      .toString();
     }
     return new CursorPageResponseBookDto<>(
         bookList,
@@ -149,7 +151,7 @@ public class BookServiceImpl implements BookService {
   @Override
   public void softDelete(Long bookId) {
     Book book = bookRepository.findById(bookId)
-        .orElseThrow(()-> new NoSuchElementException("도서가 존재하지 않습니다."));
+                              .orElseThrow(() -> new NoSuchElementException("도서가 존재하지 않습니다."));
     book.softDelete();
     List<Review> reviews = reviewRepository.findByBookId(bookId);
     reviews.forEach(review -> {
@@ -164,7 +166,7 @@ public class BookServiceImpl implements BookService {
   @Override
   public void hardDelete(Long bookId) {
     Book book = bookRepository.findById(bookId)
-        .orElseThrow(()-> new NoSuchElementException("도서가 존재하지 않습니다."));
+                              .orElseThrow(() -> new NoSuchElementException("도서가 존재하지 않습니다."));
 
     List<Long> reviewIds = reviewRepository.findIdsByBookId(bookId);
     if (!reviewIds.isEmpty()) {
