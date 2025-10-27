@@ -22,6 +22,7 @@ public class RankWriter implements ItemWriter<Rank> {
 
     @Override
     public void write(Chunk<? extends Rank> chunk) {
+        // TODO 필요하다면 하루에 한번만 실행 될 수 있도록 조회 체크 or 오늘자 삭제 후 재저장
         AtomicInteger counter = new AtomicInteger(1);
 
         List<Rank> sorted = chunk.getItems().stream()
