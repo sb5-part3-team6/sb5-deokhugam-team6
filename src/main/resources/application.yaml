@@ -32,6 +32,12 @@ management:
     health:
       show-details: always
 
+external:
+  naver:
+    api:
+      client-id: ${NAVER_CLIENT_ID}
+      client-secret: ${NAVER_CLIENT_SECRET}
+
 info:
   name: Deokhugam
   version: 1.0.0
@@ -51,3 +57,4 @@ info:
     multipart:
       max-file-size: ${spring.servlet.multipart.maxFileSize}
       max-request-size: ${spring.servlet.multipart.maxRequestSize}
+
