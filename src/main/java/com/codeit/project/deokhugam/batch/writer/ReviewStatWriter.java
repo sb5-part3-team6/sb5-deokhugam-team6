@@ -1,0 +1,35 @@
+package com.codeit.project.deokhugam.batch.writer;
+
+import com.codeit.project.deokhugam.domain.rank.entity.Rank;
+import com.codeit.project.deokhugam.domain.rank.repository.RankRepository;
+import lombok.RequiredArgsConstructor;
+import org.springframework.batch.core.configuration.annotation.StepScope;
+import org.springframework.batch.item.Chunk;
+import org.springframework.batch.item.ItemWriter;
+import org.springframework.stereotype.Component;
+
+import java.util.Comparator;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
+
+@Component
+@StepScope
+@RequiredArgsConstructor
+public class ReviewStatWriter implements ItemWriter<Rank> {
+
+    private final RankRepository rankRepository;
+
+    @Override
+    public void write(Chunk<? extends Rank> chunk) {
+        AtomicInteger counter = new AtomicInteger(1);
+
+        List<Rank> sorted = chunk.getItems().stream()
+                .sorted(Comparator.comparing(Rank::getScore).reversed())
+                .peek(rank -> rank.updateRankNo(counter.getAndIncrement()))
+                .collect(Collectors.toList());
+
+        rankRepository.saveAll(sorted);
+    }
+}
+
