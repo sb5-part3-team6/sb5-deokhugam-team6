@@ -73,6 +73,35 @@ class UserServiceTest {
   }
 
   @Test
+  @DisplayName("회원가입 성공 - 특수문자 포함")
+  void createUser_Success_WithSpecialChar() {
+    UserRegisterRequest request = new UserRegisterRequest("special@example.com", "specialUser",
+        "Password!23"); // 특수 문자(!) 포함
+
+    when(userRepository.existsByEmail(request.email())).thenReturn(false);
+    when(userRepository.existsByNickname(request.nickname())).thenReturn(false);
+
+    User savedUserMock = mock(User.class);
+    when(savedUserMock.getId()).thenReturn(2L);
+    when(savedUserMock.getEmail()).thenReturn(request.email());
+    when(savedUserMock.getNickname()).thenReturn(request.nickname());
+    when(savedUserMock.getCreatedAt()).thenReturn(LocalDateTime.now());
+
+    when(userRepository.save(any(User.class))).thenReturn(savedUserMock);
+
+    UserDto userDto = userService.create(request);
+
+    assertNotNull(userDto);
+    assertEquals("2", userDto.id());
+    assertEquals(request.email(), userDto.email());
+    assertEquals(request.nickname(), userDto.nickname());
+
+    verify(userRepository).existsByEmail(request.email());
+    verify(userRepository).existsByNickname(request.nickname());
+    verify(userRepository).save(any(User.class));
+  }
+
+  @Test
   @DisplayName("회원가입 성공")
   void create_Success() {
     UserRegisterRequest request = new UserRegisterRequest("new@example.com", "newUser",
