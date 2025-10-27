@@ -2,27 +2,21 @@ package com.codeit.project.deokhugam.domain.book.controller;
 
 import com.codeit.project.deokhugam.domain.book.dto.BookCreateRequest;
 import com.codeit.project.deokhugam.domain.book.dto.BookDto;
+import com.codeit.project.deokhugam.domain.book.dto.BookPopularRequest;
 import com.codeit.project.deokhugam.domain.book.dto.BookSearchRequest;
 import com.codeit.project.deokhugam.domain.book.dto.BookUpdateRequest;
 import com.codeit.project.deokhugam.domain.book.dto.CursorPageResponseBookDto;
 import com.codeit.project.deokhugam.domain.book.service.BookService;
 import jakarta.validation.Valid;
-import java.time.LocalDateTime;
 import lombok.RequiredArgsConstructor;
-import org.apache.coyote.Response;
-import org.springframework.format.annotation.DateTimeFormat;
-import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
@@ -79,5 +73,13 @@ public class BookController {
     ){
         CursorPageResponseBookDto<BookDto> searchBook= bookService.search(bookSearchReq);
         return ResponseEntity.status(HttpStatus.OK).body(searchBook);
+    }
+
+    @GetMapping("/popular")
+    public ResponseEntity<CursorPageResponseBookDto<BookDto>> popular(
+        BookPopularRequest bookPopularReq
+    ){
+        CursorPageResponseBookDto<BookDto> popularBook = bookService.poplarList(bookPopularReq);
+        return ResponseEntity.ok(popularBook);
     }
 }

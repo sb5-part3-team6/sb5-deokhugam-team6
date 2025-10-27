@@ -2,6 +2,7 @@ package com.codeit.project.deokhugam.domain.book.service;
 
 import com.codeit.project.deokhugam.domain.book.dto.BookCreateRequest;
 import com.codeit.project.deokhugam.domain.book.dto.BookDto;
+import com.codeit.project.deokhugam.domain.book.dto.BookPopularRequest;
 import com.codeit.project.deokhugam.domain.book.dto.BookSearchRequest;
 import com.codeit.project.deokhugam.domain.book.dto.BookUpdateRequest;
 import com.codeit.project.deokhugam.domain.book.dto.CursorPageResponseBookDto;
@@ -14,5 +15,6 @@ public interface BookService {
   void hardDelete(Long bookId);
   BookDto findById(Long bookId);
   CursorPageResponseBookDto<BookDto> search(BookSearchRequest bookSearchReq);
+  CursorPageResponseBookDto<BookDto> poplarList(BookPopularRequest bookPopularReq);
 
 }
