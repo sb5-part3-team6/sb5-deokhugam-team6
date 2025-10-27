@@ -28,7 +28,7 @@ public class UserController implements UserApi {
   private final UserService userService;
 
   @Override
-  @PostMapping("/")
+  @PostMapping
   public ResponseEntity<UserDto> register(@Valid @RequestBody UserRegisterRequest request) {
     UserDto response = userService.create(request);
     return ResponseEntity.status(HttpStatus.CREATED)
