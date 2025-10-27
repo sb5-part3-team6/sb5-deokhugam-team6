@@ -17,6 +17,12 @@ spring:
       ddl-auto: validate
     open-in-view: false
 
+  batch:
+    job:
+      enabled: false
+    jdbc:
+      initialize-schema: always
+
 management:
   endpoints:
     web:
@@ -25,6 +31,12 @@ management:
   endpoint:
     health:
       show-details: always
+
+external:
+  naver:
+    api:
+      client-id: ${NAVER_CLIENT_ID}
+      client-secret: ${NAVER_CLIENT_SECRET}
 
 info:
   name: Deokhugam
@@ -45,3 +57,4 @@ info:
     multipart:
       max-file-size: ${spring.servlet.multipart.maxFileSize}
       max-request-size: ${spring.servlet.multipart.maxRequestSize}
+

@@ -1,13 +1,10 @@
 package com.codeit.project.deokhugam.domain.book.controller;
 
-import com.codeit.project.deokhugam.domain.book.dto.BookCreateRequest;
-import com.codeit.project.deokhugam.domain.book.dto.BookDto;
-import com.codeit.project.deokhugam.domain.book.dto.BookPopularRequest;
-import com.codeit.project.deokhugam.domain.book.dto.BookSearchRequest;
-import com.codeit.project.deokhugam.domain.book.dto.BookUpdateRequest;
-import com.codeit.project.deokhugam.domain.book.dto.CursorPageResponseBookDto;
+import com.codeit.project.deokhugam.domain.book.dto.*;
 import com.codeit.project.deokhugam.domain.book.service.BookService;
+import com.codeit.project.deokhugam.openapi.api.NaverBookApiClient;
 import jakarta.validation.Valid;
+import jakarta.websocket.server.PathParam;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -26,6 +23,8 @@ import org.springframework.web.multipart.MultipartFile;
 @RequestMapping("/api/books")
 @RequiredArgsConstructor
 public class BookController {
+
+    private final NaverBookApiClient naverBookApiClient;
     private final BookService bookService;
 
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
@@ -80,5 +79,11 @@ public class BookController {
     ){
         CursorPageResponseBookDto<BookDto> popularBook = bookService.poplarList(bookPopularReq);
         return ResponseEntity.ok(popularBook);
+    }
+
+    @GetMapping("/info")
+    public ResponseEntity<BookResponse> getBook(@PathParam("isbn") String isbn) {
+        BookResponse response = naverBookApiClient.fetchBooks(isbn);
+        return ResponseEntity.ok(response);
     }
 }
