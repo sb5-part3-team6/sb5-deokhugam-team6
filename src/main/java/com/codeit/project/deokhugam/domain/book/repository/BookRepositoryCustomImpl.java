@@ -2,6 +2,7 @@ package com.codeit.project.deokhugam.domain.book.repository;
 
 import com.codeit.project.deokhugam.domain.book.dto.BookDto;
 import com.codeit.project.deokhugam.domain.book.dto.BookSearchRequest;
+import com.codeit.project.deokhugam.domain.book.dto.BookStatDto;
 import com.codeit.project.deokhugam.domain.book.entity.QBook;
 import com.codeit.project.deokhugam.domain.review.entity.QReview;
 import com.querydsl.core.BooleanBuilder;
@@ -15,6 +16,7 @@ import com.querydsl.core.types.dsl.NumberExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
@@ -193,5 +195,55 @@ public class BookRepositoryCustomImpl implements BookRepositoryCustom {
         direction == "ASC" ? book.createdAt.gt(after) : book.createdAt.lt(after)
     );
     return primaryCmp.or(secondaryCmp);
+  }
+
+  @Override
+  public List<BookStatDto> getDailyStats() {
+    LocalDate yesterday = LocalDate.now()
+                                   .minusDays(1);
+    LocalDateTime startDateTime = yesterday.atStartOfDay();
+    LocalDateTime endDateTime = yesterday.atTime(LocalTime.MAX);
+
+    return getStats(startDateTime, endDateTime);
+  }
+
+  @Override
+  public List<BookStatDto> getWeeklyStats() {
+    // TODO 주간 날짜 통합
+    LocalDate yesterday = LocalDate.now()
+                                   .minusWeeks(1);
+    LocalDateTime startDateTime = yesterday.atStartOfDay();
+    LocalDateTime endDateTime = yesterday.atTime(LocalTime.MAX);
+
+    return getStats(startDateTime, endDateTime);
+  }
+
+  @Override
+  public List<BookStatDto> getMonthlyStats() {
+    LocalDate today = LocalDate.now();
+    LocalDateTime startDateTime = today.withDayOfMonth(1)
+                                       .atStartOfDay();
+    LocalDateTime endDateTime = today.atTime(LocalTime.MAX);
+
+    return getStats(startDateTime, endDateTime);
+  }
+
+  private List<BookStatDto> getStats(LocalDateTime startDateTime, LocalDateTime endDateTime) {
+    QBook book = QBook.book;
+    QReview review = QReview.review;
+
+    return jpaQueryFactory
+        .select(Projections.constructor(BookStatDto.class,
+            book.id,
+            review.id.countDistinct(),
+            review.rating.avg()
+        ))
+        .from(book)
+        .innerJoin(review)
+        .on(review.book.id.eq(book.id)
+                          .and(review.createdAt.between(startDateTime, endDateTime)))
+        .where(book.createdAt.between(startDateTime, endDateTime))
+        .groupBy(book.id)
+        .fetch();
   }
 }
