@@ -2,6 +2,7 @@ package com.codeit.project.deokhugam.domain.book.controller;
 
 import com.codeit.project.deokhugam.domain.book.dto.BookCreateRequest;
 import com.codeit.project.deokhugam.domain.book.dto.BookDto;
+import com.codeit.project.deokhugam.domain.book.dto.BookPopularRequest;
 import com.codeit.project.deokhugam.domain.book.dto.BookSearchRequest;
 import com.codeit.project.deokhugam.domain.book.dto.BookUpdateRequest;
 import com.codeit.project.deokhugam.domain.book.dto.CursorPageResponseBookDto;
@@ -71,5 +72,13 @@ public class BookController {
     ){
         CursorPageResponseBookDto<BookDto> searchBook= bookService.search(bookSearchReq);
         return ResponseEntity.status(HttpStatus.OK).body(searchBook);
+    }
+
+    @GetMapping("/popular")
+    public ResponseEntity<CursorPageResponseBookDto<BookDto>> popular(
+        BookPopularRequest bookPopularReq
+    ){
+        CursorPageResponseBookDto<BookDto> popularBook = bookService.poplarList(bookPopularReq);
+        return ResponseEntity.ok(popularBook);
     }
 }
