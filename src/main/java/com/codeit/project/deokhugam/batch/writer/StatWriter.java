@@ -16,7 +16,7 @@ import java.util.stream.Collectors;
 @Component
 @StepScope
 @RequiredArgsConstructor
-public class ReviewStatWriter implements ItemWriter<Rank> {
+public class StatWriter implements ItemWriter<Rank> {
 
     private final RankRepository rankRepository;
 
@@ -32,4 +32,3 @@ public class ReviewStatWriter implements ItemWriter<Rank> {
         rankRepository.saveAll(sorted);
     }
 }
-
