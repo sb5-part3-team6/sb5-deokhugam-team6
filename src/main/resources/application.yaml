@@ -7,7 +7,7 @@ spring:
       maxRequestSize: 30MB
 
   profiles:
-    active: ${SPRING_PROFILES_ACTIVE:dev}
+    active: ${SPRING_PROFILES_ACTIVE:prod}
 
   config:
     import: optional:file:.env[.properties]

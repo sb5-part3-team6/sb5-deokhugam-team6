@@ -1,0 +1,42 @@
+spring:
+  config:
+    import : optional:dotenv:.
+    activate:
+      on-profile: prod
+
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    url: jdbc:postgresql://${DB_HOST}:${DB_PORT}/${DB_NAME}
+    username : ${DB_USERNAME}
+    password : ${DB_PASSWORD}
+
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    show-sql: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: true
+
+file:
+  upload-dir: ${FILE_UPLOAD_DIR:/app/uploads}
+
+aws:
+  accessKeyId: ${AWS_ACCESS_KEY}
+  secretKey: ${AWS_SECRET_KEY}
+  region: ${AWS_REGION}
+  s3:
+    bucket: ${AWS_S3_BUCKET}
+    prefix: uploads
+
+app:
+  cdn:
+    base-url: http://d5g2ql7c32oij.cloudfront.net
+
+logging:
+  level:
+    com.codeit.aws: INFO
+    org.hibernate.SQL: off
+    org.hibernate.orm.jdbc.bind: off
+    org.springframework.web: info
