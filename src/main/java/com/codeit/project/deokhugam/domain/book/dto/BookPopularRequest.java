@@ -12,15 +12,8 @@ public record BookPopularRequest(
     Integer limit
 ) {
   public BookPopularRequest {
-    if (limit == null) {
-      limit = 50;
-    }
-    if(period == null) {
-      period = "DAILY";
-    }
-    if(direction == null) {
-      direction = "ASC";
-    }
+    if (limit == null) limit = 50;
+    if(period == null) period = "DAILY";
+    if(direction == null) direction = "ASC";
   }
-
 }
