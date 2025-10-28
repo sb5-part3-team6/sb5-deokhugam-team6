@@ -138,7 +138,7 @@ public class ReviewServiceImpl implements ReviewService {
         List<PopularReviewDto> content = ranksList.stream().map(rank -> {
             Review review = verifyReviewExists(rank.getTargetId());
             int likeCount = reviewLikeRepository.countByReviewId(review.getId());
-            int commentCount =  commentRepository.countByReviewId(review.getId());
+            int commentCount =  commentRepository.countByReviewIdAndDeletedAtIsNull(review.getId());
             return reviewMapper.toPopularDto(review, rank,likeCount,commentCount);
         }).toList();
 
