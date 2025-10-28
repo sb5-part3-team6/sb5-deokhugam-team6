@@ -13,7 +13,7 @@ public record PowerUserDto(
     String createdAt,
     Integer rank,
     BigDecimal score,
-    Integer reviewScoreSum,
+    double reviewScoreSum,
     Integer likeCount,
     Integer commentCount
 ) {

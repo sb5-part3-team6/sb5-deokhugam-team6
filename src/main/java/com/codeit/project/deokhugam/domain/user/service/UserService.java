@@ -7,8 +7,11 @@ import com.codeit.project.deokhugam.domain.rank.entity.RankTarget;
 import com.codeit.project.deokhugam.domain.rank.entity.RankType;
 import com.codeit.project.deokhugam.domain.rank.repository.RankRepository;
 import com.codeit.project.deokhugam.domain.rank.service.RankService;
+import com.codeit.project.deokhugam.domain.review.entity.Review;
+import com.codeit.project.deokhugam.domain.review.exception.ReviewNotFoundException;
 import com.codeit.project.deokhugam.domain.review.repository.ReviewLikeRepository;
 import com.codeit.project.deokhugam.domain.review.repository.ReviewRepository;
+import com.codeit.project.deokhugam.domain.review.repository.ReviewRepositoryCustomImpl;
 import com.codeit.project.deokhugam.domain.user.dto.*;
 import com.codeit.project.deokhugam.domain.user.entity.User;
 import com.codeit.project.deokhugam.domain.user.exception.DeleteNotAllowedException;
@@ -35,6 +38,9 @@ public class UserService {
   private final UserRepository userRepository;
   private final RankRepository rankRepository;
   private final RankService rankService;
+  private final ReviewRepository reviewRepository;
+  private final ReviewLikeRepository reviewLikeRepository;
+  private final CommentRepository commentRepository;
 
   @Transactional
   public UserDto create(UserRegisterRequest request) {
@@ -133,46 +139,45 @@ public class UserService {
     }
   }
 
-  @Transactional(readOnly = true)
-  public PageResponse getRank(PowerUserQueryParams params) {
-    List<Rank> ranks = rankService.findRank(RankSearchCommand.builder()
-        .target(RankTarget.USER)
-        .type(RankType.ALL_TIME)
-        .direction(params.direction())
-        .cusor(params.cursor().toString())
-        .after(params.after().toString())
-        .limit(Long.valueOf(params.limit()))
-        .build());
-
-    List<PowerUserDto> content = new ArrayList<>();
-    for(Rank rank : ranks) {
-      User user = userRepository.findById(rank.getTargetId())
-          .orElseThrow(() -> new UserNotFoundException().withId(rank.getTargetId().toString()));
-
-      PowerUserDto powerUser = PowerUserDto.builder()
-          .userId(user.getId().toString())
-          .nickname(user.getNickname())
-          .period(rank.getType())
-          .createdAt(rank.getCreatedAt().toString())
-          .rank(rank.getRankNo())
-          .score(rank.getScore())
-          .reviewScoreSum(null)
-          .likeCount(null)
-          .commentCount(null)
-          .build();
-
-      content.add(powerUser);
-    }
-
-    return PageResponse.builder()
-        .content(content)
-        .nextCursor(null)
-        .nextAfter(null)
-        .size(content.size())
-        .totalElements(Long.valueOf(content.size()))
-        .hasNext(false)
-        .build();
-  }
+//  @Transactional(readOnly = true)
+//  public PageResponse getRank(PowerUserQueryParams params) {
+//    List<Rank> ranks = rankService.findRank(RankSearchCommand.builder()
+//        .target(RankTarget.USER)
+//        .type(RankType.ALL_TIME)
+//        .direction(params.direction())
+//        .cusor(params.cursor().toString())
+//        .after(params.after().toString())
+//        .limit(Long.valueOf(params.limit()))
+//        .build());
+//
+//    List<PowerUserDto> content = new ArrayList<>();
+//    for(Rank rank : ranks) {
+//      User user = userRepository.findById(rank.getTargetId())
+//          .orElseThrow(() -> new UserNotFoundException().withId(rank.getTargetId().toString()));
+//
+//      PowerUserDto powerUser = PowerUserDto.builder()
+//          .userId(user.getId().toString())
+//          .nickname(user.getNickname())
+//          .period(rank.getType())
+//          .createdAt(rank.getCreatedAt().toString())
+//          .rank(rank.getRankNo())
+//          .score(rank.getScore())
+//          .likeCount(null)
+//          .commentCount(null)
+//          .build();
+//
+//      content.add(powerUser);
+//    }
+//
+//    return PageResponse.builder()
+//        .content(content)
+//        .nextCursor(null)
+//        .nextAfter(null)
+//        .size(content.size())
+//        .totalElements(Long.valueOf(content.size()))
+//        .hasNext(false)
+//        .build();
+//  }
 
   public PageResponse powerList(PowerUserQueryParams params) {
 
@@ -191,6 +196,9 @@ public class UserService {
 
       List<PowerUserDto> content = rankList.stream().map(rank -> {
           User user = verifyUserExists(rank.getTargetId());
+          double reviewScoreSum = getReviewScoreByUserId(user.getId(), params.period());
+          int likeCount = reviewLikeRepository.countAllByUserIdAndDeletedAtIsNull(user.getId());
+          int commentCount = commentRepository.countAllByUserIdAndDeletedAtIsNull(user.getId());
           return PowerUserDto.builder()
                   .userId(user.getId().toString())
                   .nickname(user.getNickname())
@@ -198,9 +206,9 @@ public class UserService {
                   .createdAt(rank.getCreatedAt().toString())
                   .rank(rank.getRankNo())
                   .score(rank.getScore())
-                  .reviewScoreSum(null)
-                  .likeCount(null)
-                  .commentCount(null)
+                  .reviewScoreSum(reviewScoreSum)
+                  .likeCount(likeCount)
+                  .commentCount(commentCount)
                   .build();
       }).toList();
 
@@ -218,4 +226,21 @@ public class UserService {
         return userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 사용자 입니다."));
     }
+
+    private Review verifyReviewExists(Long reviewId) {
+        return reviewRepository.findById(reviewId).orElseThrow(ReviewNotFoundException::new);
+    }
+
+    private double getReviewScoreByUserId(Long userId, String type) {
+
+        List<Long> reviewIds = rankRepository.findReviewIds(type);
+        List<Review> reviewList = reviewIds.stream().map(this::verifyReviewExists).toList();
+
+        long count = reviewList.stream()
+                .filter(review -> review.getUser() != null && review.getUser().getId().equals(userId))
+                .count();
+
+        return count * 0.5;
+    }
+
 }

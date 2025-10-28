@@ -13,7 +13,9 @@ public interface ReviewLikeRepository extends JpaRepository<ReviewLike, Long> {
     @Transactional @Modifying
     void deleteAllByReviewId(Long reviewId);
 
-    Integer countByReviewId(Long reviewId);
+    Integer countAllByReviewIdAndDeletedAtIsNull(Long reviewId);
+
+    Integer countAllByUserIdAndDeletedAtIsNull(Long userId);
 
     boolean existsByReviewIdAndUserId(Long reviewId, Long userId);
 }
