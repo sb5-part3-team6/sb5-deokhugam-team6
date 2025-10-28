@@ -3,8 +3,10 @@ package com.codeit.project.deokhugam.domain.book.controller;
 import com.codeit.project.deokhugam.domain.book.dto.*;
 import com.codeit.project.deokhugam.domain.book.service.BookService;
 import com.codeit.project.deokhugam.openapi.api.NaverBookApiClient;
+import com.codeit.project.deokhugam.openapi.service.OcrService;
 import jakarta.validation.Valid;
 import jakarta.websocket.server.PathParam;
+import java.io.IOException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -15,9 +17,11 @@ import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
+import reactor.core.publisher.Mono;
 
 @RestController
 @RequestMapping("/api/books")
@@ -26,6 +30,7 @@ public class BookController {
 
     private final NaverBookApiClient naverBookApiClient;
     private final BookService bookService;
+    private final OcrService ocrService;
 
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<BookDto> create(
@@ -85,5 +90,23 @@ public class BookController {
     public ResponseEntity<BookResponse> getBook(@PathParam("isbn") String isbn) {
         BookResponse response = naverBookApiClient.fetchBooks(isbn);
         return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/isbn/ocr")
+    public Mono<ResponseEntity<String>> extractOcrByClova(@RequestParam("image") MultipartFile imageFile) {
+        try {
+            return ocrService.extractIsbnFromImage(imageFile)
+                .map(isbn -> {
+                    return ResponseEntity.ok(isbn);
+                })
+                .switchIfEmpty(Mono.defer(() -> {
+                    return Mono.just(ResponseEntity.notFound().build());
+                }))
+                .onErrorResume(e -> {
+                    return Mono.just(ResponseEntity.status(500).body("OCR API 호출 실패"));
+                });
+        } catch (IOException e) {
+            return Mono.just(ResponseEntity.badRequest().body("이미지 파일을 읽는 데 실패했습니다."));
+        }
     }
 }
