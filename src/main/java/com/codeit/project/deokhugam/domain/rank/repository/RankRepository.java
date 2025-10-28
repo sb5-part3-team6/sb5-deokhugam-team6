@@ -8,4 +8,12 @@ import org.springframework.data.repository.query.Param;
 public interface RankRepository extends JpaRepository<Rank, Long> {
     @Query("SELECT COUNT(r) FROM Rank r WHERE r.target = 'REVIEW' AND r.type = :type")
     long countAllByTypeForReview(@Param("type") String type);
+
+    @Query("""
+        SELECT COUNT(DISTINCT r.targetId)
+        FROM Rank r
+        WHERE r.target = 'USER'
+          AND r.type = :type
+    """)
+    Long countAllByTypeForUser(@Param("type") String type);
 }

@@ -9,6 +9,8 @@ import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.Order;
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.dsl.BooleanExpression;
+import com.querydsl.core.types.dsl.Expressions;
+import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
@@ -56,13 +58,22 @@ public class ReviewRepositoryCustomImpl {
 
     public List<Rank> findRanksByType(String type, String direction, int limit) {
         QRank rank = QRank.rank;
+        QRank sub = new QRank("sub");
 
         Order order = "asc".equalsIgnoreCase(direction) ? Order.ASC : Order.DESC;
 
+        var subQuery = JPAExpressions
+                .select(sub.targetId, sub.createdAt.max())
+                .from(sub)
+                .where(sub.target.eq("REVIEW"), sub.type.eq(type))
+                .groupBy(sub.targetId);
+
         return queryFactory
                 .selectFrom(rank)
-                .where(rank.target.eq("REVIEW")
-                        .and(rank.type.eq(type)))
+                .where(rank.target.eq("REVIEW"),
+                        rank.type.eq(type),
+                        Expressions.list(rank.targetId, rank.createdAt).in(subQuery)
+                )
                 .orderBy(new OrderSpecifier<>(order, rank.rankNo))
                 .limit(limit + 1)
                 .fetch();
