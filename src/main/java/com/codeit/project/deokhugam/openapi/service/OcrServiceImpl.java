@@ -1,17 +1,22 @@
 package com.codeit.project.deokhugam.openapi.service;
 
-import com.codeit.project.deokhugam.openapi.dto.OcrSpaceResponse;
+import com.codeit.project.deokhugam.openapi.dto.ClovaOcrRequest;
+import com.codeit.project.deokhugam.openapi.dto.ClovaOcrResponse;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
+import java.time.Instant;
+import java.util.List;
+import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import lombok.RequiredArgsConstructor;
+import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.MediaType;
+import org.springframework.http.client.MultipartBodyBuilder;
 import org.springframework.stereotype.Service;
-import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.util.MultiValueMap;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -21,67 +26,109 @@ import reactor.core.publisher.Mono;
 @Slf4j
 public class OcrServiceImpl implements OcrService {
 
-  private final WebClient ocrSpaceWebClient;
-  private final String apiKey;
+  private final WebClient naverClovaClient;
+  private final String secretKey;
+  private final ObjectMapper objectMapper;
 
   private static final Pattern ISBN_PATTERN = Pattern.compile("(978|979)\\d{10}");
 
-  public OcrServiceImpl(WebClient ocrSpaceWebClient, @Value("${ocr-space.api-key}") String apiKey) {
-    this.ocrSpaceWebClient = ocrSpaceWebClient;
-    this.apiKey = apiKey;
+  public OcrServiceImpl(@Qualifier("naverClovaClient") WebClient naverClovaClient,
+                        @Value("${ncp.ocr.secret-key}") String secretKey,
+                        ObjectMapper objectMapper) {
+
+    this.naverClovaClient = naverClovaClient;
+    this.secretKey = secretKey;
+    this.objectMapper = objectMapper;
   }
 
-  // 이미지 파일 -> ocr space api에 전송 후 isbn 추출
-  //
+
   @Override
   public Mono<String> extractIsbnFromImage(MultipartFile imageFile) throws IOException {
-    MultiValueMap<String, Object> map = new LinkedMultiValueMap<>();
-    map.add("apikey", apiKey);
-    map.add("language", "eng");
-    map.add("isOverlayRequired", "false");
+    ClovaOcrRequest.Image image = new ClovaOcrRequest.Image(
+        imageFile.getContentType().split("/")[1],
+        imageFile.getOriginalFilename()
+    );
 
-    // multiPartFile -> byteArrayResource후 map.add
-    ByteArrayResource imageResource = new ByteArrayResource(imageFile.getBytes()) {
-      @Override
-      public String getFilename() {
-        return imageFile.getOriginalFilename();
-      }
-    };
-    map.add("file", imageResource);
+    ClovaOcrRequest request = new ClovaOcrRequest(
+        "V1",
+        UUID.randomUUID().toString(),
+        Instant.now().toEpochMilli(),
+        "ko",
+        List.of(image)
+    );
 
-    return ocrSpaceWebClient.post()
-        .uri("/parse/image")
+    MultipartBodyBuilder builder = new MultipartBodyBuilder();
+
+    try {
+
+      String requestJson = objectMapper.writeValueAsString(request);
+      builder.part("message", requestJson, MediaType.APPLICATION_JSON);
+
+    } catch(JsonProcessingException e) {
+
+      log.error("ocr 요청 직렬화 실패", e);
+      return Mono.error(e);
+
+    }
+
+    builder.part("file", imageFile.getResource())
+        .filename(imageFile.getOriginalFilename())
+        .contentType(MediaType.valueOf(imageFile.getContentType()));
+
+    log.info("ocr 호출 시작");
+
+    return naverClovaClient.post()
+        .header("X-OCR-SECRET", secretKey)
         .contentType(MediaType.MULTIPART_FORM_DATA)
-        .body(BodyInserters.fromMultipartData(map))
+        .body(BodyInserters.fromMultipartData(builder.build()))
         .retrieve()
-        .bodyToMono(OcrSpaceResponse.class)
-        .map(this::findIsbnInResponse)
-        .onErrorResume(error -> {
-          log.error("OCR API 호출 실 : ", error.getMessage());
+        .bodyToMono(ClovaOcrResponse.class)
+        .doOnSuccess(response -> log.info("ocr api 응답 수신 성공"))
+        .flatMap(response -> {
+          String isbn = findIsbnInResponse(response);
+
+          if(isbn != null) {
+            log.info("isbn 추출 성공 : {}", isbn);
+            return Mono.just(isbn);
+          }
+          else {
+            return Mono.empty();
+          }
+        })
+        .doOnError(e -> log.error("api 호출 중 에러 발생 : ", e))
+        .onErrorResume(e -> {
+          log.error("clova api 호출 실패 : ", e);
           return Mono.empty();
         });
   }
 
   @Override
-  public String findIsbnInResponse(OcrSpaceResponse response) {
-    if(response == null || response.isErroredOnProcessing() || response.parsedResults() == null || response.parsedResults().isEmpty()) {
-      log.error("OCR 파싱 오류 : ", (response != null ? response.errorMessage() : "응답 없음"));
+  public String findIsbnInResponse(ClovaOcrResponse response) {
+    if (response == null || response.images() == null || response.images().isEmpty() ||
+        response.images().get(0).fields() == null) {
+      log.warn("Clova OCR 결과가 비어있음");
       return null;
     }
 
-    String fullText = response.parsedResults().get(0).parsedText();
-    if(fullText == null || fullText.isEmpty()) {
+    String fullText = response.images().get(0).fields().stream()
+        .map(ClovaOcrResponse.OcrField::inferText)
+        .collect(Collectors.joining(" "));
+
+    if (fullText.isBlank()) {
+      log.warn("Clova OCR 결과 텍스트가 비어있음");
       return null;
     }
+    log.debug("Clova OCR 결과 원본 텍스트: {}", fullText);
 
-    String text = fullText.replaceAll("[-\\s]", "");
+    String cleanedText = fullText.replaceAll("[-\\s]", "");
+    log.debug("정제된 텍스트: {}", cleanedText);
 
-    Matcher matcher = ISBN_PATTERN.matcher(text);
-    if(matcher.find()) {
+    Matcher matcher = ISBN_PATTERN.matcher(cleanedText);
+    if (matcher.find()) {
       return matcher.group(0);
     }
 
+    log.warn("정제된 텍스트에서 ISBN 패턴을 찾지 못함");
     return null;
-    // TODO : Controller에서 API 호출하기
   }
 }

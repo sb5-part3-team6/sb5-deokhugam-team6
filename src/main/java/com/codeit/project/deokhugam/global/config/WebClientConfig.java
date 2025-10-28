@@ -21,14 +21,8 @@ public class WebClientConfig {
     }
 
     @Bean
-    public WebClient ocrSpaceWebClient(WebClient.Builder builder) {
-        return builder
-            .baseUrl("https://api.ocr.space")
-            .build();
-    }
-
-    @Bean
     public WebClient naverClovaClient(WebClient.Builder builder, @Value("${ncp.ocr.invoke-url}") String ocrInvokeUrl) {
+        System.out.println(ocrInvokeUrl);
         return builder
             .baseUrl(ocrInvokeUrl)
             .build();
