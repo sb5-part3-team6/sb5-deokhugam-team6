@@ -14,11 +14,14 @@ import com.codeit.project.deokhugam.domain.review.repository.ReviewRepository;
 import com.codeit.project.deokhugam.domain.user.entity.User;
 import com.codeit.project.deokhugam.domain.user.repository.UserRepository;
 import com.codeit.project.deokhugam.global.common.dto.PageResponse;
+
 import java.time.LocalDateTime;
 import java.util.NoSuchElementException;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
 
 @Service
 @RequiredArgsConstructor
@@ -41,23 +44,27 @@ public class CommentServiceImpl implements CommentService{
         commentRepository.save(comment);
 
         notificationService.create(NotificationCreateCommand.builder()
-                                                            .type(NotificationType.REVIEW_COMMENTED)
-                                                            .reactor(userId)
-                                                            .review(reviewId)
-                                                            .data(comment.getContent())
-                                                            .build());
+                .type(NotificationType.REVIEW_COMMENTED)
+                .reactor(userId)
+                .review(reviewId)
+                .data(comment.getContent())
+                .build());
+
 
         return commentMapper.toCommentDto(comment);
     }
 
     @Override
     @Transactional
-    public CommentDto update(Long id, CommentUpdateRequest req) {
+    public CommentDto update(Long id, CommentUpdateRequest req, Long currentUserId) {
         Comment comment = commentRepository.findById(id)
                 .orElseThrow(() -> new NoSuchElementException("사용자를 찾을 수 없습니다 : " + id));
         if (comment.getDeletedAt() != null) {
             throw new IllegalStateException("삭제된 댓글은 수정할 수 없습니다.");
         }
+
+        checkAuthor(comment, currentUserId);
+
         comment.updateContent(req.content());
 
         commentRepository.save(comment);
@@ -67,23 +74,28 @@ public class CommentServiceImpl implements CommentService{
 
     @Override
     @Transactional
-    public void deleteSoft(Long id) {
+    public void deleteSoft(Long id, Long currentUserId) {
         Comment comment = commentRepository.findById(id)
                 .orElseThrow(() -> new NoSuchElementException("댓글을 찾을 수 없습니다 : " + id));
+
+        checkAuthor(comment, currentUserId);
 
         if (comment.getDeletedAt() != null) {
             throw new IllegalStateException("이미 삭제된 댓글입니다: " + id);
         }
-
         comment.softDelete();
-        commentRepository.save(comment);
-    }
 
+        commentRepository.save(comment);
+
+    }
     @Override
     @Transactional
-    public void delete(Long id) {
+    public void delete(Long id, Long currentUserId) {
         Comment comment = commentRepository.findById(id)
                 .orElseThrow(() -> new NoSuchElementException("댓글을 찾을 수 없습니다 : " + id));
+
+        checkAuthor(comment, currentUserId);
+
         if (comment.getDeletedAt() != null) {
             throw new IllegalStateException("이미 삭제된 댓글입니다: " + id);
         }
@@ -99,8 +111,15 @@ public class CommentServiceImpl implements CommentService{
     }
 
     @Override
+    @Transactional(readOnly = true)
     public PageResponse getByCursor(Long reviewId, LocalDateTime after, Long cursor, int limit, String direction) {
         return commentRepository.findCommentsByCursor(reviewId, after, cursor, limit, direction);
+    }
+
+    private void checkAuthor(Comment comment, Long currentUserId){
+        if(!comment.getUser().getId().equals(currentUserId)){
+            throw new RuntimeException("댓글 삭제/수정 권한이 없습니다.");
+        }
     }
 
 }

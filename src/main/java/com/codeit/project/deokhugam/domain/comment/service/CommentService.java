@@ -8,9 +8,9 @@ import java.time.LocalDateTime;
 
 public interface CommentService {
     CommentDto create(CommentCreateRequest req);
-    CommentDto update(Long id,CommentUpdateRequest req);
-    void deleteSoft(Long id);
-    void delete(Long id);
+    CommentDto update(Long id,CommentUpdateRequest req, Long currentUserId);
+    void deleteSoft(Long id, Long currentUserId);
+    void delete(Long id, Long currentUserId);
     CommentDto findById(Long id);
     PageResponse getByCursor(Long reviewId, LocalDateTime after, Long cursor, int limit, String direction);
 

@@ -83,7 +83,7 @@ public class CommentRepositoryCustomImpl implements CommentRepositoryCustom {
                 .select(comment.count())
                 .from(comment)
                 .where(comment.review.id.eq(reviewId)
-                                        .and(comment.deletedAt.isNull()))
+                        .and(comment.deletedAt.isNull()))
                 .fetchOne();
 
         return new PageResponse(
