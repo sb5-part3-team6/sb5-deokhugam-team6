@@ -3,14 +3,16 @@ package com.codeit.project.deokhugam.domain.user.dto;
 import com.codeit.project.deokhugam.domain.rank.entity.RankType;
 import lombok.Builder;
 
+import java.math.BigDecimal;
+
 @Builder
 public record PowerUserDto(
     String userId,
     String nickname,
-    RankType period,
+    String period,
     String createdAt,
     Integer rank,
-    Integer score,
+    BigDecimal score,
     Integer reviewScoreSum,
     Integer likeCount,
     Integer commentCount

@@ -5,14 +5,11 @@ import com.codeit.project.deokhugam.domain.rank.dto.RankSearchCommand;
 import com.codeit.project.deokhugam.domain.rank.entity.Rank;
 import com.codeit.project.deokhugam.domain.rank.entity.RankTarget;
 import com.codeit.project.deokhugam.domain.rank.entity.RankType;
+import com.codeit.project.deokhugam.domain.rank.repository.RankRepository;
 import com.codeit.project.deokhugam.domain.rank.service.RankService;
 import com.codeit.project.deokhugam.domain.review.repository.ReviewLikeRepository;
 import com.codeit.project.deokhugam.domain.review.repository.ReviewRepository;
-import com.codeit.project.deokhugam.domain.user.dto.PowerUserDto;
-import com.codeit.project.deokhugam.domain.user.dto.UserDto;
-import com.codeit.project.deokhugam.domain.user.dto.UserLoginRequest;
-import com.codeit.project.deokhugam.domain.user.dto.UserRegisterRequest;
-import com.codeit.project.deokhugam.domain.user.dto.UserUpdateRequest;
+import com.codeit.project.deokhugam.domain.user.dto.*;
 import com.codeit.project.deokhugam.domain.user.entity.User;
 import com.codeit.project.deokhugam.domain.user.exception.DeleteNotAllowedException;
 import com.codeit.project.deokhugam.domain.user.exception.EmailDuplicationException;
@@ -36,6 +33,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class UserService {
 
   private final UserRepository userRepository;
+  private final RankRepository rankRepository;
   private final RankService rankService;
 
   @Transactional
@@ -136,14 +134,14 @@ public class UserService {
   }
 
   @Transactional(readOnly = true)
-  public PageResponse getRank(String direction, LocalDate cursor, LocalDate after, Integer limit) {
+  public PageResponse getRank(PowerUserQueryParams params) {
     List<Rank> ranks = rankService.findRank(RankSearchCommand.builder()
         .target(RankTarget.USER)
         .type(RankType.ALL_TIME)
-        .direction(direction)
-        .cusor(cursor.toString())
-        .after(after.toString())
-        .limit(Long.valueOf(limit))
+        .direction(params.direction())
+        .cusor(params.cursor().toString())
+        .after(params.after().toString())
+        .limit(Long.valueOf(params.limit()))
         .build());
 
     List<PowerUserDto> content = new ArrayList<>();
@@ -154,10 +152,10 @@ public class UserService {
       PowerUserDto powerUser = PowerUserDto.builder()
           .userId(user.getId().toString())
           .nickname(user.getNickname())
-          .period(RankType.ALL_TIME)
+          .period(rank.getType())
           .createdAt(rank.getCreatedAt().toString())
           .rank(rank.getRankNo())
-          .score(Integer.parseInt(rank.getScore().toString()))
+          .score(rank.getScore())
           .reviewScoreSum(null)
           .likeCount(null)
           .commentCount(null)
@@ -175,4 +173,49 @@ public class UserService {
         .hasNext(false)
         .build();
   }
+
+  public PageResponse powerList(PowerUserQueryParams params) {
+
+      List<Rank> rankList = userRepository.findRankByType(params.period(), params.direction(), params.limit());
+      Long total = rankRepository.countAllByTypeForUser(params.period());
+      boolean hasNext = rankList.size() > params.limit();
+      String nextCursor = null;
+      String nextAfter = null;
+
+      if(hasNext) {
+        Rank lastItem = rankList.get(rankList.size() - 1);
+        nextCursor = lastItem.getId().toString();
+        nextAfter = lastItem.getCreatedAt().toString();
+        rankList.remove(lastItem);
+      }
+
+      List<PowerUserDto> content = rankList.stream().map(rank -> {
+          User user = verifyUserExists(rank.getTargetId());
+          return PowerUserDto.builder()
+                  .userId(user.getId().toString())
+                  .nickname(user.getNickname())
+                  .period(rank.getType())
+                  .createdAt(rank.getCreatedAt().toString())
+                  .rank(rank.getRankNo())
+                  .score(rank.getScore())
+                  .reviewScoreSum(null)
+                  .likeCount(null)
+                  .commentCount(null)
+                  .build();
+      }).toList();
+
+      return PageResponse.builder()
+              .content(content)
+              .nextCursor(nextCursor)
+              .size(rankList.size())
+              .totalElements(total)
+              .hasNext(hasNext)
+              .nextAfter(nextAfter)
+              .build();
+  }
+
+    private User verifyUserExists(Long userId) {
+        return userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 사용자 입니다."));
+    }
 }

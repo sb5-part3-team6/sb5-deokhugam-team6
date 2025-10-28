@@ -2,14 +2,19 @@ package com.codeit.project.deokhugam.domain.user.repository;
 
 import com.codeit.project.deokhugam.domain.comment.entity.QComment;
 import com.codeit.project.deokhugam.domain.rank.entity.QRank;
+import com.codeit.project.deokhugam.domain.rank.entity.Rank;
 import com.codeit.project.deokhugam.domain.rank.entity.RankTarget;
 import com.codeit.project.deokhugam.domain.rank.entity.RankType;
 import com.codeit.project.deokhugam.domain.review.entity.QReview;
 import com.codeit.project.deokhugam.domain.review.entity.QReviewLike;
 import com.codeit.project.deokhugam.domain.user.dto.UserStatDto;
 import com.codeit.project.deokhugam.domain.user.entity.QUser;
+import com.querydsl.core.types.Order;
+import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
+import com.querydsl.core.types.dsl.Expressions;
+import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
@@ -23,7 +28,7 @@ import org.springframework.stereotype.Repository;
 @RequiredArgsConstructor
 public class UserRepositoryCustomImpl implements UserRepositoryCustom {
 
-  private final JPAQueryFactory jpaQueryFactory;
+  private final JPAQueryFactory queryFactory;
 
   @Override
   public List<UserStatDto> getStatsByPeriod(RankType type) {
@@ -77,7 +82,7 @@ public class UserRepositoryCustomImpl implements UserRepositoryCustom {
         (startDateTime != null && endDateTime != null) ? rank.createdAt.between(startDateTime,
             endDateTime) : null;
 
-    return jpaQueryFactory.select(
+    return queryFactory.select(
                               Projections.constructor(UserStatDto.class, user.id, like.id.countDistinct(),
                                   comment.id.countDistinct(), rank.score.avg()))
                           .from(user)
@@ -103,5 +108,28 @@ public class UserRepositoryCustomImpl implements UserRepositoryCustom {
                           .where(user.deletedAt.isNull())
                           .groupBy(user.id)
                           .fetch();
+  }
+
+  public List<Rank> findRankByType(String type, String direction, int limit) {
+    QRank rank = QRank.rank;
+    QRank sub = new QRank("sub");
+
+    Order order = "asc".equalsIgnoreCase(direction) ? Order.ASC : Order.DESC;
+
+    var subQuery = JPAExpressions
+            .select(sub.targetId, sub.createdAt.max())
+            .from(sub)
+            .where(sub.target.eq("USER"), sub.type.eq(type))
+            .groupBy(sub.targetId);
+
+    return queryFactory
+            .selectFrom(rank)
+            .where(rank.target.eq("USER"),
+                    rank.type.eq(type),
+                    Expressions.list(rank.targetId, rank.createdAt).in(subQuery)
+            )
+            .orderBy(new OrderSpecifier<>(order, rank.rankNo))
+            .limit(limit + 1)
+            .fetch();
   }
 }
