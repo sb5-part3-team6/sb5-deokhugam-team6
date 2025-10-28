@@ -157,7 +157,7 @@ public class UserService {
       List<PowerUserDto> content = rankList.stream().map(rank -> {
           User user = verifyUserExists(rank.getTargetId());
           double reviewScoreSum = getReviewScoreByUserId(user.getId(), params.period());
-          int likeCount = reviewLikeRepository.countAllByUserIdAndDeletedAtIsNull(user.getId());
+          int likeCount = reviewLikeRepository.countAllByUserId(user.getId());
           int commentCount = commentRepository.countAllByUserIdAndDeletedAtIsNull(user.getId());
           return PowerUserDto.builder()
                   .userId(user.getId().toString())
