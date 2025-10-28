@@ -32,7 +32,7 @@ aws:
 
 app:
   cdn:
-    base-url: http://d5g2ql7c32oij.cloudfront.net
+    base-url: ${CDNURI}
 
 logging:
   level:
