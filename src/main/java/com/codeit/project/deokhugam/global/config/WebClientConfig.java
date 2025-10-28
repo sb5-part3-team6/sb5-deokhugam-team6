@@ -1,5 +1,6 @@
 package com.codeit.project.deokhugam.global.config;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -17,5 +18,13 @@ public class WebClientConfig {
         return builder
                 .baseUrl("https://openapi.naver.com")
                 .build();
+    }
+
+    @Bean
+    public WebClient naverClovaClient(WebClient.Builder builder, @Value("${ncp.ocr.invoke-url}") String ocrInvokeUrl) {
+        System.out.println(ocrInvokeUrl);
+        return builder
+            .baseUrl(ocrInvokeUrl)
+            .build();
     }
 }
