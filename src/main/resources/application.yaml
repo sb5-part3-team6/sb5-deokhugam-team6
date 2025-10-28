@@ -7,7 +7,7 @@ spring:
       maxRequestSize: 30MB
 
   profiles:
-    active: ${SPRING_PROFILES_ACTIVE:prod}
+    active: ${SPRING_PROFILES_ACTIVE:dev}
 
   config:
     import: optional:file:.env[.properties]
@@ -37,8 +37,8 @@ ncp:
     invoke-url: ${NCP_INVOKE_URL}
     secret-key: ${NCP_CLIENT_SECRET}
 
-ocr-space:
-  api-key: "K85373604788957"
+file:
+  upload-dir: ${FILE_UPLOAD_DIR:/app/uploads}
 
 info:
   name: Deokhugam
