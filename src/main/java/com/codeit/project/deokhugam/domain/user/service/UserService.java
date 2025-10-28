@@ -1,18 +1,18 @@
 package com.codeit.project.deokhugam.domain.user.service;
 
 import com.codeit.project.deokhugam.domain.comment.repository.CommentRepository;
-import com.codeit.project.deokhugam.domain.rank.dto.RankSearchCommand;
 import com.codeit.project.deokhugam.domain.rank.entity.Rank;
-import com.codeit.project.deokhugam.domain.rank.entity.RankTarget;
-import com.codeit.project.deokhugam.domain.rank.entity.RankType;
 import com.codeit.project.deokhugam.domain.rank.repository.RankRepository;
-import com.codeit.project.deokhugam.domain.rank.service.RankService;
 import com.codeit.project.deokhugam.domain.review.entity.Review;
 import com.codeit.project.deokhugam.domain.review.exception.ReviewNotFoundException;
 import com.codeit.project.deokhugam.domain.review.repository.ReviewLikeRepository;
 import com.codeit.project.deokhugam.domain.review.repository.ReviewRepository;
-import com.codeit.project.deokhugam.domain.review.repository.ReviewRepositoryCustomImpl;
-import com.codeit.project.deokhugam.domain.user.dto.*;
+import com.codeit.project.deokhugam.domain.user.dto.PowerUserDto;
+import com.codeit.project.deokhugam.domain.user.dto.PowerUserQueryParams;
+import com.codeit.project.deokhugam.domain.user.dto.UserDto;
+import com.codeit.project.deokhugam.domain.user.dto.UserLoginRequest;
+import com.codeit.project.deokhugam.domain.user.dto.UserRegisterRequest;
+import com.codeit.project.deokhugam.domain.user.dto.UserUpdateRequest;
 import com.codeit.project.deokhugam.domain.user.entity.User;
 import com.codeit.project.deokhugam.domain.user.exception.DeleteNotAllowedException;
 import com.codeit.project.deokhugam.domain.user.exception.EmailDuplicationException;
@@ -22,8 +22,7 @@ import com.codeit.project.deokhugam.domain.user.exception.UserAlreadyDeletedExce
 import com.codeit.project.deokhugam.domain.user.exception.UserNotFoundException;
 import com.codeit.project.deokhugam.domain.user.repository.UserRepository;
 import com.codeit.project.deokhugam.global.common.dto.PageResponse;
-import java.time.LocalDate;
-import java.util.ArrayList;
+import com.codeit.project.deokhugam.global.util.PasswordUtil;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -37,7 +36,6 @@ public class UserService {
 
   private final UserRepository userRepository;
   private final RankRepository rankRepository;
-  private final RankService rankService;
   private final ReviewRepository reviewRepository;
   private final ReviewLikeRepository reviewLikeRepository;
   private final CommentRepository commentRepository;
@@ -55,7 +53,8 @@ public class UserService {
       throw new NicknameDuplicationException().withNickname(request.nickname());
     }
 
-    User user = new User(request.email(), request.nickname(), request.password());
+    String encodedPassword = PasswordUtil.encrypt(request.password());
+    User user = new User(request.email(), request.nickname(), encodedPassword);
     User saved = userRepository.save(user);
 
     return new UserDto(saved.getId().toString(), saved.getEmail(), saved.getNickname(), saved.getCreatedAt());
@@ -69,7 +68,7 @@ public class UserService {
             throw new LoginInputInvalidException().withEmail(request.email());
         });
 
-    if(!findUser.getPassword().equals(request.password())) {
+    if(!PasswordUtil.matches(request.password(), findUser.getPassword())) {
       log.warn("비밀번호 불일치");
       throw new LoginInputInvalidException().withPassword(request.password());
     }
@@ -139,46 +138,7 @@ public class UserService {
     }
   }
 
-//  @Transactional(readOnly = true)
-//  public PageResponse getRank(PowerUserQueryParams params) {
-//    List<Rank> ranks = rankService.findRank(RankSearchCommand.builder()
-//        .target(RankTarget.USER)
-//        .type(RankType.ALL_TIME)
-//        .direction(params.direction())
-//        .cusor(params.cursor().toString())
-//        .after(params.after().toString())
-//        .limit(Long.valueOf(params.limit()))
-//        .build());
-//
-//    List<PowerUserDto> content = new ArrayList<>();
-//    for(Rank rank : ranks) {
-//      User user = userRepository.findById(rank.getTargetId())
-//          .orElseThrow(() -> new UserNotFoundException().withId(rank.getTargetId().toString()));
-//
-//      PowerUserDto powerUser = PowerUserDto.builder()
-//          .userId(user.getId().toString())
-//          .nickname(user.getNickname())
-//          .period(rank.getType())
-//          .createdAt(rank.getCreatedAt().toString())
-//          .rank(rank.getRankNo())
-//          .score(rank.getScore())
-//          .likeCount(null)
-//          .commentCount(null)
-//          .build();
-//
-//      content.add(powerUser);
-//    }
-//
-//    return PageResponse.builder()
-//        .content(content)
-//        .nextCursor(null)
-//        .nextAfter(null)
-//        .size(content.size())
-//        .totalElements(Long.valueOf(content.size()))
-//        .hasNext(false)
-//        .build();
-//  }
-
+  @Transactional(readOnly = true)
   public PageResponse powerList(PowerUserQueryParams params) {
 
       List<Rank> rankList = userRepository.findRankByType(params.period(), params.direction(), params.limit());
