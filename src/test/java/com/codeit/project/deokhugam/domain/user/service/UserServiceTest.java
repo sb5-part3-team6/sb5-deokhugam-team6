@@ -21,11 +21,13 @@ import com.codeit.project.deokhugam.domain.user.exception.NicknameDuplicationExc
 import com.codeit.project.deokhugam.domain.user.exception.UserAlreadyDeletedException;
 import com.codeit.project.deokhugam.domain.user.exception.UserNotFoundException;
 import com.codeit.project.deokhugam.domain.user.repository.UserRepository;
+import com.codeit.project.deokhugam.global.util.PasswordUtil;
 import java.time.LocalDateTime;
 import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -76,7 +78,7 @@ class UserServiceTest {
   @DisplayName("회원가입 성공 - 특수문자 포함")
   void createUser_Success_WithSpecialChar() {
     UserRegisterRequest request = new UserRegisterRequest("special@example.com", "specialUser",
-        "Password!23"); // 특수 문자(!) 포함
+        "Password!23");
 
     when(userRepository.existsByEmail(request.email())).thenReturn(false);
     when(userRepository.existsByNickname(request.nickname())).thenReturn(false);
@@ -89,6 +91,8 @@ class UserServiceTest {
 
     when(userRepository.save(any(User.class))).thenReturn(savedUserMock);
 
+    ArgumentCaptor<User> userCaptor = ArgumentCaptor.forClass(User.class);
+
     UserDto userDto = userService.create(request);
 
     assertNotNull(userDto);
@@ -98,7 +102,12 @@ class UserServiceTest {
 
     verify(userRepository).existsByEmail(request.email());
     verify(userRepository).existsByNickname(request.nickname());
-    verify(userRepository).save(any(User.class));
+    verify(userRepository).save(userCaptor.capture());
+
+    User capturedUser = userCaptor.getValue();
+    String expectedPassword = PasswordUtil.encrypt(request.password());
+    assertEquals(expectedPassword, capturedUser.getPassword());
+    assertEquals(request.email(), capturedUser.getEmail());
   }
 
   @Test
@@ -118,6 +127,8 @@ class UserServiceTest {
 
     when(userRepository.save(any(User.class))).thenReturn(savedUserMock);
 
+    ArgumentCaptor<User> userCaptor = ArgumentCaptor.forClass(User.class);
+
     UserDto userDto = userService.create(request);
 
     assertNotNull(userDto);
@@ -127,7 +138,12 @@ class UserServiceTest {
 
     verify(userRepository).existsByEmail(request.email());
     verify(userRepository).existsByNickname(request.nickname());
-    verify(userRepository).save(any(User.class));
+    verify(userRepository).save(userCaptor.capture());
+
+    User capturedUser = userCaptor.getValue();
+    String expectedPassword = PasswordUtil.encrypt(request.password());
+    assertEquals(expectedPassword, capturedUser.getPassword());
+    assertEquals(request.email(), capturedUser.getEmail());
   }
 
   @Test
@@ -147,8 +163,12 @@ class UserServiceTest {
   @Test
   @DisplayName("로그인 실패 - 비밀번호 불일치")
   void login_Fail_IncorrectPassword() {
-    UserLoginRequest request = new UserLoginRequest("test@example.com", "WrongPassword123");
-    User userInDb = new User("test@example.com", "testuser", "CorrectPassword123");
+    String correctPassword = "CorrectPassword123";
+    String encodedPassword = PasswordUtil.encrypt(correctPassword);
+    String wrongPassword = "WrongPassword123";
+
+    UserLoginRequest request = new UserLoginRequest("test@example.com", wrongPassword);
+    User userInDb = new User("test@example.com", "testuser", encodedPassword);
 
     when(userRepository.findByEmail(request.email())).thenReturn(Optional.of(userInDb));
 
@@ -162,10 +182,13 @@ class UserServiceTest {
   @Test
   @DisplayName("로그인 성공")
   void login_Success() {
-    UserLoginRequest request = new UserLoginRequest("user@example.com", "Password123");
+    String rawPassword = "Password123";
+    String encodedPassword = PasswordUtil.encrypt(rawPassword);
+
+    UserLoginRequest request = new UserLoginRequest("user@example.com", rawPassword);
 
     User dbUserMock = mock(User.class);
-    when(dbUserMock.getPassword()).thenReturn("Password123");
+    when(dbUserMock.getPassword()).thenReturn(encodedPassword);
     when(dbUserMock.getId()).thenReturn(1L);
     when(dbUserMock.getEmail()).thenReturn(request.email());
     when(dbUserMock.getNickname()).thenReturn("dbUser");
