@@ -19,7 +19,8 @@ public class RankBatchSchedular {
   private final Job statJob;
 
 //  @Scheduled(initialDelay = 1000, fixedDelay = 1000 * 60 * 60)
-  @Scheduled(cron = "0 5 0 * * *", zone = "Asia/Seoul")
+//  @Scheduled(cron = "0 5 0 * * *", zone = "Asia/Seoul")
+  @Scheduled(cron = "0 */5 * * * *", zone = "Asia/Seoul") // 5분마다 테스트
   public void runAllStats() {
     runJob(RankTarget.BOOK, RankType.DAILY);
     runJob(RankTarget.BOOK, RankType.WEEKLY);

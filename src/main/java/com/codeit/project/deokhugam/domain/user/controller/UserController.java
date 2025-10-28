@@ -1,9 +1,6 @@
 package com.codeit.project.deokhugam.domain.user.controller;
 
-import com.codeit.project.deokhugam.domain.user.dto.UserDto;
-import com.codeit.project.deokhugam.domain.user.dto.UserLoginRequest;
-import com.codeit.project.deokhugam.domain.user.dto.UserRegisterRequest;
-import com.codeit.project.deokhugam.domain.user.dto.UserUpdateRequest;
+import com.codeit.project.deokhugam.domain.user.dto.*;
 import com.codeit.project.deokhugam.domain.user.service.UserService;
 import com.codeit.project.deokhugam.global.common.dto.PageResponse;
 import jakarta.validation.Valid;
@@ -70,10 +67,9 @@ public class UserController implements UserApi {
 
   @Override
   @GetMapping("/power")
-  public ResponseEntity<PageResponse> findPowerUsers(String period,
-      String direction, LocalDate cursor, LocalDate after, Integer limit) {
-    return ResponseEntity.status(HttpStatus.OK)
-                         .body(userService.getRank(direction, cursor, after, limit));
+  public ResponseEntity<PageResponse> powerList(PowerUserQueryParams params) {
+    PageResponse response = userService.powerList(params);
+    return ResponseEntity.ok(response);
   }
 
   @Override

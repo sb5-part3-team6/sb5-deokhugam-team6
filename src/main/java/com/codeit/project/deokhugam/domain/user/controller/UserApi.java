@@ -1,9 +1,6 @@
 package com.codeit.project.deokhugam.domain.user.controller;
 
-import com.codeit.project.deokhugam.domain.user.dto.UserDto;
-import com.codeit.project.deokhugam.domain.user.dto.UserLoginRequest;
-import com.codeit.project.deokhugam.domain.user.dto.UserRegisterRequest;
-import com.codeit.project.deokhugam.domain.user.dto.UserUpdateRequest;
+import com.codeit.project.deokhugam.domain.user.dto.*;
 import com.codeit.project.deokhugam.global.common.dto.PageResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -87,13 +84,7 @@ public interface UserApi {
           @ApiResponse(responseCode = "500", description = "서버 내부 오류")
       }
   )
-  ResponseEntity<PageResponse> findPowerUsers(
-      @RequestParam String period,
-      @RequestParam String direction,
-      @RequestParam LocalDate cursor,
-      @RequestParam LocalDate after,
-      @RequestParam Integer limit
-  );
+  ResponseEntity<PageResponse> powerList(PowerUserQueryParams params);
 
   @Operation(summary = "사용자 물리 삭제")
   @ApiResponses(

@@ -14,11 +14,11 @@ public interface CommentRepository extends JpaRepository<Comment, Long>, Comment
   @Modifying
   @Query("DELETE FROM Comment c WHERE c.review.id IN :reviewIds")
   void bulkDeleteByReviewIds(List<Long> reviewId);
-
-  Integer countByReviewId(Long reviewId);
-
   Integer countByReviewIdAndDeletedAtIsNull(Long reviewId);
+  Integer countAllByUserIdAndDeletedAtIsNull(Long userId);
 
   @Transactional @Modifying
   void deleteAllByReviewId(Long reviewId);
+
+
 }

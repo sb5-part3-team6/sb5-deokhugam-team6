@@ -92,7 +92,7 @@ public class ReviewServiceImpl implements ReviewService {
         }
 
         List<ReviewDto> content = reviewList.stream().map(review -> {
-            int likeCount = reviewLikeRepository.countByReviewId(review.getId());
+            int likeCount = reviewLikeRepository.countAllByReviewIdAndDeletedAtIsNull(review.getId());
             int commentCount =  commentRepository.countByReviewIdAndDeletedAtIsNull(review.getId());
             boolean likedByMe = reviewLikeRepository.existsByReviewIdAndUserId(review.getId(), user.getId());
             return reviewMapper.toDto(review,likeCount,commentCount,likedByMe);
@@ -113,7 +113,7 @@ public class ReviewServiceImpl implements ReviewService {
         Review review = verifyReviewExists(reviewId);
 
         boolean likedByMe = reviewLikeRepository.existsByReviewIdAndUserId(review.getId(), user.getId());
-        int likeCount = reviewLikeRepository.countByReviewId(review.getId());
+        int likeCount = reviewLikeRepository.countAllByReviewIdAndDeletedAtIsNull(review.getId());
         int commentCount =  commentRepository.countByReviewIdAndDeletedAtIsNull(review.getId());
 
         return reviewMapper.toDto(review,likeCount,commentCount,likedByMe);
@@ -137,8 +137,8 @@ public class ReviewServiceImpl implements ReviewService {
 
         List<PopularReviewDto> content = ranksList.stream().map(rank -> {
             Review review = verifyReviewExists(rank.getTargetId());
-            int likeCount = reviewLikeRepository.countByReviewId(review.getId());
-            int commentCount =  commentRepository.countByReviewId(review.getId());
+            int likeCount = reviewLikeRepository.countAllByReviewIdAndDeletedAtIsNull(review.getId());
+            int commentCount =  commentRepository.countByReviewIdAndDeletedAtIsNull(review.getId());
             return reviewMapper.toPopularDto(review, rank,likeCount,commentCount);
         }).toList();
 
@@ -162,8 +162,8 @@ public class ReviewServiceImpl implements ReviewService {
         review.update(request.content(), request.rating());
         reviewRepository.save(review);
 
-        int likeCount = reviewLikeRepository.countByReviewId(review.getId());
-        int commentCount =  commentRepository.countByReviewId(review.getId());
+        int likeCount = reviewLikeRepository.countAllByReviewIdAndDeletedAtIsNull(review.getId());
+        int commentCount =  commentRepository.countByReviewIdAndDeletedAtIsNull(review.getId());
         boolean likedByMe = reviewLikeRepository.existsByReviewIdAndUserId(review.getId(), user.getId());
 
         return reviewMapper.toDto(review,likeCount,commentCount,likedByMe);
