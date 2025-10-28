@@ -4,6 +4,8 @@ import com.codeit.project.deokhugam.domain.book.dto.BookDto;
 import com.codeit.project.deokhugam.domain.book.dto.BookSearchRequest;
 import com.codeit.project.deokhugam.domain.book.dto.BookStatDto;
 import com.codeit.project.deokhugam.domain.book.entity.QBook;
+import com.codeit.project.deokhugam.domain.rank.entity.QRank;
+import com.codeit.project.deokhugam.domain.rank.entity.Rank;
 import com.codeit.project.deokhugam.domain.rank.entity.RankType;
 import com.codeit.project.deokhugam.domain.review.entity.QReview;
 import com.querydsl.core.BooleanBuilder;
@@ -14,6 +16,7 @@ import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.core.types.dsl.NumberExpression;
+import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
@@ -237,6 +240,29 @@ public class BookRepositoryCustomImpl implements BookRepositoryCustom {
     }
 
     return getStats(startDateTime, endDateTime);
+  }
+
+  public List<Rank> findRanksByType(String type, String direction, int limit) {
+      QRank rank = QRank.rank;
+      QRank sub = new QRank("sub");
+
+      Order order = "asc".equalsIgnoreCase(direction) ? Order.ASC : Order.DESC;
+
+      var subQuery = JPAExpressions
+              .select(sub.targetId, sub.createdAt.max())
+              .from(sub)
+              .where(sub.target.eq("BOOK"), sub.type.eq(type))
+              .groupBy(sub.targetId);
+
+      return jpaQueryFactory
+              .selectFrom(rank)
+              .where(rank.target.eq("BOOK"),
+                      rank.type.eq(type),
+                      Expressions.list(rank.targetId, rank.createdAt).in(subQuery)
+              )
+              .orderBy(new OrderSpecifier<>(order, rank.rankNo))
+              .limit(limit + 1)
+              .fetch();
   }
 
   private List<BookStatDto> getStats(LocalDateTime startDateTime, LocalDateTime endDateTime) {

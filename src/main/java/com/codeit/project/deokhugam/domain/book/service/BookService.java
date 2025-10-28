@@ -6,6 +6,7 @@ import com.codeit.project.deokhugam.domain.book.dto.BookPopularRequest;
 import com.codeit.project.deokhugam.domain.book.dto.BookSearchRequest;
 import com.codeit.project.deokhugam.domain.book.dto.BookUpdateRequest;
 import com.codeit.project.deokhugam.domain.book.dto.CursorPageResponseBookDto;
+import com.codeit.project.deokhugam.global.common.dto.PageResponse;
 import org.springframework.web.multipart.MultipartFile;
 
 public interface BookService {
@@ -15,6 +16,5 @@ public interface BookService {
   void hardDelete(Long bookId);
   BookDto findById(Long bookId);
   CursorPageResponseBookDto<BookDto> search(BookSearchRequest bookSearchReq);
-  CursorPageResponseBookDto<BookDto> poplarList(BookPopularRequest bookPopularReq);
-
+  PageResponse popularList(BookPopularRequest request);
 }

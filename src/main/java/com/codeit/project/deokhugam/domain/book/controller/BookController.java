@@ -2,6 +2,7 @@ package com.codeit.project.deokhugam.domain.book.controller;
 
 import com.codeit.project.deokhugam.domain.book.dto.*;
 import com.codeit.project.deokhugam.domain.book.service.BookService;
+import com.codeit.project.deokhugam.global.common.dto.PageResponse;
 import com.codeit.project.deokhugam.openapi.api.NaverBookApiClient;
 import jakarta.validation.Valid;
 import jakarta.websocket.server.PathParam;
@@ -74,11 +75,9 @@ public class BookController {
     }
 
     @GetMapping("/popular")
-    public ResponseEntity<CursorPageResponseBookDto<BookDto>> popular(
-        BookPopularRequest bookPopularReq
-    ){
-        CursorPageResponseBookDto<BookDto> popularBook = bookService.poplarList(bookPopularReq);
-        return ResponseEntity.ok(popularBook);
+    public ResponseEntity<PageResponse> popular(BookPopularRequest bookPopularReq){
+        PageResponse response = bookService.popularList(bookPopularReq);
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping("/info")
