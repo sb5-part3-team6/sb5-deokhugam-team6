@@ -49,22 +49,24 @@ public class CommentController implements CommentAPI {
   public ResponseEntity<CommentDto> update(@PathVariable Long commentId,
       @RequestBody CommentUpdateRequest req,
       @RequestHeader("Deokhugam-Request-User-ID") String userId) {
-    CommentDto updatedComment = commentService.update(commentId, req);
+    Long currentUserId = Long.parseLong(userId);
+    CommentDto updatedComment = commentService.update(commentId, req, currentUserId);
     return ResponseEntity.ok(updatedComment);
   }
 
   @DeleteMapping("/{commentId}")
   public ResponseEntity<Void> deleteSoft(@PathVariable Long commentId,
     @RequestHeader("Deokhugam-Request-User-ID") String userId) {
-    commentService.deleteSoft(commentId);
-    return ResponseEntity.noContent()
-                         .build();
+    Long currentUserId = Long.parseLong(userId);
+    commentService.deleteSoft(commentId, currentUserId);
+    return ResponseEntity.noContent().build();
   }
 
   @DeleteMapping("/{commentId}/hard")
   public ResponseEntity<Void> deleteHard(@PathVariable Long commentId,
     @RequestHeader("Deokhugam-Request-User-ID") String userId) {
-    commentService.delete(commentId);
+    Long currentUserId = Long.parseLong(userId);
+    commentService.delete(commentId, currentUserId);
     return ResponseEntity.noContent()
                          .build();
   }
