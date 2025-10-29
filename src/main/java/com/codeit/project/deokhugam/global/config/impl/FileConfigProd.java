@@ -33,7 +33,7 @@ public class FileConfigProd implements FileConfig {
       Files.createDirectories(p);
       return p.toFile();
     } catch (Exception e) {
-      throw new IllegalStateException("아바타 디렉토리 생성 실패", e);
+      throw new IllegalStateException("썸네일 디렉토리 생성 실패", e);
     }
   }
 }
