@@ -31,7 +31,6 @@ import org.springframework.stereotype.Repository;
 public class BookRepositoryCustomImpl implements BookRepositoryCustom {
 
   private final JPAQueryFactory jpaQueryFactory;
-  private final QueryFactory queryFactory;
 
   @Override
   public List<BookDto> findBooks(BookSearchRequest bookSearchReq, int pageSize) {
