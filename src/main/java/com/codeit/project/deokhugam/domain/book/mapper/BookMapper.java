@@ -1,8 +1,7 @@
 package com.codeit.project.deokhugam.domain.book.mapper;
 
-import com.codeit.project.deokhugam.domain.book.dto.BookDto;
+import com.codeit.project.deokhugam.domain.book.dto.response.BookDto;
 import com.codeit.project.deokhugam.domain.book.entity.Book;
-import java.util.List;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 

@@ -1,13 +1,13 @@
 package com.codeit.project.deokhugam.domain.notification.service;
 
-import com.codeit.project.deokhugam.domain.notification.dto.NotificationCreateCommand;
-import com.codeit.project.deokhugam.domain.notification.dto.NotificationDeleteCommand;
-import com.codeit.project.deokhugam.domain.notification.dto.NotificationDto;
-import com.codeit.project.deokhugam.domain.notification.dto.NotificationUpdateRequest;
+import com.codeit.project.deokhugam.domain.notification.dto.command.NotificationCreateCommand;
+import com.codeit.project.deokhugam.domain.notification.dto.command.NotificationDeleteCommand;
+import com.codeit.project.deokhugam.domain.notification.dto.response.NotificationDto;
+import com.codeit.project.deokhugam.domain.notification.dto.request.NotificationUpdateRequest;
 import com.codeit.project.deokhugam.domain.notification.entity.Notification;
 import com.codeit.project.deokhugam.domain.notification.entity.NotificationType;
-import com.codeit.project.deokhugam.domain.notification.exception.NotificationInvalidUserException;
-import com.codeit.project.deokhugam.domain.notification.exception.NotificationNotFoundException;
+import com.codeit.project.deokhugam.domain.notification.exception.detail.NotificationInvalidUserException;
+import com.codeit.project.deokhugam.domain.notification.exception.detail.NotificationNotFoundException;
 import com.codeit.project.deokhugam.domain.notification.mapper.NotificationMapper;
 import com.codeit.project.deokhugam.domain.notification.repository.NotificationRepository;
 import com.codeit.project.deokhugam.domain.user.repository.UserRepository;
@@ -18,7 +18,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDate;
 import java.util.List;
 
 @Slf4j

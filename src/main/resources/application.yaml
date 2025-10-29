@@ -26,17 +26,6 @@ management:
     health:
       show-details: always
 
-external:
-  naver:
-    api:
-      client-id: ${NAVER_CLIENT_ID}
-      client-secret: ${NAVER_CLIENT_SECRET}
-
-ncp:
-  ocr:
-    invoke-url: ${NCP_INVOKE_URL}
-    secret-key: ${NCP_CLIENT_SECRET}
-
 file:
   upload-dir: ${FILE_UPLOAD_DIR:/app/uploads}
 
@@ -57,3 +46,12 @@ info:
       max-file-size: ${spring.servlet.multipart.maxFileSize}
       max-request-size: ${spring.servlet.multipart.maxRequestSize}
 
+external:
+  naver:
+    api:
+      client-id: ${NAVER_CLIENT_ID}
+      client-secret: ${NAVER_CLIENT_SECRET}
+  ncp:
+    api:
+      invoke-url: ${NCP_INVOKE_URL}
+      secret-key: ${NCP_CLIENT_SECRET}

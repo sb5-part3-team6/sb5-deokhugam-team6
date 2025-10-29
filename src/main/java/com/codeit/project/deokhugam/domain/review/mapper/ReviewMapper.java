@@ -1,8 +1,8 @@
 package com.codeit.project.deokhugam.domain.review.mapper;
 
 import com.codeit.project.deokhugam.domain.rank.entity.Rank;
-import com.codeit.project.deokhugam.domain.review.dto.PopularReviewDto;
-import com.codeit.project.deokhugam.domain.review.dto.ReviewDto;
+import com.codeit.project.deokhugam.domain.review.dto.response.PopularReviewDto;
+import com.codeit.project.deokhugam.domain.review.dto.response.ReviewDto;
 import com.codeit.project.deokhugam.domain.review.entity.Review;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;

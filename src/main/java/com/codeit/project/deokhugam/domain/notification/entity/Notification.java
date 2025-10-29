@@ -2,7 +2,7 @@ package com.codeit.project.deokhugam.domain.notification.entity;
 
 import com.codeit.project.deokhugam.domain.review.entity.Review;
 import com.codeit.project.deokhugam.domain.user.entity.User;
-import com.codeit.project.deokhugam.global.entity.BaseEntity;
+import com.codeit.project.deokhugam.global.common.entity.BaseEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.JoinColumn;

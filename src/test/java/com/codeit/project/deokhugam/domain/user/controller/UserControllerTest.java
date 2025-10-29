@@ -10,10 +10,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import com.codeit.project.deokhugam.domain.user.dto.UserDto;
-import com.codeit.project.deokhugam.domain.user.dto.UserRegisterRequest;
-import com.codeit.project.deokhugam.domain.user.exception.EmailDuplicationException;
-import com.codeit.project.deokhugam.domain.user.exception.NicknameDuplicationException;
+import com.codeit.project.deokhugam.domain.user.dto.request.UserRegisterRequest;
+import com.codeit.project.deokhugam.domain.user.dto.response.UserDto;
+import com.codeit.project.deokhugam.domain.user.exception.detail.EmailDuplicationException;
+import com.codeit.project.deokhugam.domain.user.exception.detail.NicknameDuplicationException;
 import com.codeit.project.deokhugam.domain.user.service.UserService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.DisplayName;
@@ -51,9 +51,9 @@ class UserControllerTest {
     );
 
     mockMvc.perform(post("/api/users")
-            .contentType(MediaType.APPLICATION_JSON)
-            .content(objectMapper.writeValueAsString(invalidRequest)))
-        .andExpect(status().isBadRequest());
+               .contentType(MediaType.APPLICATION_JSON)
+               .content(objectMapper.writeValueAsString(invalidRequest)))
+           .andExpect(status().isBadRequest());
 
     verify(userService, never()).create(any(UserRegisterRequest.class));
   }
@@ -153,11 +153,11 @@ class UserControllerTest {
         .thenReturn(mockResponse);
 
     mockMvc.perform(post("/api/users")
-            .contentType(MediaType.APPLICATION_JSON)
-            .content(objectMapper.writeValueAsString(request)))
-        .andExpect(status().isCreated())
-        .andExpect(jsonPath("$.email").value("test@example.com"))
-        .andExpect(jsonPath("$.nickname").value("testuser"));
+               .contentType(MediaType.APPLICATION_JSON)
+               .content(objectMapper.writeValueAsString(request)))
+           .andExpect(status().isCreated())
+           .andExpect(jsonPath("$.email").value("test@example.com"))
+           .andExpect(jsonPath("$.nickname").value("testuser"));
 
     verify(userService, times(1)).create(any(UserRegisterRequest.class));
   }

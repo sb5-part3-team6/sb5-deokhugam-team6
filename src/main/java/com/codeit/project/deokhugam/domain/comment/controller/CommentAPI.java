@@ -1,8 +1,8 @@
 package com.codeit.project.deokhugam.domain.comment.controller;
 
-import com.codeit.project.deokhugam.domain.comment.dto.CommentCreateRequest;
-import com.codeit.project.deokhugam.domain.comment.dto.CommentDto;
-import com.codeit.project.deokhugam.domain.comment.dto.CommentUpdateRequest;
+import com.codeit.project.deokhugam.domain.comment.dto.request.CommentCreateRequest;
+import com.codeit.project.deokhugam.domain.comment.dto.response.CommentDto;
+import com.codeit.project.deokhugam.domain.comment.dto.request.CommentUpdateRequest;
 import com.codeit.project.deokhugam.global.common.dto.PageResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;

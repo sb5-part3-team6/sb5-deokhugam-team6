@@ -1,12 +1,12 @@
 package com.codeit.project.deokhugam.domain.comment.service;
 
-import com.codeit.project.deokhugam.domain.comment.dto.CommentCreateRequest;
-import com.codeit.project.deokhugam.domain.comment.dto.CommentDto;
-import com.codeit.project.deokhugam.domain.comment.dto.CommentUpdateRequest;
+import com.codeit.project.deokhugam.domain.comment.dto.request.CommentCreateRequest;
+import com.codeit.project.deokhugam.domain.comment.dto.response.CommentDto;
+import com.codeit.project.deokhugam.domain.comment.dto.request.CommentUpdateRequest;
 import com.codeit.project.deokhugam.domain.comment.entity.Comment;
 import com.codeit.project.deokhugam.domain.comment.mapper.CommentMapper;
 import com.codeit.project.deokhugam.domain.comment.repository.CommentRepository;
-import com.codeit.project.deokhugam.domain.notification.dto.NotificationCreateCommand;
+import com.codeit.project.deokhugam.domain.notification.dto.command.NotificationCreateCommand;
 import com.codeit.project.deokhugam.domain.notification.entity.NotificationType;
 import com.codeit.project.deokhugam.domain.notification.service.NotificationService;
 import com.codeit.project.deokhugam.domain.review.entity.Review;

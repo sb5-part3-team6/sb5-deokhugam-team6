@@ -9,19 +9,19 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import com.codeit.project.deokhugam.domain.user.dto.UserDto;
-import com.codeit.project.deokhugam.domain.user.dto.UserLoginRequest;
-import com.codeit.project.deokhugam.domain.user.dto.UserRegisterRequest;
-import com.codeit.project.deokhugam.domain.user.dto.UserUpdateRequest;
+import com.codeit.project.deokhugam.domain.user.dto.response.UserDto;
+import com.codeit.project.deokhugam.domain.user.dto.request.UserLoginRequest;
+import com.codeit.project.deokhugam.domain.user.dto.request.UserRegisterRequest;
+import com.codeit.project.deokhugam.domain.user.dto.request.UserUpdateRequest;
 import com.codeit.project.deokhugam.domain.user.entity.User;
-import com.codeit.project.deokhugam.domain.user.exception.DeleteNotAllowedException;
-import com.codeit.project.deokhugam.domain.user.exception.EmailDuplicationException;
-import com.codeit.project.deokhugam.domain.user.exception.LoginInputInvalidException;
-import com.codeit.project.deokhugam.domain.user.exception.NicknameDuplicationException;
-import com.codeit.project.deokhugam.domain.user.exception.UserAlreadyDeletedException;
-import com.codeit.project.deokhugam.domain.user.exception.UserNotFoundException;
+import com.codeit.project.deokhugam.domain.user.exception.detail.DeleteNotAllowedException;
+import com.codeit.project.deokhugam.domain.user.exception.detail.EmailDuplicationException;
+import com.codeit.project.deokhugam.domain.user.exception.detail.LoginInputInvalidException;
+import com.codeit.project.deokhugam.domain.user.exception.detail.NicknameDuplicationException;
+import com.codeit.project.deokhugam.domain.user.exception.detail.UserAlreadyDeletedException;
+import com.codeit.project.deokhugam.domain.user.exception.detail.UserNotFoundException;
 import com.codeit.project.deokhugam.domain.user.repository.UserRepository;
-import com.codeit.project.deokhugam.global.util.PasswordUtil;
+import com.codeit.project.deokhugam.domain.user.util.PasswordUtil;
 import java.time.LocalDateTime;
 import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
@@ -36,7 +36,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 class UserServiceTest {
 
   @InjectMocks
-  private UserService userService;
+  private UserServiceImpl userService;
 
   @Mock
   private UserRepository userRepository;

@@ -3,7 +3,7 @@ package com.codeit.project.deokhugam.batch.reader;
 import com.codeit.project.deokhugam.domain.book.repository.BookRepository;
 import com.codeit.project.deokhugam.domain.rank.entity.RankTarget;
 import com.codeit.project.deokhugam.domain.rank.entity.RankType;
-import com.codeit.project.deokhugam.domain.review.repository.ReviewStatRepository;
+import com.codeit.project.deokhugam.domain.review.repository.ReviewRepository;
 import com.codeit.project.deokhugam.domain.user.repository.UserRepository;
 import java.util.Iterator;
 import org.springframework.batch.core.configuration.annotation.StepScope;
@@ -16,7 +16,7 @@ import org.springframework.stereotype.Component;
 public class RankReader implements ItemReader<Object> {
 
   private final BookRepository bookRepository;
-  private final ReviewStatRepository reviewRepository;
+  private final ReviewRepository reviewRepository;
   private final UserRepository userRepository;
 
   private final RankType rankType;
@@ -26,7 +26,7 @@ public class RankReader implements ItemReader<Object> {
 
   public RankReader(
       BookRepository bookRepository,
-      ReviewStatRepository reviewRepository,
+      ReviewRepository reviewRepository,
       UserRepository userRepository,
       @Value("#{jobParameters['rankType']}") String rankType,
       @Value("#{jobParameters['rankTarget']}") String rankTarget

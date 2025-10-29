@@ -1,9 +1,9 @@
 package com.codeit.project.deokhugam.domain.notification.service;
 
-import com.codeit.project.deokhugam.domain.notification.dto.NotificationCreateCommand;
-import com.codeit.project.deokhugam.domain.notification.dto.NotificationDeleteCommand;
-import com.codeit.project.deokhugam.domain.notification.dto.NotificationDto;
-import com.codeit.project.deokhugam.domain.notification.dto.NotificationUpdateRequest;
+import com.codeit.project.deokhugam.domain.notification.dto.command.NotificationCreateCommand;
+import com.codeit.project.deokhugam.domain.notification.dto.command.NotificationDeleteCommand;
+import com.codeit.project.deokhugam.domain.notification.dto.response.NotificationDto;
+import com.codeit.project.deokhugam.domain.notification.dto.request.NotificationUpdateRequest;
 import com.codeit.project.deokhugam.global.common.dto.PageResponse;
 
 public interface NotificationService {

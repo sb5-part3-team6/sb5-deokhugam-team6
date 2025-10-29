@@ -18,24 +18,31 @@ public class RankBatchSchedular {
   private final JobLauncher jobLauncher;
   private final Job statJob;
 
-//  @Scheduled(initialDelay = 1000, fixedDelay = 1000 * 60 * 60)
-//  @Scheduled(cron = "0 5 0 * * *", zone = "Asia/Seoul")
-  @Scheduled(cron = "0 */5 * * * *", zone = "Asia/Seoul") // 5분마다 테스트
+  @Scheduled(cron = "0 5 0 * * *", zone = "Asia/Seoul")
   public void runAllStats() {
     runJob(RankTarget.BOOK, RankType.DAILY);
+    runJob(RankTarget.REVIEW, RankType.DAILY);
+    runJob(RankTarget.USER, RankType.DAILY);
+
     runJob(RankTarget.BOOK, RankType.WEEKLY);
     runJob(RankTarget.BOOK, RankType.MONTHLY);
     runJob(RankTarget.BOOK, RankType.ALL_TIME);
 
-    runJob(RankTarget.REVIEW, RankType.DAILY);
     runJob(RankTarget.REVIEW, RankType.WEEKLY);
     runJob(RankTarget.REVIEW, RankType.MONTHLY);
     runJob(RankTarget.REVIEW, RankType.ALL_TIME);
 
-    runJob(RankTarget.USER, RankType.DAILY);
     runJob(RankTarget.USER, RankType.WEEKLY);
     runJob(RankTarget.USER, RankType.MONTHLY);
     runJob(RankTarget.USER, RankType.ALL_TIME);
+  }
+
+//  @Scheduled(initialDelay = 1000, fixedDelay = 1000 * 60 * 60)
+  public void runDaily(){
+    // TODO : 일간 랭킹 애들은 계속 조금씩 갱신할지 or 그냥 아예 어제일자 랭킹을 보여줄지
+    runJob(RankTarget.BOOK, RankType.DAILY);
+    runJob(RankTarget.REVIEW, RankType.DAILY);
+    runJob(RankTarget.USER, RankType.DAILY);
   }
 
   private void runJob(RankTarget target, RankType type) {

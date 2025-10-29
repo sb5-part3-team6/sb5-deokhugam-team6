@@ -1,11 +1,17 @@
 package com.codeit.project.deokhugam.domain.book.service;
 
-import com.codeit.project.deokhugam.domain.book.dto.*;
+import com.codeit.project.deokhugam.domain.book.dto.request.BookCreateRequest;
+import com.codeit.project.deokhugam.domain.book.dto.request.BookPopularRequest;
+import com.codeit.project.deokhugam.domain.book.dto.request.BookSearchRequest;
+import com.codeit.project.deokhugam.domain.book.dto.request.BookUpdateRequest;
+import com.codeit.project.deokhugam.domain.book.dto.response.BookDto;
+import com.codeit.project.deokhugam.domain.book.dto.response.CursorPageResponseBookDto;
+import com.codeit.project.deokhugam.domain.book.dto.response.PopularBookDto;
 import com.codeit.project.deokhugam.domain.book.entity.Book;
-import com.codeit.project.deokhugam.domain.book.exception.BookNotFoundException;
+import com.codeit.project.deokhugam.domain.book.exception.detail.BookNotFoundException;
 import com.codeit.project.deokhugam.domain.book.mapper.BookMapper;
 import com.codeit.project.deokhugam.domain.book.repository.BookRepository;
-import com.codeit.project.deokhugam.domain.book.storage.FileStorage;
+import com.codeit.project.deokhugam.global.storage.FileStorage;
 import com.codeit.project.deokhugam.domain.comment.entity.Comment;
 import com.codeit.project.deokhugam.domain.comment.repository.CommentRepository;
 import com.codeit.project.deokhugam.domain.rank.entity.Rank;
@@ -150,18 +156,18 @@ public class BookServiceImpl implements BookService {
       Long reviewCount = getReviewCount(book.getId());
       Double rating = getAverageRating(book.getId());
       return PopularBookDto.builder()
-              .id(rank.getId())
-              .bookId(book.getId())
-              .title(book.getTitle())
-              .author(book.getAuthor())
-              .thumbnailUrl(book.getThumbnailUrl())
-              .period(request.period())
-              .rank(rank.getRankNo())
-              .score(rank.getScore())
-              .reviewCount(reviewCount)
-              .rating(rating)
-              .createdAt(rank.getCreatedAt())
-              .build();
+                           .id(rank.getId())
+                           .bookId(book.getId())
+                           .title(book.getTitle())
+                           .author(book.getAuthor())
+                           .thumbnailUrl(book.getThumbnailUrl())
+                           .period(request.period())
+                           .rank(rank.getRankNo())
+                           .score(rank.getScore())
+                           .reviewCount(reviewCount)
+                           .rating(rating)
+                           .createdAt(rank.getCreatedAt())
+                           .build();
     }).toList();
 
     return PageResponse.builder()
@@ -185,7 +191,6 @@ public class BookServiceImpl implements BookService {
       List<Comment> comments = commentRepository.findByReviewId(review.getId());
       comments.forEach(Comment::softDelete);
     });
-    // TODO Review, Comment 소프트 삭제 고려
   }
 
   @Override @Transactional
@@ -202,7 +207,6 @@ public class BookServiceImpl implements BookService {
 
     fileStorage.deleteThumbnailImage(book.getIsbn());
     bookRepository.deleteById(bookId);
-    // TODO Review, Comment 삭제 고려
   }
 
   private double getAverageRating(Long bookId) {

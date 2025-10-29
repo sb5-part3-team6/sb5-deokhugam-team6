@@ -1,21 +1,26 @@
 package com.codeit.project.deokhugam.domain.review.service;
 
 import com.codeit.project.deokhugam.domain.book.entity.Book;
-import com.codeit.project.deokhugam.domain.book.exception.BookNotFoundException;
+import com.codeit.project.deokhugam.domain.book.exception.detail.BookNotFoundException;
 import com.codeit.project.deokhugam.domain.book.repository.BookRepository;
 import com.codeit.project.deokhugam.domain.comment.repository.CommentRepository;
 import com.codeit.project.deokhugam.domain.rank.entity.Rank;
 import com.codeit.project.deokhugam.domain.rank.repository.RankRepository;
-import com.codeit.project.deokhugam.domain.review.dto.*;
+import com.codeit.project.deokhugam.domain.review.dto.request.ReviewCreateRequest;
+import com.codeit.project.deokhugam.domain.review.dto.request.ReviewPopularQueryParams;
+import com.codeit.project.deokhugam.domain.review.dto.request.ReviewQueryParams;
+import com.codeit.project.deokhugam.domain.review.dto.request.ReviewUpdateRequest;
+import com.codeit.project.deokhugam.domain.review.dto.response.PopularReviewDto;
+import com.codeit.project.deokhugam.domain.review.dto.response.ReviewDto;
+import com.codeit.project.deokhugam.domain.review.dto.response.ReviewLikeDto;
 import com.codeit.project.deokhugam.domain.review.entity.Review;
 import com.codeit.project.deokhugam.domain.review.entity.ReviewLike;
-import com.codeit.project.deokhugam.domain.review.event.ReviewLikedEvent;
-import com.codeit.project.deokhugam.domain.review.exception.ReviewAlreadyExistsException;
-import com.codeit.project.deokhugam.domain.review.exception.ReviewNotFoundException;
+import com.codeit.project.deokhugam.domain.review.dto.event.ReviewLikedEvent;
+import com.codeit.project.deokhugam.domain.review.exception.detail.ReviewAlreadyExistsException;
+import com.codeit.project.deokhugam.domain.review.exception.detail.ReviewNotFoundException;
 import com.codeit.project.deokhugam.domain.review.mapper.ReviewMapper;
 import com.codeit.project.deokhugam.domain.review.repository.ReviewLikeRepository;
 import com.codeit.project.deokhugam.domain.review.repository.ReviewRepository;
-import com.codeit.project.deokhugam.domain.review.repository.ReviewRepositoryCustomImpl;
 import com.codeit.project.deokhugam.domain.user.entity.User;
 import com.codeit.project.deokhugam.domain.user.repository.UserRepository;
 import com.codeit.project.deokhugam.global.common.dto.PageResponse;
@@ -32,7 +37,6 @@ import java.util.Optional;
 public class ReviewServiceImpl implements ReviewService {
 
     private final ReviewRepository reviewRepository;
-    private final ReviewRepositoryCustomImpl reviewRepositoryCustom;
     private final ReviewLikeRepository reviewLikeRepository;
     private final BookRepository bookRepository;
     private final UserRepository userRepository;
@@ -76,7 +80,7 @@ public class ReviewServiceImpl implements ReviewService {
     }
 
     public PageResponse list(ReviewQueryParams params, Long userId) {
-        List<Review> reviewList = reviewRepositoryCustom.list(params);
+        List<Review> reviewList = reviewRepository.list(params);
         User user = verifyUserExists(userId);
 
         Long total = reviewRepository.countTotal(params.bookId());
@@ -121,7 +125,7 @@ public class ReviewServiceImpl implements ReviewService {
 
     public PageResponse popularList(ReviewPopularQueryParams params) {
 
-        List<Rank> ranksList = reviewRepositoryCustom.findRanksByType(params.period(), params.direction(), params.limit());
+        List<Rank> ranksList = reviewRepository.findRanksByType(params.period(), params.direction(), params.limit());
 
         Long total = rankRepository.countAllByTypeForReview(params.period());
         boolean hasNext = ranksList.size() > params.limit();

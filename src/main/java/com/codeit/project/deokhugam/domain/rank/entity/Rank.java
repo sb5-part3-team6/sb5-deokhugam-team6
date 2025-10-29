@@ -1,6 +1,6 @@
 package com.codeit.project.deokhugam.domain.rank.entity;
 
-import com.codeit.project.deokhugam.global.entity.BaseEntity;
+import com.codeit.project.deokhugam.global.common.entity.BaseEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;

@@ -1,7 +1,7 @@
 package com.codeit.project.deokhugam.domain.notification.controller;
 
-import com.codeit.project.deokhugam.domain.notification.dto.NotificationDto;
-import com.codeit.project.deokhugam.domain.notification.dto.NotificationUpdateRequest;
+import com.codeit.project.deokhugam.domain.notification.dto.response.NotificationDto;
+import com.codeit.project.deokhugam.domain.notification.dto.request.NotificationUpdateRequest;
 import com.codeit.project.deokhugam.domain.notification.service.NotificationService;
 import com.codeit.project.deokhugam.global.common.dto.PageResponse;
 import jakarta.validation.Valid;

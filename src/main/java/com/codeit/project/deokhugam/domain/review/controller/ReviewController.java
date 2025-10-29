@@ -1,6 +1,11 @@
 package com.codeit.project.deokhugam.domain.review.controller;
 
-import com.codeit.project.deokhugam.domain.review.dto.*;
+import com.codeit.project.deokhugam.domain.review.dto.request.ReviewCreateRequest;
+import com.codeit.project.deokhugam.domain.review.dto.request.ReviewPopularQueryParams;
+import com.codeit.project.deokhugam.domain.review.dto.request.ReviewQueryParams;
+import com.codeit.project.deokhugam.domain.review.dto.request.ReviewUpdateRequest;
+import com.codeit.project.deokhugam.domain.review.dto.response.ReviewDto;
+import com.codeit.project.deokhugam.domain.review.dto.response.ReviewLikeDto;
 import com.codeit.project.deokhugam.domain.review.service.ReviewService;
 import com.codeit.project.deokhugam.global.common.dto.PageResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -12,7 +17,7 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("/api/reviews")
-public class ReviewController {
+public class ReviewController implements ReviewApi {
 
     private final ReviewService reviewService;
 

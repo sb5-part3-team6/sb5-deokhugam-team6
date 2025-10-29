@@ -10,8 +10,8 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import com.codeit.project.deokhugam.domain.notification.dto.NotificationDto;
-import com.codeit.project.deokhugam.domain.notification.dto.NotificationUpdateRequest;
+import com.codeit.project.deokhugam.domain.notification.dto.response.NotificationDto;
+import com.codeit.project.deokhugam.domain.notification.dto.request.NotificationUpdateRequest;
 import com.codeit.project.deokhugam.domain.notification.service.NotificationService;
 import com.codeit.project.deokhugam.global.common.dto.PageResponse;
 import com.fasterxml.jackson.databind.ObjectMapper;
