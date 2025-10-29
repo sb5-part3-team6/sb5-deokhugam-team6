@@ -1,6 +1,8 @@
 package com.codeit.project.deokhugam.domain.notification.exception;
 
 import com.codeit.project.deokhugam.domain.notification.controller.NotificationController;
+import com.codeit.project.deokhugam.domain.notification.exception.detail.NotificationInvalidUserException;
+import com.codeit.project.deokhugam.domain.notification.exception.detail.NotificationNotFoundException;
 import com.codeit.project.deokhugam.global.common.dto.ErrorResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;

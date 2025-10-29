@@ -1,6 +1,6 @@
 package com.codeit.project.deokhugam.domain.notification.mapper;
 
-import com.codeit.project.deokhugam.domain.notification.dto.NotificationDto;
+import com.codeit.project.deokhugam.domain.notification.dto.response.NotificationDto;
 import com.codeit.project.deokhugam.domain.notification.entity.Notification;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;

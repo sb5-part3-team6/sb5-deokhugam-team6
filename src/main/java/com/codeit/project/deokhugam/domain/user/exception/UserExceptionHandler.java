@@ -1,6 +1,12 @@
 package com.codeit.project.deokhugam.domain.user.exception;
 
 import com.codeit.project.deokhugam.domain.user.controller.UserController;
+import com.codeit.project.deokhugam.domain.user.exception.detail.DeleteNotAllowedException;
+import com.codeit.project.deokhugam.domain.user.exception.detail.EmailDuplicationException;
+import com.codeit.project.deokhugam.domain.user.exception.detail.LoginInputInvalidException;
+import com.codeit.project.deokhugam.domain.user.exception.detail.NicknameDuplicationException;
+import com.codeit.project.deokhugam.domain.user.exception.detail.UserAlreadyDeletedException;
+import com.codeit.project.deokhugam.domain.user.exception.detail.UserNotFoundException;
 import com.codeit.project.deokhugam.global.common.dto.ErrorResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;

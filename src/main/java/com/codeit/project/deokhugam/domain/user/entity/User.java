@@ -1,7 +1,7 @@
 package com.codeit.project.deokhugam.domain.user.entity;
 
 
-import com.codeit.project.deokhugam.global.entity.BaseDeletableEntity;
+import com.codeit.project.deokhugam.global.common.entity.BaseDeletableEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;

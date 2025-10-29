@@ -1,7 +1,7 @@
 package com.codeit.project.deokhugam.global.config;
 
-import com.codeit.project.deokhugam.global.util.LoginUserArgumentResolver;
-import com.codeit.project.deokhugam.global.util.MDCLoggingInterceptor;
+import com.codeit.project.deokhugam.domain.user.util.LoginUserArgumentResolver;
+import com.codeit.project.deokhugam.global.log.MDCLoggingInterceptor;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;

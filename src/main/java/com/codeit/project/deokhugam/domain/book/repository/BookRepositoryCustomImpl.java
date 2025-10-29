@@ -1,7 +1,7 @@
 package com.codeit.project.deokhugam.domain.book.repository;
 
-import com.codeit.project.deokhugam.domain.book.dto.BookDto;
-import com.codeit.project.deokhugam.domain.book.dto.BookSearchRequest;
+import com.codeit.project.deokhugam.domain.book.dto.response.BookDto;
+import com.codeit.project.deokhugam.domain.book.dto.request.BookSearchRequest;
 import com.codeit.project.deokhugam.domain.book.dto.BookStatDto;
 import com.codeit.project.deokhugam.domain.book.entity.QBook;
 import com.codeit.project.deokhugam.domain.rank.entity.QRank;
@@ -31,7 +31,6 @@ import org.springframework.stereotype.Repository;
 public class BookRepositoryCustomImpl implements BookRepositoryCustom {
 
   private final JPAQueryFactory jpaQueryFactory;
-  private final QueryFactory queryFactory;
 
   @Override
   public List<BookDto> findBooks(BookSearchRequest bookSearchReq, int pageSize) {

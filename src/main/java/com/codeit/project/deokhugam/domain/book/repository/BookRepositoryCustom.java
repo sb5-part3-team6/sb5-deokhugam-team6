@@ -1,7 +1,7 @@
 package com.codeit.project.deokhugam.domain.book.repository;
 
-import com.codeit.project.deokhugam.domain.book.dto.BookDto;
-import com.codeit.project.deokhugam.domain.book.dto.BookSearchRequest;
+import com.codeit.project.deokhugam.domain.book.dto.response.BookDto;
+import com.codeit.project.deokhugam.domain.book.dto.request.BookSearchRequest;
 import com.codeit.project.deokhugam.domain.book.dto.BookStatDto;
 import com.codeit.project.deokhugam.domain.rank.entity.Rank;
 import com.codeit.project.deokhugam.domain.rank.entity.RankType;

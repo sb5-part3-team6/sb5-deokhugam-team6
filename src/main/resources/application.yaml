@@ -26,19 +26,8 @@ management:
     health:
       show-details: always
 
-external:
-  naver:
-    api:
-      client-id: ${NAVER_CLIENT_ID}
-      client-secret: ${NAVER_CLIENT_SECRET}
-
-ncp:
-  ocr:
-    invoke-url: ${NCP_INVOKE_URL}
-    secret-key: ${NCP_CLIENT_SECRET}
-
-ocr-space:
-  api-key: "K85373604788957"
+file:
+  upload-dir: ${FILE_UPLOAD_DIR:/app/uploads}
 
 info:
   name: Deokhugam
@@ -53,10 +42,16 @@ info:
       driver-class-name: ${spring.datasource.driver-class-name}
     jpa:
       ddl-auto: ${spring.jpa.hibernate.ddl-auto}
-    storage:
-      type: ${discodeit.storage.type}
-      path: ${discodeit.storage.local.root-path}
     multipart:
       max-file-size: ${spring.servlet.multipart.maxFileSize}
       max-request-size: ${spring.servlet.multipart.maxRequestSize}
 
+external:
+  naver:
+    api:
+      client-id: ${NAVER_CLIENT_ID}
+      client-secret: ${NAVER_CLIENT_SECRET}
+  ncp:
+    api:
+      invoke-url: ${NCP_INVOKE_URL}
+      secret-key: ${NCP_CLIENT_SECRET}

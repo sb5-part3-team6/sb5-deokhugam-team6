@@ -1,6 +1,11 @@
 package com.codeit.project.deokhugam.domain.review.service;
 
-import com.codeit.project.deokhugam.domain.review.dto.*;
+import com.codeit.project.deokhugam.domain.review.dto.request.ReviewCreateRequest;
+import com.codeit.project.deokhugam.domain.review.dto.request.ReviewPopularQueryParams;
+import com.codeit.project.deokhugam.domain.review.dto.request.ReviewQueryParams;
+import com.codeit.project.deokhugam.domain.review.dto.request.ReviewUpdateRequest;
+import com.codeit.project.deokhugam.domain.review.dto.response.ReviewDto;
+import com.codeit.project.deokhugam.domain.review.dto.response.ReviewLikeDto;
 import com.codeit.project.deokhugam.global.common.dto.PageResponse;
 
 public interface ReviewService {

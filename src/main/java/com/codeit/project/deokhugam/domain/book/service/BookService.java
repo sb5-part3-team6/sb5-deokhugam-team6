@@ -1,11 +1,11 @@
 package com.codeit.project.deokhugam.domain.book.service;
 
-import com.codeit.project.deokhugam.domain.book.dto.BookCreateRequest;
-import com.codeit.project.deokhugam.domain.book.dto.BookDto;
-import com.codeit.project.deokhugam.domain.book.dto.BookPopularRequest;
-import com.codeit.project.deokhugam.domain.book.dto.BookSearchRequest;
-import com.codeit.project.deokhugam.domain.book.dto.BookUpdateRequest;
-import com.codeit.project.deokhugam.domain.book.dto.CursorPageResponseBookDto;
+import com.codeit.project.deokhugam.domain.book.dto.request.BookCreateRequest;
+import com.codeit.project.deokhugam.domain.book.dto.response.BookDto;
+import com.codeit.project.deokhugam.domain.book.dto.request.BookPopularRequest;
+import com.codeit.project.deokhugam.domain.book.dto.request.BookSearchRequest;
+import com.codeit.project.deokhugam.domain.book.dto.request.BookUpdateRequest;
+import com.codeit.project.deokhugam.domain.book.dto.response.CursorPageResponseBookDto;
 import com.codeit.project.deokhugam.global.common.dto.PageResponse;
 import org.springframework.web.multipart.MultipartFile;
 

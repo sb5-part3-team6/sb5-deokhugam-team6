@@ -1,6 +1,6 @@
 package com.codeit.project.deokhugam.domain.comment.repository;
 
-import com.codeit.project.deokhugam.domain.comment.dto.CommentDto;
+import com.codeit.project.deokhugam.domain.comment.dto.response.CommentDto;
 import com.codeit.project.deokhugam.domain.comment.entity.Comment;
 import com.codeit.project.deokhugam.domain.comment.entity.QComment;
 import com.codeit.project.deokhugam.domain.user.entity.QUser;

@@ -1,6 +1,10 @@
 package com.codeit.project.deokhugam.domain.user.controller;
 
-import com.codeit.project.deokhugam.domain.user.dto.*;
+import com.codeit.project.deokhugam.domain.user.dto.request.PowerUserQueryParams;
+import com.codeit.project.deokhugam.domain.user.dto.request.UserLoginRequest;
+import com.codeit.project.deokhugam.domain.user.dto.request.UserRegisterRequest;
+import com.codeit.project.deokhugam.domain.user.dto.request.UserUpdateRequest;
+import com.codeit.project.deokhugam.domain.user.dto.response.UserDto;
 import com.codeit.project.deokhugam.global.common.dto.PageResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -9,11 +13,9 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import java.time.LocalDate;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestParam;
 
 @Tag(name = "사용자 관리", description = "사용자 관련 API")
 public interface UserApi {

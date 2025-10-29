@@ -21,7 +21,7 @@ public class WebClientConfig {
     }
 
     @Bean
-    public WebClient naverClovaClient(WebClient.Builder builder, @Value("${ncp.ocr.invoke-url}") String ocrInvokeUrl) {
+    public WebClient naverClovaClient(WebClient.Builder builder, @Value("${external.ncp.api.invoke-url}") String ocrInvokeUrl) {
         System.out.println(ocrInvokeUrl);
         return builder
             .baseUrl(ocrInvokeUrl)
