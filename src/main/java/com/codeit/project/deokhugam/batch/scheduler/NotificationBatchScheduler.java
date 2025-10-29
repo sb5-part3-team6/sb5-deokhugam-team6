@@ -1,4 +1,4 @@
-package com.codeit.project.deokhugam.batch.schedular;
+package com.codeit.project.deokhugam.batch.scheduler;
 
 import com.codeit.project.deokhugam.domain.notification.service.NotificationBatchService;
 import lombok.RequiredArgsConstructor;
@@ -7,7 +7,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 @RequiredArgsConstructor
-public class NotificationBatchSchedular {
+public class NotificationBatchScheduler {
 
   private final NotificationBatchService notificationBatchService;
 

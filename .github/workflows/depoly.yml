@@ -1,4 +1,4 @@
-name: depoly.yml
+name: deploy.yml
 on:
   push:
     branches:

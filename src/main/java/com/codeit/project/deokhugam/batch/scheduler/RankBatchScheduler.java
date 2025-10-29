@@ -1,4 +1,4 @@
-package com.codeit.project.deokhugam.batch.schedular;
+package com.codeit.project.deokhugam.batch.scheduler;
 
 import com.codeit.project.deokhugam.domain.rank.entity.RankTarget;
 import com.codeit.project.deokhugam.domain.rank.entity.RankType;
@@ -14,7 +14,7 @@ import org.springframework.stereotype.Component;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class RankBatchSchedular {
+public class RankBatchScheduler {
   private final JobLauncher jobLauncher;
   private final Job statJob;
 
