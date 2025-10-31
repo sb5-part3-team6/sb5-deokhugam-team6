@@ -1,14 +1,14 @@
 package com.codeit.project.deokhugam.domain.comment.service;
 
+import com.codeit.project.deokhugam.domain.comment.dto.event.CommentUpdateEvent;
 import com.codeit.project.deokhugam.domain.comment.dto.request.CommentCreateRequest;
 import com.codeit.project.deokhugam.domain.comment.dto.response.CommentDto;
 import com.codeit.project.deokhugam.domain.comment.dto.request.CommentUpdateRequest;
 import com.codeit.project.deokhugam.domain.comment.entity.Comment;
 import com.codeit.project.deokhugam.domain.comment.mapper.CommentMapper;
 import com.codeit.project.deokhugam.domain.comment.repository.CommentRepository;
-import com.codeit.project.deokhugam.domain.notification.dto.command.NotificationCreateCommand;
-import com.codeit.project.deokhugam.domain.notification.entity.NotificationType;
-import com.codeit.project.deokhugam.domain.notification.service.NotificationService;
+import com.codeit.project.deokhugam.domain.comment.dto.event.CommentDeleteEvent;
+import com.codeit.project.deokhugam.domain.comment.dto.event.CommentEvent;
 import com.codeit.project.deokhugam.domain.review.entity.Review;
 import com.codeit.project.deokhugam.domain.review.repository.ReviewRepository;
 import com.codeit.project.deokhugam.domain.user.entity.User;
@@ -19,6 +19,7 @@ import java.time.LocalDateTime;
 import java.util.NoSuchElementException;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -30,7 +31,7 @@ public class CommentServiceImpl implements CommentService{
     private final UserRepository userRepository;
     private final ReviewRepository reviewRepository;
     private final CommentMapper commentMapper;
-    private final NotificationService notificationService;
+    private final ApplicationEventPublisher eventPublisher;
 
     @Override
     @Transactional
@@ -43,13 +44,7 @@ public class CommentServiceImpl implements CommentService{
         Comment comment = new Comment(reviewId, userId, req.content());
         commentRepository.save(comment);
 
-        notificationService.create(NotificationCreateCommand.builder()
-                .type(NotificationType.REVIEW_COMMENTED)
-                .reactor(userId)
-                .review(reviewId)
-                .data(comment.getContent())
-                .build());
-
+        eventPublisher.publishEvent(new CommentEvent(reviewId, userId, comment.getContent()));
 
         return commentMapper.toCommentDto(comment);
     }
@@ -62,12 +57,16 @@ public class CommentServiceImpl implements CommentService{
         if (comment.getDeletedAt() != null) {
             throw new IllegalStateException("삭제된 댓글은 수정할 수 없습니다.");
         }
-
         checkAuthor(comment, currentUserId);
+
+        String oldData = comment.getContent();
 
         comment.updateContent(req.content());
 
         commentRepository.save(comment);
+
+        eventPublisher.publishEvent(new CommentUpdateEvent(comment.getReview(), comment.getUser(),
+            oldData, comment.getContent() ));
 
         return commentMapper.toCommentDto(comment);
     }
@@ -87,6 +86,7 @@ public class CommentServiceImpl implements CommentService{
 
         commentRepository.save(comment);
 
+        eventPublisher.publishEvent(new CommentDeleteEvent(comment.getReview(), comment.getUser(), comment.getContent(), true));
     }
     @Override
     @Transactional
@@ -100,6 +100,8 @@ public class CommentServiceImpl implements CommentService{
             throw new IllegalStateException("이미 삭제된 댓글입니다: " + id);
         }
         commentRepository.deleteById(id);
+
+        eventPublisher.publishEvent(new CommentDeleteEvent(comment.getReview(), comment.getUser(), comment.getContent(), true));
     }
 
     @Override

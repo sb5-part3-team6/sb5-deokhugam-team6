@@ -35,4 +35,8 @@ public class Notification extends BaseEntity {
   public void updateConfirmed(Boolean confirmed) {
     this.confirmed = confirmed;
   }
+
+  public void updateContent(String content) {
+    this.content = content;
+  }
 }

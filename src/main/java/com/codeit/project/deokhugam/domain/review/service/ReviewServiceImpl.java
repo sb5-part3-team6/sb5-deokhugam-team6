@@ -3,9 +3,11 @@ package com.codeit.project.deokhugam.domain.review.service;
 import com.codeit.project.deokhugam.domain.book.entity.Book;
 import com.codeit.project.deokhugam.domain.book.exception.detail.BookNotFoundException;
 import com.codeit.project.deokhugam.domain.book.repository.BookRepository;
+import com.codeit.project.deokhugam.domain.comment.dto.event.CommentDeleteEvent;
 import com.codeit.project.deokhugam.domain.comment.repository.CommentRepository;
 import com.codeit.project.deokhugam.domain.rank.entity.Rank;
 import com.codeit.project.deokhugam.domain.rank.repository.RankRepository;
+import com.codeit.project.deokhugam.domain.review.dto.event.ReviewLikedDeleteEvent;
 import com.codeit.project.deokhugam.domain.review.dto.request.ReviewCreateRequest;
 import com.codeit.project.deokhugam.domain.review.dto.request.ReviewPopularQueryParams;
 import com.codeit.project.deokhugam.domain.review.dto.request.ReviewQueryParams;
@@ -181,6 +183,8 @@ public class ReviewServiceImpl implements ReviewService {
 
         review.softDelete();
         reviewRepository.save(review);
+
+        eventPublisher.publishEvent(new CommentDeleteEvent(review, null, null, false));
     }
 
     @Override
@@ -192,6 +196,8 @@ public class ReviewServiceImpl implements ReviewService {
         reviewLikeRepository.deleteAllByReviewId(reviewId);
         commentRepository.deleteAllByReviewId(reviewId);
         reviewRepository.delete(review);
+
+        eventPublisher.publishEvent(new CommentDeleteEvent(review, null, null, false));
     }
 
     private User verifyUserExists(Long userId) {
@@ -212,7 +218,7 @@ public class ReviewServiceImpl implements ReviewService {
 
         if (maybeLike.isPresent()) {
             reviewLikeRepository.delete(maybeLike.get());
-            //TODO: 관련 알림 삭제 - NotificationRepository.delete()
+            eventPublisher.publishEvent(new ReviewLikedDeleteEvent(review, user, true));
             return false;
         }
 
