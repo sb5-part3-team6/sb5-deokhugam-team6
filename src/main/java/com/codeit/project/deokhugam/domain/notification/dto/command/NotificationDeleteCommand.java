@@ -1,9 +1,15 @@
 package com.codeit.project.deokhugam.domain.notification.dto.command;
 
-import com.codeit.project.deokhugam.domain.comment.entity.Comment;
 import com.codeit.project.deokhugam.domain.notification.entity.NotificationType;
 import com.codeit.project.deokhugam.domain.review.entity.Review;
+import com.codeit.project.deokhugam.domain.user.entity.User;
+import lombok.Builder;
 
-public record NotificationDeleteCommand(Review review, Comment comment,  NotificationType type) {
-
+@Builder
+public record NotificationDeleteCommand(
+    Review review,
+    User reactor,
+    NotificationType type,
+    String data,
+    Boolean only) {
 }

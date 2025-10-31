@@ -7,6 +7,7 @@ import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
@@ -16,10 +17,11 @@ public class NotificationRepositoryCustomImpl implements NotificationRepositoryC
 
   private final JPAQueryFactory qf;
   private final QNotification notification = QNotification.notification;
+  private static final String NEW_LINE = "[\\r\\n]";
 
   @Override
-  public List<Notification> findNotificationsByUserId(Long userId, String direction,
-      String cursor, String after, int limit) {
+  public List<Notification> findNotificationsByUserId(Long userId, String direction, String cursor,
+      String after, int limit) {
 
     BooleanBuilder builder = new BooleanBuilder();
     builder.and(notification.user.id.eq(userId));
@@ -28,8 +30,8 @@ public class NotificationRepositoryCustomImpl implements NotificationRepositoryC
       builder.and(notification.id.lt(Long.parseLong(cursor)));
     }
 
-    OrderSpecifier<?> order = "ASC".equalsIgnoreCase(direction) ? notification.id.asc()
-        : notification.id.desc();
+    OrderSpecifier<?> order =
+        "ASC".equalsIgnoreCase(direction) ? notification.id.asc() : notification.id.desc();
 
     return qf.selectFrom(notification)
              .where(builder)
@@ -54,5 +56,42 @@ public class NotificationRepositoryCustomImpl implements NotificationRepositoryC
     return qf.delete(notification)
              .where(notification.confirmed.isTrue(), notification.createdAt.loe(oneWeekAgo))
              .execute();
+  }
+
+  @Override
+  public Optional<Notification> findByReviewIdAndTypeAndContentIgnoreNewline(Long reviewId,
+      String type, String content) {
+
+    String normalizedContent = content.replaceAll(NEW_LINE, "");
+
+    return qf.selectFrom(notification)
+             .where(notification.review.id.eq(reviewId), notification.type.eq(type))
+             .fetch()
+             .stream()
+             .filter(n -> n.getContent()
+                           .replaceAll(NEW_LINE, "")
+                           .equals(normalizedContent))
+             .findFirst();
+  }
+
+  public Long deleteByReviewIdAndTypeAndContentIgnoreNewline(Long reviewId, String type,
+      String content) {
+
+    List<Notification> targets = qf.selectFrom(notification)
+                                   .where(notification.review.id.eq(reviewId),
+                                       notification.type.eq(type))
+                                   .fetch()
+                                   .stream()
+                                   .filter(n -> n.getContent()
+                                                 .replaceAll(NEW_LINE, "")
+                                                 .equals(content.replaceAll(NEW_LINE, "")))
+                                   .toList();
+
+    if (!targets.isEmpty()) {
+      qf.delete(notification)
+        .where(notification.in(targets))
+        .execute();
+    }
+    return (long) targets.size();
   }
 }

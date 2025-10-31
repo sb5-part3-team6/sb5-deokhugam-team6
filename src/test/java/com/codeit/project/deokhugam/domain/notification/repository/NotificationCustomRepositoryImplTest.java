@@ -10,6 +10,7 @@ import com.codeit.project.deokhugam.global.config.QuerydslConfig;
 import jakarta.persistence.EntityManager;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -130,5 +131,43 @@ class NotificationCustomRepositoryImplTest {
     for (Notification n : afterCursor) {
       assertThat(n.getCreatedAt()).isBefore(cursorNotification.getCreatedAt());
     }
+  }
+
+  @Test
+  @DisplayName("QueryDSL - countByUserId 확인")
+  void countByUserId() {
+    Long count = notificationRepositoryImpl.countByUserId(user1.getId());
+    assertThat(count).isEqualTo(30);
+  }
+
+  @Test
+  @DisplayName("QueryDSL - findByReviewIdAndTypeAndContentIgnoreNewline 확인")
+  void findByReviewIdAndTypeAndContentIgnoreNewline() {
+    Notification n = new Notification(review, user1, "COMMENT", "Hello\nWorld", false);
+    em.persist(n);
+    em.flush();
+    em.clear();
+
+    Optional<Notification> found = notificationRepositoryImpl.findByReviewIdAndTypeAndContentIgnoreNewline(
+        review.getId(), "COMMENT", "Hello\r\nWorld");
+
+    assertThat(found).isPresent();
+    assertThat(found.get().getContent()).isEqualTo("Hello\nWorld");
+  }
+
+  @Test
+  @DisplayName("QueryDSL - deleteByReviewIdAndTypeAndContentIgnoreNewline 확인")
+  void deleteByReviewIdAndTypeAndContentIgnoreNewline() {
+    Notification n1 = new Notification(review, user1, "COMMENT", "Delete\nMe", false);
+    Notification n2 = new Notification(review, user1, "COMMENT", "Delete\r\nMe", false);
+    em.persist(n1);
+    em.persist(n2);
+    em.flush();
+    em.clear();
+
+    Long deleted = notificationRepositoryImpl.deleteByReviewIdAndTypeAndContentIgnoreNewline(
+        review.getId(), "COMMENT", "Delete\r\nMe");
+
+    assertThat(deleted).isEqualTo(2);
   }
 }

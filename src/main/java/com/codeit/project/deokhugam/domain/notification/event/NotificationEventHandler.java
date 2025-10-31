@@ -17,7 +17,7 @@ import org.springframework.transaction.event.TransactionalEventListener;
 
 @RequiredArgsConstructor
 @Component
-public class ReviewEventHandler {
+public class NotificationEventHandler {
 
   private final NotificationService notificationService;
 
@@ -31,7 +31,7 @@ public class ReviewEventHandler {
   }
 
   @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
-  public void handleReviewCommentedEvent(CommentEvent e) {
+  public void handleCommentEvent(CommentEvent e) {
     notificationService.create(NotificationCreateCommand.builder()
                                                         .type(NotificationType.REVIEW_COMMENTED)
                                                         .reactor(e.user())
@@ -51,7 +51,7 @@ public class ReviewEventHandler {
   }
 
   @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
-  public void handleReviewCommentedDeleteEvent(CommentDeleteEvent e) {
+  public void handleCommentDeleteEvent(CommentDeleteEvent e) {
     notificationService.delete(NotificationDeleteCommand.builder()
                                                         .type(NotificationType.REVIEW_COMMENTED)
                                                         .reactor(e.user())
@@ -62,7 +62,7 @@ public class ReviewEventHandler {
   }
 
   @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
-  public void handleCommentedUpdateEvent(CommentUpdateEvent e) {
+  public void handleCommentUpdateEvent(CommentUpdateEvent e) {
     notificationService.update(NotificationUpdateCommand.builder()
                                                         .review(e.review())
                                                         .user(e.user())

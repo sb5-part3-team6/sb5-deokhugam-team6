@@ -7,6 +7,8 @@ import static org.mockito.Mockito.verify;
 
 import com.codeit.project.deokhugam.domain.book.entity.Book;
 import com.codeit.project.deokhugam.domain.notification.dto.command.NotificationCreateCommand;
+import com.codeit.project.deokhugam.domain.notification.dto.command.NotificationDeleteCommand;
+import com.codeit.project.deokhugam.domain.notification.dto.command.NotificationUpdateCommand;
 import com.codeit.project.deokhugam.domain.notification.dto.response.NotificationDto;
 import com.codeit.project.deokhugam.domain.notification.dto.request.NotificationUpdateRequest;
 import com.codeit.project.deokhugam.domain.notification.entity.Notification;
@@ -179,5 +181,90 @@ class NotificationServiceTest {
     Notification saved = captor.getValue();
     assertThat(saved.getContent()).contains("3위");
     assertThat(saved.getType()).isEqualTo(NotificationType.REVIEW_RANKED.name());
+  }
+
+  @Test
+  @DisplayName("리뷰 댓글 알림 업데이트 성공")
+  void updateReviewCommentedNotification_success() {
+    String oldContent = NotificationType.REVIEW_COMMENTED.formatContent(user.getNickname(), "old");
+    String newContent = NotificationType.REVIEW_COMMENTED.formatContent(user.getNickname(), "new");
+
+    given(notificationRepository.findByReviewIdAndTypeAndContentIgnoreNewline(review.getId(),
+        NotificationType.REVIEW_COMMENTED.name(), oldContent)).willReturn(
+        Optional.of(notification));
+
+    NotificationUpdateCommand command = NotificationUpdateCommand.builder()
+                                                                 .review(review)
+                                                                 .user(user)
+                                                                 .oldData("old")
+                                                                 .newData("new")
+                                                                 .build();
+
+    notificationService.update(command);
+
+    assertThat(notification.getContent()).isEqualTo(newContent);
+    verify(notificationRepository).findByReviewIdAndTypeAndContentIgnoreNewline(review.getId(),
+        NotificationType.REVIEW_COMMENTED.name(), oldContent);
+  }
+
+  @Test
+  @DisplayName("리뷰 댓글 알림 업데이트 - 알림 없음")
+  void updateReviewCommentedNotification_notFound() {
+    String oldContent = NotificationType.REVIEW_COMMENTED.formatContent(user.getNickname(), "old");
+
+    given(notificationRepository.findByReviewIdAndTypeAndContentIgnoreNewline(review.getId(),
+        NotificationType.REVIEW_COMMENTED.name(), oldContent)).willReturn(Optional.empty());
+
+    NotificationUpdateCommand command = NotificationUpdateCommand.builder()
+                                                                 .review(review)
+                                                                 .user(user)
+                                                                 .oldData("old")
+                                                                 .newData("new")
+                                                                 .build();
+
+    assertThatThrownBy(() -> notificationService.update(command)).isInstanceOf(
+        NotificationNotFoundException.class);
+  }
+
+  @Test
+  @DisplayName("리뷰 좋아요 알림 삭제 성공 - only true")
+  void deleteReviewLikedNotification_success() {
+    NotificationDeleteCommand command = NotificationDeleteCommand.builder()
+                                                                 .review(review)
+                                                                 .reactor(user)
+                                                                 .only(true)
+                                                                 .type(
+                                                                     NotificationType.REVIEW_LIKED)
+                                                                 .build();
+
+    given(notificationRepository.deleteByReviewIdAndTypeAndContentIgnoreNewline(review.getId(),
+        NotificationType.REVIEW_LIKED.name(),
+        NotificationType.REVIEW_LIKED.formatContent(user.getNickname()))).willReturn(1L);
+
+    notificationService.delete(command);
+
+    verify(notificationRepository).deleteByReviewIdAndTypeAndContentIgnoreNewline(review.getId(),
+        NotificationType.REVIEW_LIKED.name(),
+        NotificationType.REVIEW_LIKED.formatContent(user.getNickname()));
+  }
+
+  @Test
+  @DisplayName("리뷰 댓글 알림 전체 삭제 성공 - only false")
+  void deleteReviewCommentedNotificationAll_success() {
+    NotificationDeleteCommand command = NotificationDeleteCommand.builder()
+                                                                 .review(review)
+                                                                 .reactor(user)
+                                                                 .only(false)
+                                                                 .type(
+                                                                     NotificationType.REVIEW_COMMENTED)
+                                                                 .build();
+
+    given(notificationRepository.deleteNotificationsByReviewIdAndType(review.getId(),
+        NotificationType.REVIEW_COMMENTED.name())).willReturn(2L);
+
+    notificationService.delete(command);
+
+    verify(notificationRepository).deleteNotificationsByReviewIdAndType(review.getId(),
+        NotificationType.REVIEW_COMMENTED.name());
   }
 }

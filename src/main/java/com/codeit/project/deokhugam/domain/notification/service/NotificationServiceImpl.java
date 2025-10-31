@@ -2,8 +2,9 @@ package com.codeit.project.deokhugam.domain.notification.service;
 
 import com.codeit.project.deokhugam.domain.notification.dto.command.NotificationCreateCommand;
 import com.codeit.project.deokhugam.domain.notification.dto.command.NotificationDeleteCommand;
-import com.codeit.project.deokhugam.domain.notification.dto.response.NotificationDto;
+import com.codeit.project.deokhugam.domain.notification.dto.command.NotificationUpdateCommand;
 import com.codeit.project.deokhugam.domain.notification.dto.request.NotificationUpdateRequest;
+import com.codeit.project.deokhugam.domain.notification.dto.response.NotificationDto;
 import com.codeit.project.deokhugam.domain.notification.entity.Notification;
 import com.codeit.project.deokhugam.domain.notification.entity.NotificationType;
 import com.codeit.project.deokhugam.domain.notification.exception.detail.NotificationInvalidUserException;
@@ -12,13 +13,12 @@ import com.codeit.project.deokhugam.domain.notification.mapper.NotificationMappe
 import com.codeit.project.deokhugam.domain.notification.repository.NotificationRepository;
 import com.codeit.project.deokhugam.domain.user.repository.UserRepository;
 import com.codeit.project.deokhugam.global.common.dto.PageResponse;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
 
 @Slf4j
 @Service
@@ -48,8 +48,8 @@ public class NotificationServiceImpl implements NotificationService {
                                                                       .toString();
 
     boolean hasNext = notifications.size() > fetchLimit;
-    if(hasNext){
-      notifications.remove(notifications.size()-1);
+    if (hasNext) {
+      notifications.remove(notifications.size() - 1);
     }
 
     return PageResponse.builder()
@@ -110,57 +110,127 @@ public class NotificationServiceImpl implements NotificationService {
   public void create(NotificationCreateCommand command) {
 
     switch (command.type()) {
-      case REVIEW_LIKED -> handleReviewLiked(command);
-      case REVIEW_COMMENTED -> handleReviewCommented(command);
-      case REVIEW_RANKED -> handleReviewRanked(command);
+      case REVIEW_LIKED -> createByLike(command);
+      case REVIEW_COMMENTED -> createByComment(command);
+      case REVIEW_RANKED -> createByRank(command);
     }
   }
 
   @Override
+  @Transactional(propagation = Propagation.REQUIRES_NEW)
   public void delete(NotificationDeleteCommand command) {
-    // TODO 조금 더 고민하고 구현해야할듯
+
+    if (command.type() == NotificationType.REVIEW_LIKED) {
+      deleteByLike(command);
+    } else if (command.type() == NotificationType.REVIEW_COMMENTED) {
+      deleteByReview(command);
+    }
   }
 
-  private void handleReviewLiked(NotificationCreateCommand command) {
+  @Override
+  @Transactional(propagation = Propagation.REQUIRES_NEW)
+  public void update(NotificationUpdateCommand command) {
+
+    String oldContent = formatCommentedContent(command.user()
+                                                      .getNickname(), command.oldData());
+    String newContent = formatCommentedContent(command.user()
+                                                      .getNickname(), command.newData());
+
+    Notification notification = notificationRepository.findByReviewIdAndTypeAndContentIgnoreNewline(
+                                                          command.review()
+                                                                 .getId(), NotificationType.REVIEW_COMMENTED.name(), oldContent)
+                                                      .orElseThrow(
+                                                          NotificationNotFoundException::new);
+
+    notification.updateContent(newContent);
+  }
+
+  private void createByLike(NotificationCreateCommand command) {
 
     String content = NotificationType.REVIEW_LIKED.formatContent(command.reactor()
                                                                         .getNickname());
-    Notification notification = new Notification(command.review(), command.review()
-                                                                          .getUser(),
-        NotificationType.REVIEW_LIKED.name(), content, false);
+    saveNotification(new Notification(command.review(), command.review()
+                                                               .getUser(),
+        NotificationType.REVIEW_LIKED.name(), content, false));
+  }
+
+  private void createByComment(NotificationCreateCommand command) {
+
+    String content = command.data() != null ? formatCommentedContent(command.reactor()
+                                                                            .getNickname(),
+        command.data()) : formatCommentedContent(command.reactor()
+                                                        .getNickname(), "");
+    saveNotification(new Notification(command.review(), command.review()
+                                                               .getUser(),
+        NotificationType.REVIEW_COMMENTED.name(), content, false));
+  }
+
+  private void createByRank(NotificationCreateCommand command) {
+
+    String content = command.data() != null ? String.format("리뷰가 인기 순위 %s위에 들었어요!", command.data())
+        : NotificationType.REVIEW_RANKED.formatContent();
+    saveNotification(new Notification(command.review(), command.review()
+                                                               .getUser(),
+        NotificationType.REVIEW_RANKED.name(), content, false));
+  }
+
+  private String formatCommentedContent(String nickname, String data) {
+
+    return NotificationType.REVIEW_COMMENTED.formatContent(nickname, data != null ? data : "");
+  }
+
+  private String getCommentedContent(NotificationDeleteCommand command) {
+
+    return formatCommentedContent(command.reactor()
+                                         .getNickname(), command.data());
+  }
+
+  private String getLikedContent(NotificationDeleteCommand command) {
+
+    return NotificationType.REVIEW_LIKED.formatContent(command.reactor()
+                                                              .getNickname());
+  }
+
+  private void saveNotification(Notification notification) {
+
     notificationRepository.save(notification);
   }
 
-  private void handleReviewCommented(NotificationCreateCommand command) {
+  private void deleteByReview(NotificationDeleteCommand command) {
 
-    String content;
-    if (command.data() != null) {
-      content = NotificationType.REVIEW_COMMENTED.formatContent(command.reactor()
-                                                                       .getNickname(),
-          command.data());
+    Long reviewId = command.review()
+                           .getId();
+    String type = NotificationType.REVIEW_COMMENTED.name();
+    Long count;
+
+    if (Boolean.TRUE.equals(command.only())) {
+      count = notificationRepository.deleteByReviewIdAndTypeAndContentIgnoreNewline(reviewId, type,
+          getCommentedContent(command));
     } else {
-      content = NotificationType.REVIEW_COMMENTED.formatContent(command.reactor()
-                                                                       .getNickname(), "");
+      count = notificationRepository.deleteNotificationsByReviewIdAndType(reviewId, type);
+      deleteByLike(command);
     }
-
-    Notification notification = new Notification(command.review(), command.review()
-                                                                          .getUser(),
-        NotificationType.REVIEW_COMMENTED.name(), content, false);
-    notificationRepository.save(notification);
+    logDelete(reviewId, "comment", count);
   }
 
-  private void handleReviewRanked(NotificationCreateCommand command) {
-    // TODO 인기 순위 진입 시 알림 메세지 확인
-    String content;
-    if (command.data() != null) {
-      content = String.format("리뷰가 인기 순위 %s위에 들었어요!", command.data());
-    } else {
-      content = NotificationType.REVIEW_RANKED.formatContent();
-    }
+  private void deleteByLike(NotificationDeleteCommand command) {
 
-    Notification notification = new Notification(command.review(), command.review()
-                                                                          .getUser(),
-        NotificationType.REVIEW_RANKED.name(), content, false);
-    notificationRepository.save(notification);
+    Long reviewId = command.review()
+                           .getId();
+    String type = NotificationType.REVIEW_LIKED.name();
+    Long count;
+
+    if (Boolean.TRUE.equals(command.only())) {
+      count = notificationRepository.deleteByReviewIdAndTypeAndContentIgnoreNewline(reviewId, type,
+          getLikedContent(command));
+    } else {
+      count = notificationRepository.deleteNotificationsByReviewIdAndType(reviewId, type);
+    }
+    logDelete(reviewId, "like", count);
+  }
+
+  private void logDelete(Long reviewId, String type, Long count) {
+
+    log.info("reviewId : {}, {} notifications deleted: {}", reviewId, type, count);
   }
 }
