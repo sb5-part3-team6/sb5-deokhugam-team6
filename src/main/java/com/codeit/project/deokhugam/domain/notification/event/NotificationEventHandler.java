@@ -10,6 +10,7 @@ import com.codeit.project.deokhugam.domain.notification.entity.NotificationType;
 import com.codeit.project.deokhugam.domain.notification.service.NotificationService;
 import com.codeit.project.deokhugam.domain.review.dto.event.ReviewLikedDeleteEvent;
 import com.codeit.project.deokhugam.domain.review.dto.event.ReviewLikedEvent;
+import com.codeit.project.deokhugam.domain.review.dto.event.ReviewRankedEvent;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.event.TransactionPhase;
@@ -34,6 +35,16 @@ public class NotificationEventHandler {
   public void handleCommentEvent(CommentEvent e) {
     notificationService.create(NotificationCreateCommand.builder()
                                                         .type(NotificationType.REVIEW_COMMENTED)
+                                                        .reactor(e.user())
+                                                        .review(e.review())
+                                                        .data(e.data())
+                                                        .build());
+  }
+
+  @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
+  public void handleReviewRankedEventEvent(ReviewRankedEvent e) {
+    notificationService.create(NotificationCreateCommand.builder()
+                                                        .type(NotificationType.REVIEW_RANKED)
                                                         .reactor(e.user())
                                                         .review(e.review())
                                                         .data(e.data())

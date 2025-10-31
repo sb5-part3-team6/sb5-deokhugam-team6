@@ -14,10 +14,12 @@ import com.codeit.project.deokhugam.domain.notification.entity.NotificationType;
 import com.codeit.project.deokhugam.domain.notification.service.NotificationService;
 import com.codeit.project.deokhugam.domain.review.dto.event.ReviewLikedDeleteEvent;
 import com.codeit.project.deokhugam.domain.review.dto.event.ReviewLikedEvent;
+import com.codeit.project.deokhugam.domain.review.dto.event.ReviewRankedEvent;
 import com.codeit.project.deokhugam.domain.review.entity.Review;
 import com.codeit.project.deokhugam.domain.user.entity.User;
 import java.time.LocalDate;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -26,7 +28,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
-class EventHandlerTest {
+class NotificationEventHandlerTest {
 
   @Mock
   private NotificationService notificationService;
@@ -50,6 +52,7 @@ class EventHandlerTest {
   }
 
   @Test
+  @DisplayName("리뷰 좋아요 이벤트 발생 시 NotificationService.create 호출")
   void handleReviewLikedEvent_callsNotificationServiceCreate() {
     ReviewLikedEvent event = new ReviewLikedEvent(review, user);
 
@@ -66,6 +69,7 @@ class EventHandlerTest {
   }
 
   @Test
+  @DisplayName("리뷰 댓글 이벤트 발생 시 NotificationService.create 호출")
   void handleReviewCommentedEvent_callsNotificationServiceCreate() {
     CommentEvent event = new CommentEvent(review, user, "새 댓글");
 
@@ -83,6 +87,25 @@ class EventHandlerTest {
   }
 
   @Test
+  @DisplayName("리뷰 랭킹 이벤트 발생 시 NotificationService.create 호출")
+  void handleReviewRankedEvent_callsNotificationServiceCreate() {
+    ReviewRankedEvent event = new ReviewRankedEvent(review, user, "");
+
+    eventHandler.handleReviewRankedEventEvent(event);
+
+    ArgumentCaptor<NotificationCreateCommand> captor = ArgumentCaptor.forClass(
+        NotificationCreateCommand.class);
+    verify(notificationService).create(captor.capture());
+
+    NotificationCreateCommand cmd = captor.getValue();
+    assertThat(cmd.type()).isEqualTo(NotificationType.REVIEW_RANKED);
+    assertThat(cmd.reactor()).isEqualTo(user);
+    assertThat(cmd.review()).isEqualTo(review);
+    assertThat(cmd.data()).isEqualTo("");
+  }
+
+  @Test
+  @DisplayName("리뷰 좋아요 삭제 이벤트 발생 시 NotificationService.delete 호출")
   void handleReviewLikedDeleteEvent_callsNotificationServiceDelete() {
     ReviewLikedDeleteEvent event = new ReviewLikedDeleteEvent(review, user, true);
 
@@ -99,6 +122,7 @@ class EventHandlerTest {
   }
 
   @Test
+  @DisplayName("리뷰 댓글 삭제 이벤트 발생 시 NotificationService.delete 호출")
   void handleReviewCommentedDeleteEvent_callsNotificationServiceDelete() {
     CommentDeleteEvent event = new CommentDeleteEvent(review, user, "삭제 댓글", true);
 
@@ -116,6 +140,7 @@ class EventHandlerTest {
   }
 
   @Test
+  @DisplayName("댓글 수정 이벤트 발생 시 NotificationService.update 호출")
   void handleCommentedUpdateEvent_callsNotificationServiceUpdate() {
     CommentUpdateEvent event = new CommentUpdateEvent(review, user, commentDataOld, commentDataNew);
 
