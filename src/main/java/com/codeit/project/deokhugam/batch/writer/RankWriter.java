@@ -30,6 +30,21 @@ public class RankWriter implements ItemWriter<Rank> {
   public void write(Chunk<? extends Rank> chunk) {
 
     handlePreviousDailyRankAndDelete(chunk);
+    List<Rank> ranks = saveRank(chunk);
+    publishNewDailyRankNotifications(ranks);
+  }
+
+  private void handlePreviousDailyRankAndDelete(Chunk<? extends Rank> chunk) {
+    if (isDailyReviewRank(chunk)) {
+      LocalDate today = LocalDate.now();
+
+      eventPublisher.publishEvent(new ReviewRankedDeleteEvent());
+
+      rankRepository.deleteByDateAndTypeDaily(today);
+    }
+  }
+
+  private List<Rank> saveRank(Chunk<? extends Rank> chunk) {
 
     AtomicInteger counter = new AtomicInteger(1);
 
@@ -42,17 +57,7 @@ public class RankWriter implements ItemWriter<Rank> {
 
     rankRepository.saveAll(sorted);
 
-    publishNewDailyRankNotifications(sorted);
-  }
-
-  private void handlePreviousDailyRankAndDelete(Chunk<? extends Rank> chunk) {
-    if (isDailyReviewRank(chunk)) {
-      LocalDate today = LocalDate.now();
-
-      eventPublisher.publishEvent(new ReviewRankedDeleteEvent());
-
-      rankRepository.deleteByDateAndTypeDaily(today);
-    }
+    return sorted;
   }
 
   private void publishNewDailyRankNotifications(List<Rank> ranks) {

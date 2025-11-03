@@ -124,11 +124,6 @@ public class NotificationServiceImpl implements NotificationService {
   @Transactional(propagation = Propagation.REQUIRES_NEW)
   public void delete(NotificationDeleteCommand command) {
 
-    if (command.type() == NotificationType.REVIEW_LIKED) {
-      deleteByLike(command);
-    } else if (command.type() == NotificationType.REVIEW_COMMENTED) {
-      deleteByReview(command);
-    }
     switch (command.type()) {
       case REVIEW_LIKED -> deleteByLike(command);
       case REVIEW_COMMENTED -> deleteByReview(command);
