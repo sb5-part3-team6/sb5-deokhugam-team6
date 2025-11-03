@@ -18,6 +18,6 @@ public class NotificationBatchServiceImpl implements NotificationBatchService {
   public void cleanBatch() {
 
     Long cnt = notificationRepository.deleteConfirmedOlderThanOneWeek();
-    log.info("알림 배치 동작 완료 삭제 수: " + cnt);
+    log.info("delete {} confirmed notifications older than 1 week", cnt);
   }
 }

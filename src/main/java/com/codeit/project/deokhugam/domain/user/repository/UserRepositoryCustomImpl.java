@@ -110,6 +110,15 @@ public class UserRepositoryCustomImpl implements UserRepositoryCustom {
                           .fetch();
   }
 
+  @Override
+  public Long deleteExpiredSoftDeletedUsers() {
+    QUser user = QUser.user;
+    return queryFactory.delete(user)
+                        .where(user.deletedAt.before(LocalDateTime.now().minusDays(1)))
+                        .execute();
+  }
+
+  @Override
   public List<Rank> findRankByType(String type, String direction, int limit) {
     QRank rank = QRank.rank;
     QRank sub = new QRank("sub");

@@ -8,4 +8,5 @@ import java.util.List;
 public interface UserRepositoryCustom {
   List<UserStatDto> getStatsByPeriod(RankType type);
   List<Rank> findRankByType(String type, String direction, int limit);
+  Long deleteExpiredSoftDeletedUsers();
 }
