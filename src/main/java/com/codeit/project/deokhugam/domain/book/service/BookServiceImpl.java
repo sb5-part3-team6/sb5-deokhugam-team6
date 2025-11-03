@@ -5,12 +5,14 @@ import com.codeit.project.deokhugam.domain.book.dto.request.BookPopularRequest;
 import com.codeit.project.deokhugam.domain.book.dto.request.BookSearchRequest;
 import com.codeit.project.deokhugam.domain.book.dto.request.BookUpdateRequest;
 import com.codeit.project.deokhugam.domain.book.dto.response.BookDto;
+import com.codeit.project.deokhugam.domain.book.dto.response.BookResponse;
 import com.codeit.project.deokhugam.domain.book.dto.response.CursorPageResponseBookDto;
 import com.codeit.project.deokhugam.domain.book.dto.response.PopularBookDto;
 import com.codeit.project.deokhugam.domain.book.entity.Book;
 import com.codeit.project.deokhugam.domain.book.exception.detail.BookNotFoundException;
 import com.codeit.project.deokhugam.domain.book.mapper.BookMapper;
 import com.codeit.project.deokhugam.domain.book.repository.BookRepository;
+import com.codeit.project.deokhugam.external.client.NaverBookApiClient;
 import com.codeit.project.deokhugam.global.storage.FileStorage;
 import com.codeit.project.deokhugam.domain.comment.entity.Comment;
 import com.codeit.project.deokhugam.domain.comment.repository.CommentRepository;
@@ -19,6 +21,8 @@ import com.codeit.project.deokhugam.domain.rank.repository.RankRepository;
 import com.codeit.project.deokhugam.domain.review.entity.Review;
 import com.codeit.project.deokhugam.domain.review.repository.ReviewRepository;
 import com.codeit.project.deokhugam.global.common.dto.PageResponse;
+import java.io.InputStream;
+import java.time.format.DateTimeFormatter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -27,6 +31,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.NoSuchElementException;
+import org.springframework.web.reactive.function.client.WebClient;
 
 @Service
 @RequiredArgsConstructor
@@ -38,6 +43,8 @@ public class BookServiceImpl implements BookService {
   private final ReviewRepository reviewRepository;
   private final CommentRepository commentRepository;
   private final RankRepository rankRepository;
+  private final NaverBookApiClient naverBookApiClient;
+  private final WebClient webClient;
 
   @Override @Transactional
   public BookDto create(BookCreateRequest bookData, MultipartFile thumbnailImage) {
@@ -179,6 +186,39 @@ public class BookServiceImpl implements BookService {
             .nextAfter(nextAfter)
             .build();
   }
+
+  @Override
+  public BookResponse saveNaverThumbnail(String isbn) {
+    BookResponse bookResponse = naverBookApiClient.fetchBooks(isbn);
+    byte[] imageBytes = downloadAndSaveThumbnail(isbn, bookResponse.thumbnailImage());
+    String base64Data = java.util.Base64.getEncoder().encodeToString(imageBytes);
+    return bookResponse.toBuilder()
+        .thumbnailImage(base64Data)
+        .build();
+  }
+
+  private byte[] downloadAndSaveThumbnail(String isbn, String thumbnailImage) {
+    return webClient.get()
+        .uri(thumbnailImage)
+        .retrieve()
+        .toEntity(byte[].class)
+        .map(responseEntity -> {
+          String contentType = responseEntity.getHeaders().getContentType().toString();
+          long contentLength = responseEntity.getHeaders().getContentLength();
+          byte[] body = responseEntity.getBody();
+
+          if(body == null || body.length == 0) {
+            return new byte[0];
+          }
+          try(InputStream is = new java.io.ByteArrayInputStream(body)) {
+            ((FileStorage)fileStorage).saveThumbnailImage(isbn, is, contentType,contentLength);
+          }catch(Exception e){
+            throw new RuntimeException("썸네일 저장 중 오류 발생", e);
+          }
+          return body;
+        }).block();
+  }
+
 
   @Override @Transactional
   public void softDelete(Long bookId) {
