@@ -20,7 +20,7 @@ import org.springframework.context.annotation.Import;
 
 @DataJpaTest
 @Import(QuerydslConfig.class)
-class NotificationCustomRepositoryImplTest {
+class NotificationRepositoryCustomTest {
 
   @Autowired
   private EntityManager em;
