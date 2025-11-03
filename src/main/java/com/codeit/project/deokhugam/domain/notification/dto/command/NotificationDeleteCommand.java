@@ -12,4 +12,5 @@ public record NotificationDeleteCommand(
     NotificationType type,
     String data,
     Boolean only) {
+
 }

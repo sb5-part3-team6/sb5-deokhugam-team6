@@ -4,5 +4,5 @@ import java.time.LocalDate;
 
 public interface RankRepositoryCustom {
 
-  void deleteByDate(LocalDate date);
+  void deleteByDateAndTypeDaily(LocalDate date);
 }

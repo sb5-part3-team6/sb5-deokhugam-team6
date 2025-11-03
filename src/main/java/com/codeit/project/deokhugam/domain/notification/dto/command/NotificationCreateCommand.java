@@ -6,9 +6,12 @@ import com.codeit.project.deokhugam.domain.user.entity.User;
 import lombok.Builder;
 
 @Builder
-public record NotificationCreateCommand (
-        Review review,
-        User reactor,
-        String data,
-        NotificationType type
-) {}
+public record NotificationCreateCommand(
+    Review review,
+    User reactor,
+    String data,
+    NotificationType type,
+    Long reviewId
+) {
+
+}

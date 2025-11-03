@@ -11,8 +11,11 @@ import com.codeit.project.deokhugam.domain.notification.exception.detail.Notific
 import com.codeit.project.deokhugam.domain.notification.exception.detail.NotificationNotFoundException;
 import com.codeit.project.deokhugam.domain.notification.mapper.NotificationMapper;
 import com.codeit.project.deokhugam.domain.notification.repository.NotificationRepository;
+import com.codeit.project.deokhugam.domain.review.entity.Review;
+import com.codeit.project.deokhugam.domain.review.repository.ReviewRepository;
 import com.codeit.project.deokhugam.domain.user.repository.UserRepository;
 import com.codeit.project.deokhugam.global.common.dto.PageResponse;
+import java.time.LocalDate;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -25,6 +28,7 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class NotificationServiceImpl implements NotificationService {
 
+  private final ReviewRepository reviewRepository;
   private final UserRepository userRepository;
   private final NotificationRepository notificationRepository;
   private final NotificationMapper notificationMapper;
@@ -125,6 +129,11 @@ public class NotificationServiceImpl implements NotificationService {
     } else if (command.type() == NotificationType.REVIEW_COMMENTED) {
       deleteByReview(command);
     }
+    switch (command.type()) {
+      case REVIEW_LIKED -> deleteByLike(command);
+      case REVIEW_COMMENTED -> deleteByReview(command);
+      case REVIEW_RANKED -> deleteByRank();
+    }
   }
 
   @Override
@@ -167,11 +176,16 @@ public class NotificationServiceImpl implements NotificationService {
 
   private void createByRank(NotificationCreateCommand command) {
 
-    String content = command.data() != null ? String.format("리뷰가 인기 순위 %s위에 들었어요!", command.data())
-        : NotificationType.REVIEW_RANKED.formatContent();
-    saveNotification(new Notification(command.review(), command.review()
-                                                               .getUser(),
-        NotificationType.REVIEW_RANKED.name(), content, false));
+    Review review = reviewRepository.findById(command.reviewId())
+                                    .orElse(null);
+    if (review == null) {
+      return;
+    }
+
+    String content = NotificationType.REVIEW_RANKED.formatContent();
+    saveNotification(
+        new Notification(review, review.getUser(), NotificationType.REVIEW_RANKED.name(), content,
+            false));
   }
 
   private String formatCommentedContent(String nickname, String data) {
@@ -210,7 +224,7 @@ public class NotificationServiceImpl implements NotificationService {
       count = notificationRepository.deleteNotificationsByReviewIdAndType(reviewId, type);
       deleteByLike(command);
     }
-    logDelete(reviewId, "comment", count);
+    logDelete(reviewId, NotificationType.REVIEW_COMMENTED.name(), count);
   }
 
   private void deleteByLike(NotificationDeleteCommand command) {
@@ -226,7 +240,18 @@ public class NotificationServiceImpl implements NotificationService {
     } else {
       count = notificationRepository.deleteNotificationsByReviewIdAndType(reviewId, type);
     }
-    logDelete(reviewId, "like", count);
+    logDelete(reviewId, NotificationType.REVIEW_LIKED.name(), count);
+  }
+
+
+  private void deleteByRank() {
+
+    String type = NotificationType.REVIEW_RANKED.name();
+    LocalDate today = LocalDate.now();
+
+    Long count = notificationRepository.deleteByDateAndType(today, type);
+
+    logDelete(0L, NotificationType.REVIEW_RANKED.name(), count);
   }
 
   private void logDelete(Long reviewId, String type, Long count) {
