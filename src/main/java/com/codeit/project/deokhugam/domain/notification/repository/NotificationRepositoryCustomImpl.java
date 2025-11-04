@@ -5,7 +5,9 @@ import com.codeit.project.deokhugam.domain.notification.entity.QNotification;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.jpa.impl.JPAQueryFactory;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
@@ -92,6 +94,26 @@ public class NotificationRepositoryCustomImpl implements NotificationRepositoryC
         .where(notification.in(targets))
         .execute();
     }
+    return (long) targets.size();
+  }
+
+  public Long deleteByDateAndType(LocalDate date, String type) {
+    LocalDateTime start = date.atStartOfDay();
+    LocalDateTime end = date.atTime(LocalTime.MAX);
+
+    List<Notification> targets = qf.selectFrom(notification)
+                                   .where(notification.type.eq(type)
+                                                           .and(
+                                                               notification.createdAt.between(start,
+                                                                   end)))
+                                   .fetch();
+
+    if (!targets.isEmpty()) {
+      qf.delete(notification)
+        .where(notification.in(targets))
+        .execute();
+    }
+
     return (long) targets.size();
   }
 }

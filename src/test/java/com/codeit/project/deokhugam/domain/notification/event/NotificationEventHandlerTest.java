@@ -89,7 +89,7 @@ class NotificationEventHandlerTest {
   @Test
   @DisplayName("리뷰 랭킹 이벤트 발생 시 NotificationService.create 호출")
   void handleReviewRankedEvent_callsNotificationServiceCreate() {
-    ReviewRankedEvent event = new ReviewRankedEvent(review, user, "");
+    ReviewRankedEvent event = new ReviewRankedEvent(review.getId());
 
     eventHandler.handleReviewRankedEventEvent(event);
 
@@ -99,9 +99,7 @@ class NotificationEventHandlerTest {
 
     NotificationCreateCommand cmd = captor.getValue();
     assertThat(cmd.type()).isEqualTo(NotificationType.REVIEW_RANKED);
-    assertThat(cmd.reactor()).isEqualTo(user);
-    assertThat(cmd.review()).isEqualTo(review);
-    assertThat(cmd.data()).isEqualTo("");
+    assertThat(cmd.reviewId()).isEqualTo(review.getId());
   }
 
   @Test

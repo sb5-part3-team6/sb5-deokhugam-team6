@@ -10,5 +10,6 @@ public interface NotificationMapper {
 
   @Mapping(target = "reviewId", source = "review.id")
   @Mapping(target = "userId", source = "user.id")
+  @Mapping(target = "reviewTitle", source = "review.content")
   NotificationDto toDto(Notification notification);
 }

@@ -123,9 +123,8 @@ public class ReviewRepositoryCustomImpl implements ReviewRepositoryCustom {
 
     switch (type) {
       case DAILY -> {
-        LocalDate yesterday = today.minusDays(1);
-        startDateTime = yesterday.atStartOfDay();
-        endDateTime = yesterday.atTime(LocalTime.MAX);
+        startDateTime = today.atStartOfDay();
+        endDateTime = today.atTime(LocalTime.MAX);
       }
       case WEEKLY -> {
         LocalDate startOfLastWeek = today.with(DayOfWeek.MONDAY);
