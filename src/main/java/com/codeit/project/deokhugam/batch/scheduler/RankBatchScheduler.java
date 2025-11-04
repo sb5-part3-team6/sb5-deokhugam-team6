@@ -2,6 +2,9 @@ package com.codeit.project.deokhugam.batch.scheduler;
 
 import com.codeit.project.deokhugam.domain.rank.entity.RankTarget;
 import com.codeit.project.deokhugam.domain.rank.entity.RankType;
+import io.micrometer.core.instrument.Counter;
+import io.micrometer.core.instrument.MeterRegistry;
+import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.batch.core.Job;
@@ -17,7 +20,22 @@ import org.springframework.stereotype.Component;
 public class RankBatchScheduler {
   private final JobLauncher jobLauncher;
   private final Job statJob;
+  private final MeterRegistry meterRegistry;
+  private Counter batchSuccessCounter;
+  private Counter batchFailCounter;
 
+  @PostConstruct
+  public void initMetrics() {
+    batchSuccessCounter = Counter.builder("batch_jobs_success_total")
+            .description("성공적으로 실행한 총 batch job 수")
+            .register(meterRegistry);
+
+    batchFailCounter = Counter.builder("batch_jobs_failed_total")
+            .description("실패한 총 batch job 수")
+            .register(meterRegistry);
+  }
+
+//  @Scheduled(cron = "0 */5 * * * *", zone = "Asia/Seoul") // 5분마다 테스트
   @Scheduled(cron = "0 5 0 * * *", zone = "Asia/Seoul")
   public void runAllStats() {
     runJob(RankTarget.BOOK, RankType.DAILY);
@@ -55,9 +73,11 @@ public class RankBatchScheduler {
 
       jobLauncher.run(statJob, jobParameters);
       log.info("{} {} batch job 실행 완료", target, type);
+      batchSuccessCounter.increment();
 
     } catch (Exception e) {
       log.error("{} {} batch job 실행 실패", target, type, e);
+      batchFailCounter.increment();
     }
   }
 }
