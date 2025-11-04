@@ -1,5 +1,7 @@
 package com.codeit.project.deokhugam.global.storage.impl;
 
+import com.codeit.project.deokhugam.domain.book.dto.response.BookResponse;
+import com.codeit.project.deokhugam.domain.book.entity.Book;
 import com.codeit.project.deokhugam.global.config.FileConfig;
 import com.codeit.project.deokhugam.global.storage.FileStorage;
 import java.io.File;
@@ -18,9 +20,9 @@ public class FileStorageDev implements FileStorage {
   private final FileConfig fileConfig;
 
   @Override
-  public void saveThumbnailImage(String isbn, MultipartFile thumbnailImage) {
+  public String saveThumbnailImage(Book book, MultipartFile thumbnailImage) {
     File dir = fileConfig.getThumbnailUploadDirFile();
-    File dest = new File(dir, isbn);
+    File dest = new File(dir,book.getThumbnailUrl());
     if(dest.exists()){
       boolean deleted = dest.delete();
       if(!deleted){
@@ -33,19 +35,20 @@ public class FileStorageDev implements FileStorage {
       throw new RuntimeException("썸네일 파일 저장 실패 : "+ dest.getAbsolutePath(), e);
     }
     System.out.println("아바타 저장 완료 : " + dest.getAbsolutePath());
+    return dest.getAbsolutePath();
   }
 
   @Override
-  public void saveThumbnailImage(String isbn, InputStream inputStream, String contentType,
+  public String saveThumbnailImage(BookResponse book, InputStream inputStream, String contentType,
       long contentLength) {
-
+    return "";
   }
 
   @Override
-  public String getThumbnailImage(String isbn) {
+  public String getThumbnailImage(Book book) {
     return ServletUriComponentsBuilder.fromCurrentContextPath()
         .path("/thumbnails/")
-        .path(isbn)
+        .path(book.getIsbn())
         .toUriString();
   }
 
