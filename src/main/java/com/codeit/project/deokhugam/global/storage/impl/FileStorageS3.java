@@ -1,7 +1,11 @@
 package com.codeit.project.deokhugam.global.storage.impl;
 
+import com.codeit.project.deokhugam.domain.book.dto.response.BookResponse;
+import com.codeit.project.deokhugam.domain.book.entity.Book;
 import com.codeit.project.deokhugam.global.storage.FileStorage;
 import java.io.InputStream;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -32,34 +36,52 @@ public class FileStorageS3 implements FileStorage {
   @Value("${app.cdn.base-url}")
   private String cdnBaseUrl;
 
-  //private String ext =".jpg";
+  private static final String THUMBNAIL_PATH = "thumbnails";
+  private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyyMMddHHmmssSSS");
+
 
   @Override
-  public void saveThumbnailImage(String isbn, MultipartFile thumbnailImage) {
-    String key = String.format("%s/thumbnails/%s",prefix,isbn);
-    deleteFromS3(key);
+  public String saveThumbnailImage(Book book, MultipartFile thumbnailImage) {
+    String timestamp = LocalDateTime.now().format(FORMATTER);
+    String key = String.format("%s/%s/%s_%s",prefix,THUMBNAIL_PATH,book.getIsbn(),timestamp);
+    if (book.getThumbnailUrl() != null && !book.getThumbnailUrl().isEmpty()) {
+      deleteFromS3(extractKeyFromUrl(book.getThumbnailUrl()));
+    }
     uploadToS3(key,thumbnailImage);
     log.info("썸네일 업로드 완료 : {}", key);
+    return getFullUrl(key);
   }
   //api로 받은 정보
-  public void saveThumbnailImage(String isbn, InputStream inputStream, String contentType, long contentLength ) {
-    String key = String.format("%s/thumbnails/%s", prefix, isbn);
-    deleteFromS3(key);
+  public String saveThumbnailImage(BookResponse bookResponse, InputStream inputStream, String contentType, long contentLength ) {
+    String timestamp = LocalDateTime.now().format(FORMATTER);
+    String key = String.format("%s/%s/%s", prefix, THUMBNAIL_PATH,bookResponse.isbn(),timestamp);
+    if (bookResponse.thumbnailImage() != null && !bookResponse.thumbnailImage().isEmpty()) {
+      deleteFromS3(extractKeyFromUrl(bookResponse.thumbnailImage()));
+    }
     uploadStreamToS3(key, inputStream, contentType, contentLength);
     log.info("썸네일 업로드 완료 (스트림) : {}", key);
+    return getFullUrl(key);
+  }
+
+  private String getFullUrl(String key) {
+    return String.format("%s/%s", cdnBaseUrl, key);
+  }
+  private String extractKeyFromUrl(String fullUrl) {
+    if(fullUrl.contains(cdnBaseUrl)) {
+      return fullUrl.substring(cdnBaseUrl.length()).replaceAll("^/|/$", "");
+    }
+    return fullUrl;
   }
 
   @Override
-  public String getThumbnailImage(String isbn) {
-    String key = String.format("%s/thumbnails/%s",prefix,isbn);
-    return String.format("%s/%s",cdnBaseUrl,key);
+  public String getThumbnailImage(Book book) {
+    return book.getThumbnailUrl();
   }
 
   @Override
-  public void deleteThumbnailImage(String isbn) {
-    String key = String.format("%s/thumbnails/%s",prefix,isbn);
-    deleteFromS3(key);
-    log.info("썸네일 삭제 완료 : {}",key);
+  public void deleteThumbnailImage(String url) {
+    deleteFromS3(extractKeyFromUrl(url));
+    log.info("썸네일 삭제 완료 : {}",url);
   }
 
   private void uploadToS3(String key,MultipartFile file) {

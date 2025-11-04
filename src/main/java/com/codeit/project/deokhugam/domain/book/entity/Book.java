@@ -57,4 +57,9 @@ public class Book extends BaseDeletableEntity {
       this.thumbnailUrl = newThumbnailImageUrl;
     }
   }
+  public void update(String newThumbnailImageUrl) {
+    if (newThumbnailImageUrl != null && !newThumbnailImageUrl.equals(this.thumbnailUrl)) {
+      this.thumbnailUrl = newThumbnailImageUrl;
+    }
+  }
 }
