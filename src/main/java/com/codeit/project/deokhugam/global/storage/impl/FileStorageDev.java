@@ -4,6 +4,7 @@ import com.codeit.project.deokhugam.global.config.FileConfig;
 import com.codeit.project.deokhugam.global.storage.FileStorage;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
@@ -32,6 +33,12 @@ public class FileStorageDev implements FileStorage {
       throw new RuntimeException("썸네일 파일 저장 실패 : "+ dest.getAbsolutePath(), e);
     }
     System.out.println("아바타 저장 완료 : " + dest.getAbsolutePath());
+  }
+
+  @Override
+  public void saveThumbnailImage(String isbn, InputStream inputStream, String contentType,
+      long contentLength) {
+
   }
 
   @Override

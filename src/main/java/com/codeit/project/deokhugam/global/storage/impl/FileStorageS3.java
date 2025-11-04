@@ -1,6 +1,7 @@
 package com.codeit.project.deokhugam.global.storage.impl;
 
 import com.codeit.project.deokhugam.global.storage.FileStorage;
+import java.io.InputStream;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -40,6 +41,13 @@ public class FileStorageS3 implements FileStorage {
     uploadToS3(key,thumbnailImage);
     log.info("썸네일 업로드 완료 : {}", key);
   }
+  //api로 받은 정보
+  public void saveThumbnailImage(String isbn, InputStream inputStream, String contentType, long contentLength ) {
+    String key = String.format("%s/thumbnails/%s", prefix, isbn);
+    deleteFromS3(key);
+    uploadStreamToS3(key, inputStream, contentType, contentLength);
+    log.info("썸네일 업로드 완료 (스트림) : {}", key);
+  }
 
   @Override
   public String getThumbnailImage(String isbn) {
@@ -60,9 +68,24 @@ public class FileStorageS3 implements FileStorage {
           .bucket(bucketName)
           .key(key)
           .contentType(file.getContentType())
+          .contentLength(file.getSize())
           .build();
 
       s3Client.putObject(putReq, RequestBody.fromInputStream(file.getInputStream(), file.getSize()));
+    } catch (Exception e) {
+      throw new RuntimeException("S3 업로드 실패: " + key, e);
+    }
+  }
+
+  private void uploadStreamToS3(String key,InputStream inputStream, String contentType, long contentLength) {
+    try {
+      PutObjectRequest putReq = PutObjectRequest.builder()
+          .bucket(bucketName)
+          .key(key)
+          .contentType(contentType)
+          .contentLength(contentLength)
+          .build();
+      s3Client.putObject(putReq, RequestBody.fromInputStream(inputStream, contentLength));
     } catch (Exception e) {
       throw new RuntimeException("S3 업로드 실패: " + key, e);
     }

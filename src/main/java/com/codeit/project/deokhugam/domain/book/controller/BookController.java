@@ -99,7 +99,7 @@ public class BookController implements BookApi {
 
   @GetMapping("/info")
   public ResponseEntity<BookResponse> getBook(@PathParam("isbn") String isbn) {
-    BookResponse response = naverBookApiClient.fetchBooks(isbn);
+    BookResponse response = bookService.saveNaverThumbnail(isbn);
     return ResponseEntity.ok(response);
   }
 
