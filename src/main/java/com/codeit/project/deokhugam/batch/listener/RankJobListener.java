@@ -15,17 +15,17 @@ public class RankJobListener implements JobExecutionListener {
 
     @Override
     public void beforeJob(JobExecution jobExecution) {
-        log.info("📊 [RankJob] 배치 Job 시작: {}", jobExecution.getJobInstance().getJobName());
+        log.info(" [RankJob] 배치 Job 시작: {}", jobExecution.getJobInstance().getJobName());
         batchMetricsService.incrementJobRun();
     }
 
     @Override
     public void afterJob(JobExecution jobExecution) {
         if (jobExecution.getStatus() == BatchStatus.COMPLETED) {
-            log.info("✅ [RankJob] 배치 Job 성공: {}", jobExecution.getJobInstance().getJobName());
+            log.info(" [RankJob] 배치 Job 성공: {}", jobExecution.getJobInstance().getJobName());
             batchMetricsService.incrementJobSuccess();
         } else {
-            log.error("❌ [RankJob] 배치 Job 실패: {} - 상태: {}",
+            log.error(" [RankJob] 배치 Job 실패: {} - 상태: {}",
                     jobExecution.getJobInstance().getJobName(),
                     jobExecution.getStatus());
             batchMetricsService.incrementJobFail();
