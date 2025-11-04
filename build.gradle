@@ -42,7 +42,7 @@ dependencies {
 
 
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
-//    implementation 'io.micrometer:micrometer-registry-prometheus'    // 나중에 커스텀 메트릭 전송용
+    implementation 'io.micrometer:micrometer-registry-prometheus'    // 나중에 커스텀 메트릭 전송용
 
     implementation 'org.mapstruct:mapstruct:1.6.3'
     implementation 'org.springframework.boot:spring-boot-starter-batch'    // 추후 배치 고려
@@ -65,6 +65,9 @@ dependencies {
 
     // s3
     implementation 'software.amazon.awssdk:s3:2.31.7'
+
+    // security
+    implementation 'org.springframework.boot:spring-boot-starter-security'
 }
 
 tasks.named('test') {
