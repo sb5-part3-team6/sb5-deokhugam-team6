@@ -41,12 +41,12 @@ class RankProcessorTest {
   @Test
   void process_UserTarget() {
     RankProcessor processor = new RankProcessor(RankType.ALL_TIME.name(), RankTarget.USER.name());
-    UserStatDto user = new UserStatDto(2L, 80L, 5L, 10.0);
+    UserStatDto user = new UserStatDto(2L, 80L, 5L, BigDecimal.TEN);
 
     Rank result = processor.process(user);
 
     assertThat(result.getTarget()).isEqualTo(RankTarget.USER.name());
     assertThat(result.getTargetId()).isEqualTo(2L);
-    assertThat(result.getScore()).isEqualTo(BigDecimal.valueOf(80L * 0.2 + 5L * 0.3 + 10.0 * 0.5));
+    assertThat(result.getScore()).isEqualTo(BigDecimal.valueOf(80L * 0.2 + 5L * 0.3 + BigDecimal.TEN.doubleValue() * 0.5));
   }
 }
