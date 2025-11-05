@@ -53,10 +53,7 @@ public class BookServiceImpl implements BookService {
     }
 
     String thumbnailImageUrl = null;
-    if (thumbnailImage != null && !thumbnailImage.isEmpty()) {
-      fileStorage.saveThumbnailImage(bookData.isbn(), thumbnailImage);
-      thumbnailImageUrl = fileStorage.getThumbnailImage(bookData.isbn());
-    }
+
     //리뷰갯수 평점 넣어야 함
     Book book = new Book(
         bookData.title(),
@@ -67,6 +64,10 @@ public class BookServiceImpl implements BookService {
         bookData.isbn(),
         thumbnailImageUrl);
 
+    if (thumbnailImage != null && !thumbnailImage.isEmpty()) {
+      thumbnailImageUrl = fileStorage.saveThumbnailImage(book, thumbnailImage);
+      book.update(thumbnailImageUrl);
+    }
     Book created = bookRepository.save(book);
     long reviewCount = getReviewCount(book.getId());
     double rating = getAverageRating(book.getId());
@@ -80,8 +81,8 @@ public class BookServiceImpl implements BookService {
 
     String newThumbnailImageUrl = book.getThumbnailUrl();
     if (thumbnailImage != null && !thumbnailImage.isEmpty()) {
-      fileStorage.saveThumbnailImage(book.getIsbn(), thumbnailImage);
-      newThumbnailImageUrl = fileStorage.getThumbnailImage(book.getIsbn());
+      newThumbnailImageUrl = fileStorage.saveThumbnailImage(book, thumbnailImage);
+      book.update(newThumbnailImageUrl);
     }
 
     String newTitle = bookData.title();
@@ -190,16 +191,16 @@ public class BookServiceImpl implements BookService {
   @Override
   public BookResponse saveNaverThumbnail(String isbn) {
     BookResponse bookResponse = naverBookApiClient.fetchBooks(isbn);
-    byte[] imageBytes = downloadAndSaveThumbnail(isbn, bookResponse.thumbnailImage());
+    byte[] imageBytes = downloadAndSaveThumbnail(bookResponse);
     String base64Data = java.util.Base64.getEncoder().encodeToString(imageBytes);
     return bookResponse.toBuilder()
         .thumbnailImage(base64Data)
         .build();
   }
 
-  private byte[] downloadAndSaveThumbnail(String isbn, String thumbnailImage) {
+  private byte[] downloadAndSaveThumbnail(BookResponse bookResponse) {
     return webClient.get()
-        .uri(thumbnailImage)
+        .uri(bookResponse.thumbnailImage())
         .retrieve()
         .toEntity(byte[].class)
         .map(responseEntity -> {
@@ -211,7 +212,7 @@ public class BookServiceImpl implements BookService {
             return new byte[0];
           }
           try(InputStream is = new java.io.ByteArrayInputStream(body)) {
-            ((FileStorage)fileStorage).saveThumbnailImage(isbn, is, contentType,contentLength);
+            ((FileStorage)fileStorage).saveThumbnailImage(bookResponse, is, contentType,contentLength);
           }catch(Exception e){
             throw new RuntimeException("썸네일 저장 중 오류 발생", e);
           }
@@ -245,7 +246,7 @@ public class BookServiceImpl implements BookService {
 
     reviewRepository.bulkDeleteByBookId(bookId);
 
-    fileStorage.deleteThumbnailImage(book.getIsbn());
+    fileStorage.deleteThumbnailImage(book.getThumbnailUrl());
     bookRepository.deleteById(bookId);
   }
 
