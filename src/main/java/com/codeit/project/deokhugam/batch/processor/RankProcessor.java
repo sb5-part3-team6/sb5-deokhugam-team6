@@ -43,7 +43,7 @@ public class RankProcessor implements ItemProcessor<Object, Rank> {
       }
       case USER -> {
         UserStatDto user = (UserStatDto) dto;
-        score = user.reviewRankScore() * 0.5 + user.likeCount() * 0.2 + user.commentCount() * 0.3;
+        score = user.reviewRankScore().doubleValue() * 0.5 + user.likeCount() * 0.2 + user.commentCount() * 0.3;
         id = user.userId();
       }
       default -> throw new IllegalArgumentException("Unsupported RankTarget: " + rankTarget);
