@@ -20,10 +20,6 @@ public class RankBatchScheduler {
 
   @Scheduled(cron = "0 5 0 * * *", zone = "Asia/Seoul")
   public void runAllStats() {
-    runJob(RankTarget.BOOK, RankType.DAILY);
-    runJob(RankTarget.REVIEW, RankType.DAILY);
-    runJob(RankTarget.USER, RankType.DAILY);
-
     runJob(RankTarget.BOOK, RankType.WEEKLY);
     runJob(RankTarget.BOOK, RankType.MONTHLY);
     runJob(RankTarget.BOOK, RankType.ALL_TIME);

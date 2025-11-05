@@ -12,6 +12,7 @@ import com.codeit.project.deokhugam.domain.review.dto.ReviewStatDto;
 import com.codeit.project.deokhugam.domain.review.repository.ReviewRepository;
 import com.codeit.project.deokhugam.domain.user.dto.UserStatDto;
 import com.codeit.project.deokhugam.domain.user.repository.UserRepository;
+import java.math.BigDecimal;
 import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -85,7 +86,7 @@ class RankReaderTest {
   @DisplayName("USER 랭크 - MONTHLY 타입 데이터 정상 조회")
   void read_USER_MONTHLY() {
     List<UserStatDto> fakeUsers = List.of(
-        new UserStatDto(1L, 3L, 1L, 8.5)
+        new UserStatDto(1L, 3L, 1L, BigDecimal.TEN)
     );
     when(userRepository.getStatsByPeriod(RankType.MONTHLY)).thenReturn(fakeUsers);
 
