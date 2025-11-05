@@ -83,7 +83,7 @@ public class UserRepositoryCustomImpl implements UserRepositoryCustom {
 
     return queryFactory.select(
                               Projections.constructor(UserStatDto.class, user.id, like.id.countDistinct(),
-                                  comment.id.countDistinct(), rank.score.avg()))
+                                  comment.id.countDistinct(), rank.score.sum()))
                           .from(user)
                           .leftJoin(like)
                           .on(like.user.id.eq(user.id)
