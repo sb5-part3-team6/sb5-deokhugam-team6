@@ -8,6 +8,7 @@ import com.codeit.project.deokhugam.domain.book.dto.request.BookSearchRequest;
 import com.codeit.project.deokhugam.domain.book.dto.request.BookUpdateRequest;
 import com.codeit.project.deokhugam.domain.book.dto.response.CursorPageResponseBookDto;
 import com.codeit.project.deokhugam.domain.book.service.BookService;
+import com.codeit.project.deokhugam.domain.user.util.LoginUser;
 import com.codeit.project.deokhugam.external.client.NaverBookApiClient;
 import com.codeit.project.deokhugam.external.client.NaverCloudOcrApiClient;
 import com.codeit.project.deokhugam.global.common.dto.PageResponse;
