@@ -6,45 +6,41 @@ import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 
+@Slf4j
 @Configuration
 @Profile("dev")
 public class FileConfigDev implements FileConfig {
 
+  @Value("${file.upload-dir}")
   private String uploadDir;
 
-  @PostConstruct
-  public void init(){
-    String os = System.getProperty("os.name").toLowerCase();
-    if(os.contains("win")){
-      uploadDir = "C:/uploads/";
-    }else{
-      uploadDir = "/var/uploads/";
-    }
+  private Path uploadPath;
 
-    File dir = new File(uploadDir);
-    if(!dir.exists()){
-      boolean create = dir.mkdir();
-      if(create){
-        System.out.println("업로드 디렉토리 생성 완료 : "+ uploadDir);
-      }else{
-        System.out.println("업로드 디렉토리 생성 실패 : "+ uploadDir);
-      }
+  @PostConstruct
+  public void init() {
+    try {
+      uploadPath = Paths.get(uploadDir)
+                        .toAbsolutePath()
+                        .normalize();
+      Files.createDirectories(uploadPath);
+    } catch (Exception e) {
+      throw new IllegalStateException("업로드 디렉토리 생성 실패 : " + uploadDir, e);
     }
   }
 
   @Override
   public File getThumbnailUploadDirFile() {
-    Path dir = Paths.get(uploadDir,"thumbnails");
-    if(Files.notExists(dir)){
-      try {
-        Files.createDirectories(dir);
-      } catch (Exception e) {
-        throw new RuntimeException("썸네일 업로드 디렉토리 생성 실패");
-      }
+    try {
+      Path p = uploadPath.resolve("thumbnails");
+      Files.createDirectories(p);
+      return p.toFile();
+    } catch (Exception e) {
+      throw new IllegalStateException("썸네일 디렉토리 생성 실패", e);
     }
-    return dir.toFile();
   }
 }
