@@ -73,7 +73,7 @@ SPRING_PROFILES_ACTIVE=dev
 # =========== DB ==========
 POSTGRES_PORT=5432
 POSTGRES_DB=deokhugam
-POSTGRES_HOST=localhost
+POSTGRES_HOST=db
 POSTGRES_USER=deokhugam_user
 POSTGRES_PASSWORD=user1234
 
@@ -105,6 +105,28 @@ docker 실행을 원하시는 경우, 아래 파일을 교체해주세요.
 version: "3.9"
 
 services:
+  db:
+    image: postgres:17.6
+    container_name: deokhugam-db
+    environment:
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - LANG=C.UTF-8
+      - LC_ALL=C.UTF-8
+      - SPRING_PROFILES_ACTIVE=${SPRING_PROFILES_ACTIVE:-dev}
+    volumes:
+      - ./src/main/resources/schema.local.sql:/docker-entrypoint-initdb.d/schema.local.sql
+      - postgres-data:/var/lib/postgresql/data
+    networks:
+      - deokhugam-network
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    ports:
+      - "5435:5432"
   app:
     image: deokhugam:local
     build:
@@ -113,6 +135,9 @@ services:
     container_name: deokhugam-app
     env_file:
       - .env
+    depends_on:
+      db:
+        condition: service_healthy
     environment:
       TZ: ${TZ}
       SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE}
@@ -130,36 +155,19 @@ services:
       NCP_CLIENT_SECRET: ${NCP_CLIENT_SECRET}
       FILE_UPLOAD_DIR: ${FILE_UPLOAD_DIR}
     ports:
-      - "80:80"
-    depends_on:
-      - db
+      - "80:8080"
     volumes:
-      - binary-content-storage:${FILE_UPLOAD_DIR}
+      - ./uploads:/app/uploads
     networks:
       - deokhugam-network
 
-  db:
-    image: postgres:17-alpine
-    container_name: deokhugam-db
-    environment:
-      - POSTGRES_DB=${POSTGRES_DB}
-      - POSTGRES_USER=${POSTGRES_USER}
-      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
-    ports:
-      - "5432:5432"
-    volumes:
-      - postgres-data:/var/lib/postgresql/data
-      - ./src/main/resources/schema.sql:/docker-entrypoint-initdb.d/schema.sql
-    networks:
-      - deokhugam-network
-      
+
 volumes:
   postgres-data:
-  binary-content-storage:
 
 networks:
   deokhugam-network:
-    driver: bridge 
+    driver: bridge
 ```
 
 ## docker 실행
