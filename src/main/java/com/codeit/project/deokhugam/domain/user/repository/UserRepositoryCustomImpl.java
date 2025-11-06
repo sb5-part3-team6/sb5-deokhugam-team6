@@ -77,44 +77,47 @@ public class UserRepositoryCustomImpl implements UserRepositoryCustom {
     BooleanExpression reviewCondition =
         (startDateTime != null && endDateTime != null) ? review.createdAt.between(startDateTime,
             endDateTime) : null;
-    BooleanExpression rankCondition =
-        (startDateTime != null && endDateTime != null) ? rank.createdAt.between(startDateTime,
-            endDateTime) : null;
+    BooleanExpression rankCondition = rank.createdAt.between(LocalDate.now()
+                                                                      .atStartOfDay(),
+        LocalDate.now()
+                 .atTime(LocalTime.MAX));
 
     return queryFactory.select(
-                              Projections.constructor(UserStatDto.class, user.id, like.id.countDistinct(),
-                                  comment.id.countDistinct(), rank.score.sum()))
-                          .from(user)
-                          .leftJoin(like)
-                          .on(like.user.id.eq(user.id)
-                                          .and(likeCondition != null ? likeCondition
-                                              : like.id.isNotNull()))
-                          .leftJoin(comment)
-                          .on(comment.user.id.eq(user.id)
-                                             .and(comment.deletedAt.isNull())
-                                             .and(commentCondition != null ? commentCondition
-                                                 : comment.deletedAt.isNotNull()))
-                          .leftJoin(review)
-                          .on(review.user.id.eq(user.id)
-                                            .and(review.deletedAt.isNull())
-                                            .and(reviewCondition != null ? reviewCondition
-                                                : review.id.isNotNull()))
-                          .innerJoin(rank)
-                          .on(rank.targetId.eq(review.id)
-                                           .and(rank.target.eq(RankTarget.REVIEW.name()))
-                                           .and(rankCondition != null ? rankCondition
-                                               : rank.id.isNotNull()))
-                          .where(user.deletedAt.isNull())
-                          .groupBy(user.id)
-                          .fetch();
+                           Projections.constructor(UserStatDto.class, user.id, like.id.countDistinct(),
+                               comment.id.countDistinct(), rank.score.sum()))
+                       .from(user)
+                       .innerJoin(review)
+                       .on(review.user.id.eq(user.id)
+                                         .and(review.deletedAt.isNull())
+                                         .and(reviewCondition != null ? reviewCondition
+                                             : review.id.isNotNull()))
+                       .leftJoin(like)
+                       .on(like.user.id.eq(review.user.id)
+                                       .and(likeCondition != null ? likeCondition
+                                           : like.id.isNotNull()))
+                       .leftJoin(comment)
+                       .on(comment.user.id.eq(user.id)
+                                          .and(comment.deletedAt.isNull())
+                                          .and(commentCondition != null ? commentCondition
+                                              : comment.deletedAt.isNotNull()))
+                       .innerJoin(rank)
+                       .on(rank.targetId.eq(review.id)
+                                        .and(rank.target.eq(RankTarget.REVIEW.name()))
+                                        .and(rank.type.eq(RankType.ALL_TIME.name()))
+                                        .and(rankCondition != null ? rankCondition
+                                            : rank.id.isNotNull()))
+                       .where(user.deletedAt.isNull())
+                       .groupBy(user.id)
+                       .fetch();
   }
 
   @Override
   public Long deleteExpiredSoftDeletedUsers() {
     QUser user = QUser.user;
     return queryFactory.delete(user)
-                        .where(user.deletedAt.before(LocalDateTime.now().minusDays(1)))
-                        .execute();
+                       .where(user.deletedAt.before(LocalDateTime.now()
+                                                                 .minusDays(1)))
+                       .execute();
   }
 
   @Override
@@ -124,20 +127,17 @@ public class UserRepositoryCustomImpl implements UserRepositoryCustom {
 
     Order order = "asc".equalsIgnoreCase(direction) ? Order.ASC : Order.DESC;
 
-    var subQuery = JPAExpressions
-            .select(sub.targetId, sub.createdAt.max())
-            .from(sub)
-            .where(sub.target.eq("USER"), sub.type.eq(type))
-            .groupBy(sub.targetId);
+    var subQuery = JPAExpressions.select(sub.targetId, sub.createdAt.max())
+                                 .from(sub)
+                                 .where(sub.target.eq("USER"), sub.type.eq(type))
+                                 .groupBy(sub.targetId);
 
-    return queryFactory
-            .selectFrom(rank)
-            .where(rank.target.eq("USER"),
-                    rank.type.eq(type),
-                    Expressions.list(rank.targetId, rank.createdAt).in(subQuery)
-            )
-            .orderBy(new OrderSpecifier<>(order, rank.rankNo))
-            .limit(limit + 1)
-            .fetch();
+    return queryFactory.selectFrom(rank)
+                       .where(rank.target.eq("USER"), rank.type.eq(type),
+                           Expressions.list(rank.targetId, rank.createdAt)
+                                      .in(subQuery))
+                       .orderBy(new OrderSpecifier<>(order, rank.rankNo))
+                       .limit(limit + 1)
+                       .fetch();
   }
 }

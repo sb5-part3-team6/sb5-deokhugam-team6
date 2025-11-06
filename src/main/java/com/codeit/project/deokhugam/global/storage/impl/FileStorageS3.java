@@ -48,7 +48,7 @@ public class FileStorageS3 implements FileStorage {
       deleteFromS3(extractKeyFromUrl(book.getThumbnailUrl()));
     }
     uploadToS3(key,thumbnailImage);
-    log.info("썸네일 업로드 완료 : {}", key);
+    log.debug("썸네일 업로드 완료 : {}", key);
     return getFullUrl(key);
   }
   //api로 받은 정보
@@ -59,7 +59,7 @@ public class FileStorageS3 implements FileStorage {
       deleteFromS3(extractKeyFromUrl(bookResponse.thumbnailImage()));
     }
     uploadStreamToS3(key, inputStream, contentType, contentLength);
-    log.info("썸네일 업로드 완료 (스트림) : {}", key);
+    log.debug("썸네일 업로드 완료 (스트림) : {}", key);
     return getFullUrl(key);
   }
 
@@ -81,7 +81,7 @@ public class FileStorageS3 implements FileStorage {
   @Override
   public void deleteThumbnailImage(String url) {
     deleteFromS3(extractKeyFromUrl(url));
-    log.info("썸네일 삭제 완료 : {}",url);
+    log.debug("썸네일 삭제 완료 : {}",url);
   }
 
   private void uploadToS3(String key,MultipartFile file) {

@@ -76,7 +76,7 @@ public class NaverCloudOcrApiClient {
            .filename(imageFile.getOriginalFilename())
            .contentType(MediaType.valueOf(imageFile.getContentType()));
 
-    log.info("ocr 호출 시작");
+    log.debug("ocr 호출 시작");
 
     return naverClovaClient.post()
                            .header("X-OCR-SECRET", secretKey)
@@ -84,12 +84,12 @@ public class NaverCloudOcrApiClient {
                            .body(BodyInserters.fromMultipartData(builder.build()))
                            .retrieve()
                            .bodyToMono(ClovaOcrResponse.class)
-                           .doOnSuccess(response -> log.info("ocr api 응답 수신 성공"))
+                           .doOnSuccess(response -> log.debug("ocr api 응답 수신 성공"))
                            .flatMap(response -> {
                              String isbn = findIsbnInResponse(response);
 
                              if (isbn != null) {
-                               log.info("isbn 추출 성공 : {}", isbn);
+                               log.debug("isbn 추출 성공 : {}", isbn);
                                return Mono.just(isbn);
                              } else {
                                return Mono.empty();
