@@ -25,20 +25,15 @@ Batch 처리로 인기 도서·리뷰·사용자 순위를 계산하고, 독자�
 ## 기술 스택
 
 ### 프론트
-<img src="https://img.shields.io/badge/React-61DAFB?style=for-the-badge&logo=react&logoColor=white" alt="">
-<img src="https://img.shields.io/badge/typescript-3178C6?style=for-the-badge&logo=typescript&logoColor=white" alt="">
+<img src="https://img.shields.io/badge/React-61DAFB?style=for-the-badge&logo=react&logoColor=white" alt=""> <img src="https://img.shields.io/badge/typescript-3178C6?style=for-the-badge&logo=typescript&logoColor=white" alt="">
 
 ---
 ### 백엔드
-<img src="https://img.shields.io/badge/Java 17-007396?style=for-the-badge&logo=openjdk&logoColor=white" alt="">
-<img src="https://img.shields.io/badge/SpringBoot 3.5.6-6DB33F?style=for-the-badge&logo=springboot&logoColor=white" alt="">
-<img src="https://img.shields.io/badge/PostgreSQL 17.6-4169E1?style=for-the-badge&logo=postgresql&logoColor=white" alt="">
+<img src="https://img.shields.io/badge/Java 17-007396?style=for-the-badge&logo=openjdk&logoColor=white" alt=""> <img src="https://img.shields.io/badge/SpringBoot 3.5.6-6DB33F?style=for-the-badge&logo=springboot&logoColor=white" alt=""> <img src="https://img.shields.io/badge/PostgreSQL 17.6-4169E1?style=for-the-badge&logo=postgresql&logoColor=white" alt="">
 
 ---
 ### 협업 도구
-<img src="https://img.shields.io/badge/Github-181717?style=for-the-badge&logo=github&logoColor=white" alt="">
-<img src="https://img.shields.io/badge/Notion-000000?style=for-the-badge&logo=notion&logoColor=white" alt="">
-<img src="https://img.shields.io/badge/DISCORD-5865F2?style=for-the-badge&logo=discord&logoColor=white" alt="">
+<img src="https://img.shields.io/badge/Github-181717?style=for-the-badge&logo=github&logoColor=white" alt=""> <img src="https://img.shields.io/badge/Notion-000000?style=for-the-badge&logo=notion&logoColor=white" alt=""> <img src="https://img.shields.io/badge/DISCORD-5865F2?style=for-the-badge&logo=discord&logoColor=white" alt="">
 
 ### 아키텍처
 
