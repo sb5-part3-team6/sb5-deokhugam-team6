@@ -19,6 +19,7 @@ public class RankBatchScheduler {
   private final Job statJob;
 
   @Scheduled(cron = "0 5 0 * * *", zone = "Asia/Seoul")
+//  @Scheduled(initialDelay = 1000, fixedDelay = 1000 * 60 * 60)
   public void runAllStats() {
     runJob(RankTarget.BOOK, RankType.WEEKLY);
     runJob(RankTarget.BOOK, RankType.MONTHLY);
@@ -49,10 +50,10 @@ public class RankBatchScheduler {
           .toJobParameters();
 
       jobLauncher.run(statJob, jobParameters);
-      log.info("{} {} batch job 실행 완료", target, type);
+      log.info("{} {} batch job success", target, type);
 
     } catch (Exception e) {
-      log.error("{} {} batch job 실행 실패", target, type, e);
+      log.error("{} {} batch job fail", target, type, e);
     }
   }
 }
