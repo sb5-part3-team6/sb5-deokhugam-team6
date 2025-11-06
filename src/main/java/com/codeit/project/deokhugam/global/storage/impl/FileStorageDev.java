@@ -17,25 +17,28 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 @RequiredArgsConstructor
 @Profile("dev")
 public class FileStorageDev implements FileStorage {
+
   private final FileConfig fileConfig;
 
   @Override
   public String saveThumbnailImage(Book book, MultipartFile thumbnailImage) {
     File dir = fileConfig.getThumbnailUploadDirFile();
-    File dest = new File(dir,book.getThumbnailUrl());
-    if(dest.exists()){
+    File dest = new File(dir, book.getIsbn());
+    if (dest.exists()) {
       boolean deleted = dest.delete();
-      if(!deleted){
+      if (!deleted) {
         throw new RuntimeException("기존 썸네일 삭제 실패 : " + dest.getAbsolutePath());
       }
     }
-    try{
+    try {
       thumbnailImage.transferTo(dest);
-    }catch(IOException e){
-      throw new RuntimeException("썸네일 파일 저장 실패 : "+ dest.getAbsolutePath(), e);
+    } catch (IOException e) {
+      throw new RuntimeException("썸네일 파일 저장 실패 : " + dest.getAbsolutePath(), e);
     }
-    System.out.println("아바타 저장 완료 : " + dest.getAbsolutePath());
-    return dest.getAbsolutePath();
+    return ServletUriComponentsBuilder.fromCurrentContextPath()
+                                      .path("/thumbnails/")
+                                      .path(book.getIsbn())
+                                      .toUriString();
   }
 
   @Override
@@ -47,21 +50,21 @@ public class FileStorageDev implements FileStorage {
   @Override
   public String getThumbnailImage(Book book) {
     return ServletUriComponentsBuilder.fromCurrentContextPath()
-        .path("/thumbnails/")
-        .path(book.getIsbn())
-        .toUriString();
+                                      .path("/thumbnails/")
+                                      .path(book.getIsbn())
+                                      .toUriString();
   }
 
   @Override
   public void deleteThumbnailImage(String isbn) {
     File dir = fileConfig.getThumbnailUploadDirFile();
     File dest = new File(dir, isbn);
-    if(dest.exists()){
+    if (dest.exists()) {
       boolean deleted = dest.delete();
-      if(!deleted){
-        throw new RuntimeException("기존 썸네일 삭제 실패 : "+dest.getAbsolutePath());
+      if (!deleted) {
+        throw new RuntimeException("기존 썸네일 삭제 실패 : " + dest.getAbsolutePath());
       }
     }
-    System.out.println("썸네일 삭제 완료 : "+ dest.getAbsolutePath());
+    System.out.println("썸네일 삭제 완료 : " + dest.getAbsolutePath());
   }
 }
