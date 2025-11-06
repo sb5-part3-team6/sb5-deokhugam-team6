@@ -40,6 +40,10 @@ Batch 처리로 인기 도서·리뷰·사용자 순위를 계산하고, 독자�
 <img src="https://img.shields.io/badge/Notion-000000?style=for-the-badge&logo=notion&logoColor=white" alt="">
 <img src="https://img.shields.io/badge/DISCORD-5865F2?style=for-the-badge&logo=discord&logoColor=white" alt="">
 
+### 아키텍처
+
+<img width="1000" height="550" alt="Image" src="https://github.com/user-attachments/assets/994e5a2b-6183-45de-b0cd-3ca388d897a9" />
+
 ## 구현 기능 상세
 
 ### 도서
