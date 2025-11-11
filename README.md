@@ -2,16 +2,23 @@
 
 [![codecov](https://codecov.io/gh/sb5-part3-team6/sb5-deokhugam-team6/branch/dev/graph/badge.svg?token=77AGWST30O)](https://codecov.io/gh/sb5-part3-team6/sb5-deokhugam-team6)
 
+## 서비스 미리보기
+<details>
+<summary>스크린샷</summary>
+<div>
+<img width="1500" height="900" alt="Image" src="https://github.com/user-attachments/assets/4deeba61-c3c9-4bde-916f-78266d3e5c0a" />
+
+<img width="1500" height="5600" alt="Image" src="https://github.com/user-attachments/assets/2861bf50-75aa-4304-a92c-174a2893f7ea" />
+
+<img width="1500" height="2200" alt="Image" src="https://github.com/user-attachments/assets/b1c3ff16-3fc4-426f-b189-09d899d4378d" />
+
+<img width="1500" height="2600" alt="Image" src="https://github.com/user-attachments/assets/e49d8d60-0c4d-4952-8ee4-b56934414491" />
+</div>
+</details>
+
 ## 팀 문서
 
 - [팀 노션](https://www.notion.so/_6-_5-2797bb3b3a0f810a8680ed5279a3de3e?source=copy_link)
-
-## 팀원 구성
-- 김동규 : [redmatoda](https://github.com/redmatoda)
-- 박문아 : [ayanemoona](https://github.com/ayanemoona)
-- 박주환 : [parkjoohwan](https://github.com/parkjoohwan)
-- 이소연 : [isylsy166](https://github.com/isylsy166)
-- 이유호 : [yuhoyuho](https://github.com/yuhoyuho)
 
 ## 프로젝트 소개
 ```aiignore
@@ -41,6 +48,13 @@ Batch 처리로 인기 도서·리뷰·사용자 순위를 계산하고, 독자�
 
 ## 구현 기능 상세
 
+## 팀원 구성
+- 김동규 : [redmatoda](https://github.com/redmatoda)
+- 박문아 : [ayanemoona](https://github.com/ayanemoona)
+- 박주환 : [parkjoohwan](https://github.com/parkjoohwan)
+- 이소연 : [isylsy166](https://github.com/isylsy166)
+- 이유호 : [yuhoyuho](https://github.com/yuhoyuho)
+
 ### 도서
 
 - 도서를 등록, 수정, 삭제 할 수 있습니다. 
@@ -63,11 +77,11 @@ Batch 처리로 인기 도서·리뷰·사용자 순위를 계산하고, 독자�
 - 인기 도서, 인기 리뷰, 인기 유저를 모아볼 수 있습니다. (일간, 주간, 월간, 역대)
 ## docker
 
-- 아래 docker container 환경에선 isbn 이미지로 가져오기(OCR), 정보 불러오기(NAVER API) 기능이 동작하지 않습니다.
+- 아래 (local)환경에선 isbn 이미지로 가져오기(OCR), 정보 불러오기(NAVER API) 기능이 동작하지 않습니다.
 - 이미지는 /app/uploads 경로에 저장됩니다.
-- 실행 전 local postgres에 schema.sql를 실행하거나, docker-compose.yml을 아래처럼 수정해주세요.
+- 실행 전 local postgres에 schema.sql를 실행하거나, docker-compose-local.yml을 아래처럼 이용해주세요!
 
-### 실행을 위한 .env
+### 실행을 위한 .env (for. local)
 ```aiignore
 SPRING_PROFILES_ACTIVE=dev
 # =========== DB ==========
@@ -98,82 +112,10 @@ CDN_URL=
 TZ=Asia/Seoul
 ```
 
-## if you want 
-docker 실행을 원하시는 경우, 아래 파일을 교체해주세요.
-```aiignore
-# docker-compose.yml
-version: "3.9"
-
-services:
-  db:
-    image: postgres:17.6
-    container_name: deokhugam-db
-    environment:
-      - POSTGRES_DB=${POSTGRES_DB}
-      - POSTGRES_USER=${POSTGRES_USER}
-      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
-      - LANG=C.UTF-8
-      - LC_ALL=C.UTF-8
-      - SPRING_PROFILES_ACTIVE=${SPRING_PROFILES_ACTIVE:-dev}
-    volumes:
-      - ./src/main/resources/schema.local.sql:/docker-entrypoint-initdb.d/schema.local.sql
-      - postgres-data:/var/lib/postgresql/data
-    networks:
-      - deokhugam-network
-    healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}" ]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-    ports:
-      - "5435:5432"
-  app:
-    image: deokhugam:local
-    build:
-      context: .
-      dockerfile: Dockerfile
-    container_name: deokhugam-app
-    env_file:
-      - .env
-    depends_on:
-      db:
-        condition: service_healthy
-    environment:
-      TZ: ${TZ}
-      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE}
-      SPRING_DATASOURCE_URL: ${SPRING_DATASOURCE_URL}
-      SPRING_DATASOURCE_USERNAME: ${SPRING_DATASOURCE_USERNAME}
-      SPRING_DATASOURCE_PASSWORD: ${SPRING_DATASOURCE_PASSWORD}
-      AWS_S3_ACCESS_KEY: ${AWS_S3_ACCESS_KEY}
-      AWS_S3_SECRET_KEY: ${AWS_S3_SECRET_KEY}
-      AWS_S3_REGION: ${AWS_S3_REGION}
-      AWS_S3_BUCKET: ${AWS_S3_BUCKET}
-      CDN_URL: ${CDN_URL}
-      NAVER_CLIENT_ID: ${NAVER_CLIENT_ID}
-      NAVER_CLIENT_SECRET: ${NAVER_CLIENT_SECRET}
-      NCP_INVOKE_URL: ${NCP_INVOKE_URL}
-      NCP_CLIENT_SECRET: ${NCP_CLIENT_SECRET}
-      FILE_UPLOAD_DIR: ${FILE_UPLOAD_DIR}
-    ports:
-      - "80:8080"
-    volumes:
-      - ./uploads:/app/uploads
-    networks:
-      - deokhugam-network
-
-
-volumes:
-  postgres-data:
-
-networks:
-  deokhugam-network:
-    driver: bridge
-```
-
-## docker 실행
+## docker 실행 (local)
 
 ```aiignore
-docker-compose up
+docker compose -f docker-compose-local.yml up
 ```
 
 ## 구현 홈페이지
@@ -191,306 +133,68 @@ src
 │   │                   ├── DeokhugamApplication.java
 │   │                   ├── batch
 │   │                   │   ├── job
-│   │                   │   │   └── RankBatchConfig.java
+│   │                   │   │   └── ...
 │   │                   │   ├── processor
-│   │                   │   │   └── RankProcessor.java
+│   │                   │   │   └── ...
 │   │                   │   ├── reader
-│   │                   │   │   └── RankReader.java
+│   │                   │   │   └── ...
 │   │                   │   ├── scheduler
-│   │                   │   │   ├── CleanBatchScheduler.java
-│   │                   │   │   └── RankBatchScheduler.java
+│   │                   │   │   ├── ...
 │   │                   │   └── writer
-│   │                   │       └── RankWriter.java
+│   │                   │       └── ...
 │   │                   ├── domain
 │   │                   │   ├── book
 │   │                   │   │   ├── controller
-│   │                   │   │   │   ├── BookApi.java
-│   │                   │   │   │   └── BookController.java
-│   │                   │   │   ├── dto
-│   │                   │   │   │   ├── BookStatDto.java
-│   │                   │   │   │   ├── request
-│   │                   │   │   │   │   ├── BookCreateRequest.java
-│   │                   │   │   │   │   ├── BookPopularRequest.java
-│   │                   │   │   │   │   ├── BookSearchRequest.java
-│   │                   │   │   │   │   └── BookUpdateRequest.java
-│   │                   │   │   │   └── response
-│   │                   │   │   │       ├── BookDto.java
-│   │                   │   │   │       ├── BookResponse.java
-│   │                   │   │   │       ├── CursorPageResponseBookDto.java
-│   │                   │   │   │       └── PopularBookDto.java
-│   │                   │   │   ├── entity
-│   │                   │   │   │   └── Book.java
-│   │                   │   │   ├── exception
-│   │                   │   │   │   ├── BoockExceptionHandler.java
-│   │                   │   │   │   ├── BookErrorCode.java
-│   │                   │   │   │   ├── BookException.java
-│   │                   │   │   │   └── detail
-│   │                   │   │   │       └── BookNotFoundException.java
-│   │                   │   │   ├── mapper
-│   │                   │   │   │   └── BookMapper.java
-│   │                   │   │   ├── repository
-│   │                   │   │   │   ├── BookRepository.java
-│   │                   │   │   │   ├── BookRepositoryCustom.java
-│   │                   │   │   │   └── BookRepositoryCustomImpl.java
-│   │                   │   │   └── service
-│   │                   │   │       ├── BookService.java
-│   │                   │   │       └── BookServiceImpl.java
-│   │                   │   ├── comment
-│   │                   │   │   ├── controller
-│   │                   │   │   │   ├── CommentAPI.java
-│   │                   │   │   │   └── CommentController.java
-│   │                   │   │   ├── dto
-│   │                   │   │   │   ├── event
-│   │                   │   │   │   │   ├── CommentDeleteEvent.java
-│   │                   │   │   │   │   ├── CommentEvent.java
-│   │                   │   │   │   │   └── CommentUpdateEvent.java
-│   │                   │   │   │   ├── request
-│   │                   │   │   │   │   ├── CommentCreateRequest.java
-│   │                   │   │   │   │   └── CommentUpdateRequest.java
-│   │                   │   │   │   └── response
-│   │                   │   │   │       └── CommentDto.java
-│   │                   │   │   ├── entity
-│   │                   │   │   │   └── Comment.java
-│   │                   │   │   ├── exception
-│   │                   │   │   ├── mapper
-│   │                   │   │   │   └── CommentMapper.java
-│   │                   │   │   ├── repository
-│   │                   │   │   │   ├── CommentRepository.java
-│   │                   │   │   │   ├── CommentRepositoryCustom.java
-│   │                   │   │   │   └── CommentRepositoryCustomImpl.java
-│   │                   │   │   └── service
-│   │                   │   │       ├── CommentService.java
-│   │                   │   │       └── CommentServiceImpl.java
-│   │                   │   ├── notification
-│   │                   │   │   ├── controller
-│   │                   │   │   │   ├── NotificationApi.java
-│   │                   │   │   │   └── NotificationController.java
+│   │                   │   │   │   └── ...
 │   │                   │   │   ├── dto
 │   │                   │   │   │   ├── command
-│   │                   │   │   │   │   ├── NotificationCreateCommand.java
-│   │                   │   │   │   │   ├── NotificationDeleteCommand.java
-│   │                   │   │   │   │   └── NotificationUpdateCommand.java
+│   │                   │   │   │   │   ├── ...
 │   │                   │   │   │   ├── request
-│   │                   │   │   │   │   └── NotificationUpdateRequest.java
+│   │                   │   │   │   │   └── ...
 │   │                   │   │   │   └── response
-│   │                   │   │   │       └── NotificationDto.java
+│   │                   │   │   │       └── ...
 │   │                   │   │   ├── entity
-│   │                   │   │   │   ├── Notification.java
-│   │                   │   │   │   └── NotificationType.java
+│   │                   │   │   │   └── ...
 │   │                   │   │   ├── event
-│   │                   │   │   │   └── NotificationEventHandler.java
+│   │                   │   │   │   └── ...
 │   │                   │   │   ├── exception
-│   │                   │   │   │   ├── NotificationErrorCode.java
-│   │                   │   │   │   ├── NotificationException.java
-│   │                   │   │   │   ├── NotificationExceptionHandler.java
+│   │                   │   │   │   ├── ....
 │   │                   │   │   │   └── detail
-│   │                   │   │   │       ├── NotificationInvalidUserException.java
-│   │                   │   │   │       └── NotificationNotFoundException.java
+│   │                   │   │   │       └── ...
 │   │                   │   │   ├── mapper
-│   │                   │   │   │   └── NotificationMapper.java
+│   │                   │   │   │   └── ...
 │   │                   │   │   ├── repository
-│   │                   │   │   │   ├── NotificationRepository.java
-│   │                   │   │   │   ├── NotificationRepositoryCustom.java
-│   │                   │   │   │   └── NotificationRepositoryCustomImpl.java
+│   │                   │   │   │   └── ...
 │   │                   │   │   └── service
-│   │                   │   │       ├── NotificationBatchService.java
-│   │                   │   │       ├── NotificationBatchServiceImpl.java
-│   │                   │   │       ├── NotificationService.java
-│   │                   │   │       └── NotificationServiceImpl.java
-│   │                   │   ├── rank
-│   │                   │   │   ├── entity
-│   │                   │   │   │   ├── Rank.java
-│   │                   │   │   │   ├── RankTarget.java
-│   │                   │   │   │   └── RankType.java
-│   │                   │   │   └── repository
-│   │                   │   │       ├── RankRepository.java
-│   │                   │   │       ├── RankRepositoryCustom.java
-│   │                   │   │       └── RankRepositoryCustomImpl.java
-│   │                   │   ├── review
-│   │                   │   │   ├── controller
-│   │                   │   │   │   ├── ReviewApi.java
-│   │                   │   │   │   └── ReviewController.java
-│   │                   │   │   ├── dto
-│   │                   │   │   │   ├── ReviewStatDto.java
-│   │                   │   │   │   ├── event
-│   │                   │   │   │   │   ├── ReviewLikedDeleteEvent.java
-│   │                   │   │   │   │   ├── ReviewLikedEvent.java
-│   │                   │   │   │   │   ├── ReviewRankedDeleteEvent.java
-│   │                   │   │   │   │   └── ReviewRankedEvent.java
-│   │                   │   │   │   ├── request
-│   │                   │   │   │   │   ├── ReviewCreateRequest.java
-│   │                   │   │   │   │   ├── ReviewPopularQueryParams.java
-│   │                   │   │   │   │   ├── ReviewQueryParams.java
-│   │                   │   │   │   │   └── ReviewUpdateRequest.java
-│   │                   │   │   │   └── response
-│   │                   │   │   │       ├── PopularReviewDto.java
-│   │                   │   │   │       ├── ReviewDto.java
-│   │                   │   │   │       └── ReviewLikeDto.java
-│   │                   │   │   ├── entity
-│   │                   │   │   │   ├── Review.java
-│   │                   │   │   │   └── ReviewLike.java
-│   │                   │   │   ├── exception
-│   │                   │   │   │   ├── ReviewErrorCode.java
-│   │                   │   │   │   ├── ReviewException.java
-│   │                   │   │   │   ├── ReviewExceptionHandler.java
-│   │                   │   │   │   └── detail
-│   │                   │   │   │       ├── ReviewAlreadyExistsException.java
-│   │                   │   │   │       └── ReviewNotFoundException.java
-│   │                   │   │   ├── mapper
-│   │                   │   │   │   └── ReviewMapper.java
-│   │                   │   │   ├── repository
-│   │                   │   │   │   ├── ReviewLikeRepository.java
-│   │                   │   │   │   ├── ReviewRepository.java
-│   │                   │   │   │   ├── ReviewRepositoryCustom.java
-│   │                   │   │   │   └── ReviewRepositoryCustomImpl.java
-│   │                   │   │   └── service
-│   │                   │   │       ├── ReviewService.java
-│   │                   │   │       └── ReviewServiceImpl.java
-│   │                   │   └── user
-│   │                   │       ├── controller
-│   │                   │       │   ├── UserApi.java
-│   │                   │       │   └── UserController.java
-│   │                   │       ├── dto
-│   │                   │       │   ├── UserStatDto.java
-│   │                   │       │   ├── request
-│   │                   │       │   │   ├── PowerUserQueryParams.java
-│   │                   │       │   │   ├── UserLoginRequest.java
-│   │                   │       │   │   ├── UserRegisterRequest.java
-│   │                   │       │   │   └── UserUpdateRequest.java
-│   │                   │       │   └── response
-│   │                   │       │       ├── PowerUserDto.java
-│   │                   │       │       └── UserDto.java
-│   │                   │       ├── entity
-│   │                   │       │   └── User.java
-│   │                   │       ├── exception
-│   │                   │       │   ├── UserErrorCode.java
-│   │                   │       │   ├── UserException.java
-│   │                   │       │   ├── UserExceptionHandler.java
-│   │                   │       │   └── detail
-│   │                   │       │       ├── DeleteNotAllowedException.java
-│   │                   │       │       ├── EmailDuplicationException.java
-│   │                   │       │       ├── LoginInputInvalidException.java
-│   │                   │       │       ├── NicknameDuplicationException.java
-│   │                   │       │       ├── UserAlreadyDeletedException.java
-│   │                   │       │       └── UserNotFoundException.java
-│   │                   │       ├── repository
-│   │                   │       │   ├── UserRepository.java
-│   │                   │       │   ├── UserRepositoryCustom.java
-│   │                   │       │   └── UserRepositoryCustomImpl.java
-│   │                   │       ├── service
-│   │                   │       │   ├── UserBatchService.java
-│   │                   │       │   ├── UserBatchServiceImpl.java
-│   │                   │       │   ├── UserService.java
-│   │                   │       │   └── UserServiceImpl.java
-│   │                   │       └── util
-│   │                   │           ├── LoginUser.java
-│   │                   │           ├── LoginUserArgumentResolver.java
-│   │                   │           └── PasswordUtil.java
+│   │                   │   │       └── ...
+│   │                   │   └── other domains...
 │   │                   ├── external
 │   │                   │   └── client
-│   │                   │       ├── NaverBookApiClient.java
-│   │                   │       ├── NaverCloudOcrApiClient.java
+│   │                   │       ├── ...
 │   │                   │       └── dto
-│   │                   │           ├── ClovaOcrRequest.java
-│   │                   │           ├── ClovaOcrResponse.java
-│   │                   │           ├── Item.java
-│   │                   │           └── NaverBookRss.java
+│   │                   │           └── ...
 │   │                   └── global
 │   │                       ├── common
 │   │                       │   ├── dto
-│   │                       │   │   ├── ErrorResponse.java
-│   │                       │   │   └── PageResponse.java
+│   │                       │   │   ├── ...
 │   │                       │   └── entity
-│   │                       │       ├── BaseDeletableEntity.java
-│   │                       │       └── BaseEntity.java
+│   │                       │       ├── ...
 │   │                       ├── config
-│   │                       │   ├── FileConfig.java
-│   │                       │   ├── QuerydslConfig.java
-│   │                       │   ├── S3Config.java
-│   │                       │   ├── WebClientConfig.java
-│   │                       │   ├── WebMvcConfig.java
+│   │                       │   ├── ...
 │   │                       │   └── impl
-│   │                       │       ├── FileConfigDev.java
-│   │                       │       └── FileConfigProd.java
+│   │                       │       ├── ...
 │   │                       ├── exception
-│   │                       │   ├── DeokhugamException.java
-│   │                       │   ├── ErrorCode.java
-│   │                       │   ├── GlobalErrorCode.java
-│   │                       │   └── GlobalExceptionHandler.java
+│   │                       │   ├── ...
 │   │                       ├── log
-│   │                       │   └── MDCLoggingInterceptor.java
+│   │                       │   └── ...
 │   │                       └── storage
-│   │                           ├── FileStorage.java
+│   │                           ├── ...
 │   │                           └── impl
-│   │                               ├── FileStorageDev.java
-│   │                               └── FileStorageS3.java
+│   │                               └── ...
 │   └── resources
-│       ├── application-dev.yaml
-│       ├── application-prod.yaml
-│       ├── application.yaml
-│       ├── logback-spring.xml
-│       ├── schema.sql
+│       ├── ...
 │       ├── static
-│       │   ├── assets
-│       │   │   ├── index-B4R5l8Tc.js
-│       │   │   └── index-B5v_jO85.css
-│       │   ├── favicon.ico
-│       │   ├── images
-│       │   │   ├── app
-│       │   │   │   └── favicon.ico
-│       │   │   ├── books
-│       │   │   │   └── imgError.png
-│       │   │   ├── common
-│       │   │   │   ├── buttonLoader.gif
-│       │   │   │   ├── dataLoader.gif
-│       │   │   │   ├── empty_background_pattern.png
-│       │   │   │   ├── notFound.png
-│       │   │   │   └── pageLoader.gif
-│       │   │   ├── icon
-│       │   │   │   ├── ic_award.svg
-│       │   │   │   ├── ic_bell.svg
-│       │   │   │   ├── ic_book2.svg
-│       │   │   │   ├── ic_calendar.svg
-│       │   │   │   ├── ic_check.svg
-│       │   │   │   ├── ic_chevron-down.svg
-│       │   │   │   ├── ic_chevron-right.svg
-│       │   │   │   ├── ic_close.png
-│       │   │   │   ├── ic_comment-filled.svg
-│       │   │   │   ├── ic_comment.svg
-│       │   │   │   ├── ic_edit.svg
-│       │   │   │   ├── ic_empty_search.svg
-│       │   │   │   ├── ic_exclamation-circle.svg
-│       │   │   │   ├── ic_eye_close.svg
-│       │   │   │   ├── ic_eye_open.svg
-│       │   │   │   ├── ic_heart.svg
-│       │   │   │   ├── ic_heart_black.svg
-│       │   │   │   ├── ic_heart_red.svg
-│       │   │   │   ├── ic_more.svg
-│       │   │   │   ├── ic_photo.svg
-│       │   │   │   ├── ic_photo_plus.svg
-│       │   │   │   ├── ic_plus.svg
-│       │   │   │   ├── ic_ranking.svg
-│       │   │   │   ├── ic_search.svg
-│       │   │   │   ├── ic_star.svg
-│       │   │   │   ├── ic_star_failled.svg
-│       │   │   │   ├── ic_star_half.svg
-│       │   │   │   ├── ic_trash.svg
-│       │   │   │   ├── ic_xbox.svg
-│       │   │   │   ├── u_angle-left-b.svg
-│       │   │   │   └── u_angle-right-b.svg
-│       │   │   ├── logo
-│       │   │   │   └── logo_symbol.png
-│       │   │   ├── nav
-│       │   │   │   ├── arrow_down.svg
-│       │   │   │   ├── deokhugam.svg
-│       │   │   │   └── notification.svg
-│       │   │   └── notification
-│       │   │       ├── decorative_Background_pattern.png
-│       │   │       └── scroll_Loading.gif
-│       │   ├── index.html
-│       │   └── static
-│       │       └── images
-│       │           └── favicon.ico
+│       │   ├── ...
 │       └── templates
 └── test
     ├── java
@@ -500,27 +204,18 @@ src
     │               └── deokhugam
     │                   ├── batch
     │                   │   └── rank
-    │                   │       ├── RankProcessorTest.java
-    │                   │       ├── RankReaderTest.java
-    │                   │       └── RankWriterTest.java
+    │                   │       └── ...
     │                   └── domain
     │                       ├── notification
     │                       │   ├── controller
-    │                       │   │   └── NotificationControllerTest.java
+    │                       │   │   └── ...
     │                       │   ├── event
-    │                       │   │   └── NotificationEventHandlerTest.java
+    │                       │   │   └── ...
     │                       │   ├── repository
-    │                       │   │   └── NotificationRepositoryCustomTest.java
+    │                       │   │   └── ...
     │                       │   └── service
-    │                       │       └── NotificationServiceTest.java
-    │                       ├── rank
-    │                       │   └── repository
-    │                       │       └── RankRepositoryCustomTest.java
-    │                       └── user
-    │                           ├── controller
-    │                           │   └── UserControllerTest.java
-    │                           └── service
-    │                               └── UserServiceTest.java
+    │                       │       └── ...
+    │                       └─── ...
     └── resources
-        └── application-test.yaml
+        └── ...
 ```
